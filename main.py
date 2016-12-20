@@ -48,7 +48,7 @@ def create_figure(explode_val='None'):
     if explode_val != 'None':
         kw['title'] = kw['title'] + ", " + wdg['explode'].value + "=" + str(explode_val)
 
-    p = bp.figure(plot_height=300, plot_width=400, tools='pan,box_zoom,reset', **kw)
+    p = bp.figure(plot_height=200, plot_width=300, tools='pan,box_zoom,reset', **kw)
     p.xaxis.axis_label = x_title
     p.yaxis.axis_label = y_title
 
@@ -82,7 +82,7 @@ def add_series(p, xs, ys, c, sz):
         p.line(x=xs, y=ys, color=c, alpha=0.6, hover_alpha=1)
 
 def update(attr, old, new):
-    layout.children[1] = bl.column(create_figures())
+    plots.children = create_figures()
 
 wdg = col.OrderedDict((
     ('chartType', bmw.Select(title='Chart Type', value=chartTypes[0], options=chartTypes)),
@@ -100,8 +100,8 @@ wdg['series'].on_change('value', update)
 wdg['size'].on_change('value', update)
 wdg['explode'].on_change('value', update)
 
-controls = bl.widgetbox(wdg.values(), width=200)
-plots = bl.column(create_figures())
+controls = bl.widgetbox(wdg.values(), width=200, id='widgets_section')
+plots = bl.column(create_figures(), width=1000, id='plots_section')
 layout = bl.row(controls, plots)
 
 bio.curdoc().add_root(layout)

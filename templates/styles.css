@@ -5,3 +5,17 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
+
+#modelid_widgets_section{
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+}
+#modelid_plots_section{
+    margin-left: 200px;
+}
+
+.bk-plot-layout{
+    display: inline-block;
+}
