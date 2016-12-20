@@ -1,0 +1,7 @@
+@import url(https://fonts.googleapis.com/css?family=Noto+Sans);
+
+body {
+  font-family: 'Noto Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
