@@ -16,10 +16,13 @@ https://www.continuum.io/downloads
 Then, here are the Bokeh installation instructions:
 http://bokeh.pydata.org/en/latest/docs/installation.html
 Easiest way, with Anaconda, from the command line:
+```
 conda install bokeh
-
+```
 Then, git clone this repo onto your computer.
 
 ## Running
-From command line, cd into this git repo and type
-    bokeh serve --show .
+From command line, cd into this git repo and type:
+```
+bokeh serve --show .
+```
