@@ -13,7 +13,7 @@ SZ_MAX = 20
 SZ_NORM = 9
 COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142']*5
 C_NORM = "#31AADE"
-chartTypes = ['Scatter', 'Line']
+CHARTTYPES = ['Scatter', 'Line']
 
 columns = sorted(df.columns)
 discrete = [x for x in columns if df[x].dtype == object]
@@ -48,7 +48,7 @@ def create_figure(explode_val='None'):
     if explode_val != 'None':
         kw['title'] = kw['title'] + ", " + wdg['explode'].value + "=" + str(explode_val)
 
-    p = bp.figure(plot_height=200, plot_width=300, tools='pan,box_zoom,reset', **kw)
+    p = bp.figure(plot_height=300, plot_width=300, tools='pan,box_zoom,reset', **kw)
     p.xaxis.axis_label = x_title
     p.yaxis.axis_label = y_title
 
@@ -85,7 +85,7 @@ def update(attr, old, new):
     plots.children = create_figures()
 
 wdg = col.OrderedDict((
-    ('chartType', bmw.Select(title='Chart Type', value=chartTypes[0], options=chartTypes)),
+    ('chartType', bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES)),
     ('x', bmw.Select(title='X-Axis', value=columns[0], options=columns)),
     ('y', bmw.Select(title='Y-Axis', value=columns[1], options=columns)),
     ('series', bmw.Select(title='Series', value='None', options=['None'] + continuous)),
@@ -105,3 +105,4 @@ plots = bl.column(create_figures(), width=1000, id='plots_section')
 layout = bl.row(controls, plots)
 
 bio.curdoc().add_root(layout)
+bio.curdoc().title = "Exploding Pivot Chart Maker"
