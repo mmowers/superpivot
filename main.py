@@ -12,7 +12,7 @@ df = pd.read_csv('csv/data.csv')
 SZ_MIN = 6
 SZ_MAX = 20
 SZ_NORM = 9
-COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142']*5
+COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142']*10
 C_NORM = "#31AADE"
 CHARTTYPES = ['Scatter', 'Line']
 
@@ -73,11 +73,12 @@ def create_figure(df_exploded, explode_val='None'):
     if wdg['series'].value == 'None':
         add_series(p, xs, ys, c, sz)
     else:
+        full_series = df[wdg['series'].value].unique().tolist() #for colors only
         for i, ser in enumerate(df_exploded[wdg['series'].value].unique()):
             df_series = df_exploded[df_exploded[wdg['series'].value].isin([ser])]
             xs_ser = df_series[wdg['x'].value].values
             ys_ser = df_series[wdg['y'].value].values
-            c = COLORS[i]
+            c = COLORS[full_series.index(ser)]
             add_series(p, xs_ser, ys_ser, c, sz)
     return p
 
