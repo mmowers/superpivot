@@ -48,7 +48,7 @@ def create_figure(explode_val='None'):
     if explode_val != 'None':
         kw['title'] = kw['title'] + ", " + wdg['explode'].value + "=" + str(explode_val)
 
-    p = bp.figure(plot_height=300, plot_width=300, tools='pan,box_zoom,reset', **kw)
+    p = bp.figure(plot_height=int(wdg['plot_height'].value), plot_width=int(wdg['plot_width'].value), tools='pan,box_zoom,reset', **kw)
     p.xaxis.axis_label = x_title
     p.yaxis.axis_label = y_title
 
@@ -91,6 +91,8 @@ wdg = col.OrderedDict((
     ('series', bmw.Select(title='Series', value='None', options=['None'] + continuous)),
     ('size', bmw.Select(title='Size', value='None', options=['None'] + continuous)),
     ('explode', bmw.Select(title='Explode', value='None', options=['None'] + columns)),
+    ('plot_width', bmw.TextInput(title='Plot Width (px)', value='300')),
+    ('plot_height', bmw.TextInput(title='Plot Height (px)', value='300')),
 ))
 
 wdg['chartType'].on_change('value', update)
@@ -99,6 +101,8 @@ wdg['y'].on_change('value', update)
 wdg['series'].on_change('value', update)
 wdg['size'].on_change('value', update)
 wdg['explode'].on_change('value', update)
+wdg['plot_width'].on_change('value', update)
+wdg['plot_height'].on_change('value', update)
 
 controls = bl.widgetbox(wdg.values(), width=200, id='widgets_section')
 plots = bl.column(create_figures(), width=1000, id='plots_section')
