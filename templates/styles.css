@@ -5,17 +5,44 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
-
+#modelid_layout{
+    width: auto !important;
+    height: auto !important;
+}
 #modelid_widgets_section{
     position: fixed;
     top: 0;
     left: 0;
+    bottom: 0;
     z-index: 10;
+    width: 225px !important;
+    height: auto !important;
+    overflow-y: scroll;
 }
 #modelid_plots_section{
-    margin-left: 200px;
+    margin-left: 250px;
+    width: auto !important;
+    height: auto !important;
 }
 
 .bk-plot-layout{
     display: inline-block;
+}
+div[id$="_dropboxes"],
+div[id$="_adjust"]{
+    display: none;
+}
+div[id$="_heading"]{
+    font-weight: bold;
+    cursor: pointer;
+    color: purple;
+    display: none;
+}
+#modelid_adjust_plots,
+#modelid_filters{
+    font-weight: bold;
+    color: blue;
+    cursor: pointer;
+    margin-top: 20px;
+    text-decoration: underline;
 }
