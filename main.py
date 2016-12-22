@@ -87,7 +87,10 @@ def add_series(p, xs, ys, c, sz):
     elif wdg['chartType'].value == 'Line':
         p.line(x=xs, y=ys, color=c, alpha=0.6, hover_alpha=1)
 
-def update(attr, old, new):
+def update_sel(attr, old, new):
+    update()
+
+def update():
     plots.children = create_figures()
 
 wdg = collections.OrderedDict((
@@ -103,20 +106,21 @@ for col in filterable:
     val_list = [str(i) for i in df[col].unique().tolist()]
     wdg[col+'_heading'] = bmw.Div(text=col, id=col+'_filter_heading')
     wdg[col] = bmw.CheckboxGroup(labels=val_list, active=range(len(val_list)), id=col+'_dropboxes')
-    wdg[col].on_change('active', update)
 
 wdg['adjustments'] = bmw.Div(text='Plot Adjustments', id='adjust_plots')
 wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value='300', id='plot_width_adjust')
 wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value='300', id='plot_height_adjust')
+wdg['update'] = bmw.Button(label='Update', button_type='success', id='update-button')
 
-wdg['chartType'].on_change('value', update)
-wdg['x'].on_change('value', update)
-wdg['y'].on_change('value', update)
-wdg['series'].on_change('value', update)
-wdg['size'].on_change('value', update)
-wdg['explode'].on_change('value', update)
-wdg['plot_width'].on_change('value', update)
-wdg['plot_height'].on_change('value', update)
+wdg['chartType'].on_change('value', update_sel)
+wdg['x'].on_change('value', update_sel)
+wdg['y'].on_change('value', update_sel)
+wdg['series'].on_change('value', update_sel)
+wdg['size'].on_change('value', update_sel)
+wdg['explode'].on_change('value', update_sel)
+wdg['plot_width'].on_change('value', update_sel)
+wdg['plot_height'].on_change('value', update_sel)
+wdg['update'].on_click(update)
 
 controls = bl.widgetbox(wdg.values(), id='widgets_section')
 plots = bl.column(create_figures(), id='plots_section')

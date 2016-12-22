@@ -46,3 +46,9 @@ div[id$="_heading"]{
     margin-top: 20px;
     text-decoration: underline;
 }
+.select-opt{
+    color: blue;
+    cursor: pointer;
+    margin-left: 5px;
+    margin-right: 5px;
+}
