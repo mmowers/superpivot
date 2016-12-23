@@ -15,6 +15,7 @@ SZ_NORM = 9
 COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142']*10
 C_NORM = "#31AADE"
 CHARTTYPES = ['Scatter', 'Line']
+AGGREGATIONS = ['None', 'Sum']
 
 columns = sorted(df.columns)
 discrete = [x for x in columns if df[x].dtype == object]
@@ -74,9 +75,15 @@ def create_figure(df_exploded, explode_val='None'):
 
     c = C_NORM
     if wdg['series'].value == 'None':
+        if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
+            df_exploded = df_exploded.groupby([wdg['x'].value], as_index=False, sort=False)[wdg['y'].value].sum()
+            xs = df_exploded[wdg['x'].value].values
+            ys = df_exploded[wdg['y'].value].values
         add_series(p, xs, ys, c, sz)
     else:
         full_series = df[wdg['series'].value].unique().tolist() #for colors only
+        if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
+            df_exploded = df_exploded.groupby([wdg['series'].value, wdg['x'].value], as_index=False, sort=False)[wdg['y'].value].sum()
         for i, ser in enumerate(df_exploded[wdg['series'].value].unique()):
             df_series = df_exploded[df_exploded[wdg['series'].value].isin([ser])]
             xs_ser = df_series[wdg['x'].value].values
@@ -101,6 +108,7 @@ wdg = collections.OrderedDict((
     ('chartType', bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES, name='hithere')),
     ('x', bmw.Select(title='X-Axis', value='None', options=['None'] + columns)),
     ('y', bmw.Select(title='Y-Axis', value='None', options=['None'] + columns)),
+    ('y_agg', bmw.Select(title='Y-Axis Aggregation', value='None', options=AGGREGATIONS)),
     ('series', bmw.Select(title='Series', value='None', options=['None'] + columns)),
     ('size', bmw.Select(title='Size', value='None', options=['None'] + continuous)),
     ('explode', bmw.Select(title='Explode', value='None', options=['None'] + columns)),
@@ -119,6 +127,7 @@ wdg['update'] = bmw.Button(label='Update', button_type='success', id='update-but
 wdg['chartType'].on_change('value', update_sel)
 wdg['x'].on_change('value', update_sel)
 wdg['y'].on_change('value', update_sel)
+wdg['y_agg'].on_change('value', update_sel)
 wdg['series'].on_change('value', update_sel)
 wdg['size'].on_change('value', update_sel)
 wdg['explode'].on_change('value', update_sel)
