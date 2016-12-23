@@ -100,21 +100,31 @@ def add_series(p, xs, ys, c, sz):
     elif wdg['chartType'].value == 'Line':
         p.line(x=xs, y=ys, color=c, alpha=0.6, hover_alpha=1)
 
+def build_series_legend():
+    series_legend_string = '<div class="legend-header">Series Legend</div><div class="legend-body">'
+    if wdg['series'].value != 'None':
+        for i, txt in enumerate(df[wdg['series'].value].unique().tolist()):
+            series_legend_string += '<div class="legend-entry"><span class="legend-color" style="background-color:' + COLORS[i] + ';"></span>'
+            series_legend_string += '<span class="legend-text">' + txt +'</span></div>'
+    series_legend_string += '</div>'
+    return series_legend_string
+
 def update_sel(attr, old, new):
     update()
 
 def update():
+    wdg['series_legend'].text = build_series_legend()
     plots.children = create_figures()
 
-wdg = collections.OrderedDict((
-    ('chartType', bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES, name='hithere')),
-    ('x', bmw.Select(title='X-Axis', value='None', options=['None'] + columns)),
-    ('y', bmw.Select(title='Y-Axis', value='None', options=['None'] + columns)),
-    ('y_agg', bmw.Select(title='Y-Axis Aggregation', value='None', options=AGGREGATIONS)),
-    ('series', bmw.Select(title='Series', value='None', options=['None'] + columns)),
-    ('size', bmw.Select(title='Size', value='None', options=['None'] + continuous)),
-    ('explode', bmw.Select(title='Explode', value='None', options=['None'] + columns)),
-))
+wdg = collections.OrderedDict()
+wdg['chartType'] = bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES, name='hithere')
+wdg['x'] = bmw.Select(title='X-Axis', value='None', options=['None'] + columns)
+wdg['y'] = bmw.Select(title='Y-Axis', value='None', options=['None'] + columns)
+wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='None', options=AGGREGATIONS)
+wdg['series'] = bmw.Select(title='Series', value='None', options=['None'] + columns)
+wdg['series_legend'] = bmw.Div(text=build_series_legend(), id='series_legend')
+wdg['size'] = bmw.Select(title='Size', value='None', options=['None'] + continuous)
+wdg['explode'] = bmw.Select(title='Explode', value='None', options=['None'] + columns)
 wdg['filters'] = bmw.Div(text='Filters', id='filters')
 for col in filterable:
     val_list = [str(i) for i in df[col].unique().tolist()]

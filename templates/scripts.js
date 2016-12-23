@@ -21,4 +21,7 @@ $(document).ready(function(){
         $(this).parent().next('.bk-widget').find('.bk-bs-checkbox input').first().click();
         $(this).parent().next('.bk-widget').find('.bk-bs-checkbox input').first().click();
     });
+    $('body').on('click', '.legend-header', function(){
+        $(this).next('.legend-body').toggle();
+    });
 });

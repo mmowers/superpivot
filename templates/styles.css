@@ -52,3 +52,18 @@ div[id$="_heading"]{
     margin-left: 5px;
     margin-right: 5px;
 }
+.legend-header{
+    color: blue;
+    cursor: pointer;
+}
+.legend-body{
+    display: none;
+    border: 1px solid lightgrey;
+    padding: 10px;
+}
+.legend-color{
+    width: 20px;
+    height: 10px;
+    display: inline-block;
+    margin-right: 10px
+}
