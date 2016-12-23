@@ -79,6 +79,7 @@ def create_figure(df_exploded, explode_val='None'):
             df_exploded = df_exploded.groupby([wdg['x'].value], as_index=False, sort=False)[wdg['y'].value].sum()
             xs = df_exploded[wdg['x'].value].values
             ys = df_exploded[wdg['y'].value].values
+            xs, ys = (list(t) for t in zip(*sorted(zip(xs, ys))))
         add_series(p, xs, ys, c, sz)
     else:
         full_series = df[wdg['series'].value].unique().tolist() #for colors only
@@ -88,6 +89,7 @@ def create_figure(df_exploded, explode_val='None'):
             df_series = df_exploded[df_exploded[wdg['series'].value].isin([ser])]
             xs_ser = df_series[wdg['x'].value].values
             ys_ser = df_series[wdg['y'].value].values
+            xs_ser, ys_ser = (list(t) for t in zip(*sorted(zip(xs_ser, ys_ser))))
             c = COLORS[full_series.index(ser)]
             add_series(p, xs_ser, ys_ser, c, sz)
     return p
