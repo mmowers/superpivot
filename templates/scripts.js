@@ -1,14 +1,16 @@
 $(document).ready(function(){
     $('body').on('click', '#modelid_filters', function(){
         $('[id$=_filter_heading]').toggle();
+        $('.select-all-none').hide();
+        $('.bk-widget[id$=_dropboxes]').hide();
     });
     $('body').on('click', '[id$=_filter_heading]', function(){
         if($(this).next('.select-all-none').length == 0){
             $(this).after('<div class="select-all-none"><span class="select-all select-opt">All</span>|<span class="select-none select-opt">None</span>');
         }else{
-            $(this).next().toggle();
+            $(this).next(".select-all-none").toggle();
         }
-        $(this).next().next().toggle();
+        $(this).next(".select-all-none").next(".bk-widget[id$=_dropboxes]").toggle();
     });
     $('body').on('click', '#modelid_adjust_plots', function(){
         $('div[id$=_adjust]').toggle();
