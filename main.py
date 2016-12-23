@@ -22,6 +22,10 @@ continuous = [x for x in columns if x not in discrete]
 filterable = discrete+[x for x in continuous if df[x].dtype == np.int64 and len(df[x].unique()) < 500]
 
 def create_figures():
+    plot_list = []
+    if wdg['x'].value == 'None' or wdg['y'].value == 'None':
+        return plot_list
+
     df_filtered = df
     for col in filterable:
         active = [wdg[col].labels[i] for i in wdg[col].active]
@@ -29,7 +33,6 @@ def create_figures():
             active = [int(i) for i in active]
         df_filtered = df_filtered[df_filtered[col].isin(active)]
 
-    plot_list = []
     if wdg['explode'].value == 'None':
         plot_list.append(create_figure(df_filtered))
     else:
@@ -96,8 +99,8 @@ def update():
 
 wdg = collections.OrderedDict((
     ('chartType', bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES, name='hithere')),
-    ('x', bmw.Select(title='X-Axis', value=columns[0], options=columns)),
-    ('y', bmw.Select(title='Y-Axis', value=columns[1], options=columns)),
+    ('x', bmw.Select(title='X-Axis', value='None', options=['None'] + columns)),
+    ('y', bmw.Select(title='Y-Axis', value='None', options=['None'] + columns)),
     ('series', bmw.Select(title='Series', value='None', options=['None'] + columns)),
     ('size', bmw.Select(title='Size', value='None', options=['None'] + continuous)),
     ('explode', bmw.Select(title='Explode', value='None', options=['None'] + columns)),
