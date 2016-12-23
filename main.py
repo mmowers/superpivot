@@ -14,7 +14,7 @@ SZ_MAX = 20
 SZ_NORM = 9
 COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142']*10
 C_NORM = "#31AADE"
-CHARTTYPES = ['Scatter', 'Line']
+CHARTTYPES = ['Scatter', 'Line', 'Bar']
 AGGREGATIONS = ['None', 'Sum']
 
 columns = sorted(df.columns)
@@ -105,6 +105,10 @@ def add_series(p, xs, ys, c, sz):
         p.circle(x=xs, y=ys, color=c, size=sz, fill_alpha=0.5)
     elif wdg['chartType'].value == 'Line':
         p.line(x=xs, y=ys, color=c, alpha=0.5, line_width=2)
+    elif wdg['chartType'].value == 'Bar':
+        centers = [y/2 for y in ys]
+        p.rect(x=xs, y=centers, height=ys, color=c, fill_alpha=0.5, width=0.5)
+
 
 def build_series_legend():
     series_legend_string = '<div class="legend-header">Series Legend</div><div class="legend-body">'
