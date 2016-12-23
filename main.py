@@ -34,6 +34,11 @@ def create_figures():
             active = [int(i) for i in active]
         df_filtered = df_filtered[df_filtered[col].isin(active)]
 
+    if wdg['x_scale'].value != '' and wdg['x'].value in continuous:
+        df_filtered[wdg['x'].value] = df_filtered[wdg['x'].value] * float(wdg['x_scale'].value)
+    if wdg['y_scale'].value != '' and wdg['y'].value in continuous:
+        df_filtered[wdg['y'].value] = df_filtered[wdg['y'].value] * float(wdg['y_scale'].value)
+
     if wdg['explode'].value == 'None':
         plot_list.append(create_figure(df_filtered))
     else:
@@ -61,6 +66,7 @@ def create_figure(df_exploded, explode_val='None'):
     p = bp.figure(plot_height=int(wdg['plot_height'].value), plot_width=int(wdg['plot_width'].value), tools='pan,box_zoom,reset', **kw)
     p.xaxis.axis_label = x_title
     p.yaxis.axis_label = y_title
+    adjust_axes(p)
 
     if wdg['x'].value in discrete:
         p.xaxis.major_label_orientation = pd.np.pi / 4
@@ -109,6 +115,14 @@ def build_series_legend():
     series_legend_string += '</div>'
     return series_legend_string
 
+def adjust_axes(p):
+    if wdg['x'].value in continuous:
+        if wdg['x_min'].value != '': p.x_range.start = float(wdg['x_min'].value)
+        if wdg['x_max'].value != '': p.x_range.end = float(wdg['x_max'].value)
+    if wdg['y'].value in continuous:
+        if wdg['y_min'].value != '': p.y_range.start = float(wdg['y_min'].value)
+        if wdg['y_max'].value != '': p.y_range.end = float(wdg['y_max'].value)
+
 def update_sel(attr, old, new):
     update()
 
@@ -130,11 +144,16 @@ for col in filterable:
     val_list = [str(i) for i in df[col].unique().tolist()]
     wdg[col+'_heading'] = bmw.Div(text=col, id=col+'_filter_heading')
     wdg[col] = bmw.CheckboxGroup(labels=val_list, active=range(len(val_list)), id=col+'_dropboxes')
-
+wdg['update'] = bmw.Button(label='Update', button_type='success', id='update-button')
 wdg['adjustments'] = bmw.Div(text='Plot Adjustments', id='adjust_plots')
 wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value='300', id='plot_width_adjust')
 wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value='300', id='plot_height_adjust')
-wdg['update'] = bmw.Button(label='Update', button_type='success', id='update-button')
+wdg['x_scale'] = bmw.TextInput(title='x scale', value='', id='x_scale_adjust')
+wdg['x_min'] = bmw.TextInput(title='x min', value='', id='x_min_adjust')
+wdg['x_max'] = bmw.TextInput(title='x max', value='', id='x_max_adjust')
+wdg['y_scale'] = bmw.TextInput(title='y scale', value='', id='y_scale_adjust')
+wdg['y_min'] = bmw.TextInput(title='y min', value='', id='y_min_adjust')
+wdg['y_max'] = bmw.TextInput(title='y max', value='', id='y_max_adjust')
 
 wdg['chartType'].on_change('value', update_sel)
 wdg['x'].on_change('value', update_sel)
@@ -145,6 +164,12 @@ wdg['size'].on_change('value', update_sel)
 wdg['explode'].on_change('value', update_sel)
 wdg['plot_width'].on_change('value', update_sel)
 wdg['plot_height'].on_change('value', update_sel)
+wdg['x_min'].on_change('value', update_sel)
+wdg['x_max'].on_change('value', update_sel)
+wdg['x_scale'].on_change('value', update_sel)
+wdg['y_min'].on_change('value', update_sel)
+wdg['y_max'].on_change('value', update_sel)
+wdg['y_scale'].on_change('value', update_sel)
 wdg['update'].on_click(update)
 
 controls = bl.widgetbox(wdg.values(), id='widgets_section')
