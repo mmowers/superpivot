@@ -102,9 +102,9 @@ def create_figure(df_exploded, explode_val='None'):
 
 def add_series(p, xs, ys, c, sz):
     if wdg['chartType'].value == 'Scatter':
-        p.circle(x=xs, y=ys, color=c, size=sz, alpha=0.6, hover_alpha=1)
+        p.circle(x=xs, y=ys, color=c, size=sz, fill_alpha=0.5)
     elif wdg['chartType'].value == 'Line':
-        p.line(x=xs, y=ys, color=c, alpha=0.6, hover_alpha=1)
+        p.line(x=xs, y=ys, color=c, alpha=0.5, line_width=2)
 
 def build_series_legend():
     series_legend_string = '<div class="legend-header">Series Legend</div><div class="legend-body">'
