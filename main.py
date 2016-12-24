@@ -14,7 +14,7 @@ SZ_MAX = 20
 SZ_NORM = 9
 COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142']*10
 C_NORM = "#31AADE"
-CHARTTYPES = ['Scatter', 'Line', 'Bar']
+CHARTTYPES = ['Scatter', 'Line', 'Bar', 'Area']
 AGGREGATIONS = ['None', 'Sum']
 
 columns = sorted(df.columns)
@@ -114,14 +114,19 @@ def create_figure(df_exploded, explode_val='None'):
 
 def add_series(p, xs, ys, c, sz, y_bases=None):
     if wdg['chartType'].value == 'Scatter':
-        p.circle(x=xs, y=ys, color=c, size=sz, fill_alpha=0.5)
+        p.circle(x=xs, y=ys, color=c, size=sz, fill_alpha=0.5, line_color=None, line_width=None)
     elif wdg['chartType'].value == 'Line':
         p.line(x=xs, y=ys, color=c, alpha=0.5, line_width=2)
     elif wdg['chartType'].value == 'Bar':
         if y_bases is None: y_bases = [0]*len(ys)
         centers = [(ys[i] + y_bases[i])/2 for i in range(len(ys))]
         heights = [ys[i] - y_bases[i] for i in range(len(ys))]
-        p.rect(x=xs, y=centers, height=heights, color=c, fill_alpha=0.5, width=0.5)
+        p.rect(x=xs, y=centers, height=heights, color=c, fill_alpha=0.5, width=0.5, line_color=None, line_width=None)
+    elif wdg['chartType'].value == 'Area':
+        if y_bases is None: y_bases = [0]*len(ys)
+        xs_around = xs + xs[::-1]
+        ys_around = y_bases + ys[::-1]
+        p.patch(x=xs_around, y=ys_around, alpha=0.5, fill_color=c, line_color=None, line_width=None)
 
 
 def build_series_legend():
