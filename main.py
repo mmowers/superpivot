@@ -49,8 +49,8 @@ def create_figures():
     return plot_list
 
 def create_figure(df_exploded, explode_val='None'):
-    xs = df_exploded[wdg['x'].value].values
-    ys = df_exploded[wdg['y'].value].values
+    xs = df_exploded[wdg['x'].value].values.tolist()
+    ys = df_exploded[wdg['y'].value].values.tolist()
     x_title = wdg['x'].value.title()
     y_title = wdg['y'].value.title()
 
@@ -91,23 +91,37 @@ def create_figure(df_exploded, explode_val='None'):
         full_series = df[wdg['series'].value].unique().tolist() #for colors only
         if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
             df_exploded = df_exploded.groupby([wdg['series'].value, wdg['x'].value], as_index=False, sort=False)[wdg['y'].value].sum()
+        if wdg['series_stack'].active == 1:
+            x_bases = df_exploded[wdg['x'].value].unique().tolist()
+            y_bases = [0]*len(x_bases)
         for i, ser in enumerate(df_exploded[wdg['series'].value].unique()):
             df_series = df_exploded[df_exploded[wdg['series'].value].isin([ser])]
             xs_ser = df_series[wdg['x'].value].values
             ys_ser = df_series[wdg['y'].value].values
             xs_ser, ys_ser = (list(t) for t in zip(*sorted(zip(xs_ser, ys_ser))))
             c = COLORS[full_series.index(ser)]
-            add_series(p, xs_ser, ys_ser, c, sz)
+            if wdg['series_stack'].active == 0:
+                add_series(p, xs_ser, ys_ser, c, sz)
+            else:
+                y_ser_bases = []
+                for j, x in enumerate(xs_ser):
+                    base_index = x_bases.index(x)
+                    y_ser_bases.append(y_bases[base_index])
+                    y_bases[base_index] += ys_ser[j]
+                    ys_ser[j] = y_bases[base_index]
+                add_series(p, xs_ser, ys_ser, c, sz, y_bases=y_ser_bases)
     return p
 
-def add_series(p, xs, ys, c, sz):
+def add_series(p, xs, ys, c, sz, y_bases=None):
     if wdg['chartType'].value == 'Scatter':
         p.circle(x=xs, y=ys, color=c, size=sz, fill_alpha=0.5)
     elif wdg['chartType'].value == 'Line':
         p.line(x=xs, y=ys, color=c, alpha=0.5, line_width=2)
     elif wdg['chartType'].value == 'Bar':
-        centers = [y/2 for y in ys]
-        p.rect(x=xs, y=centers, height=ys, color=c, fill_alpha=0.5, width=0.5)
+        if y_bases is None: y_bases = [0]*len(ys)
+        centers = [(ys[i] + y_bases[i])/2 for i in range(len(ys))]
+        heights = [ys[i] - y_bases[i] for i in range(len(ys))]
+        p.rect(x=xs, y=centers, height=heights, color=c, fill_alpha=0.5, width=0.5)
 
 
 def build_series_legend():
@@ -140,6 +154,7 @@ wdg['x'] = bmw.Select(title='X-Axis', value='None', options=['None'] + columns)
 wdg['y'] = bmw.Select(title='Y-Axis', value='None', options=['None'] + columns)
 wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='None', options=AGGREGATIONS)
 wdg['series'] = bmw.Select(title='Series', value='None', options=['None'] + columns)
+wdg['series_stack'] = bmw.RadioButtonGroup(labels=["Unstacked", "Stacked"], active=0)
 wdg['series_legend'] = bmw.Div(text=build_series_legend(), id='series_legend')
 wdg['size'] = bmw.Select(title='Size', value='None', options=['None'] + continuous)
 wdg['explode'] = bmw.Select(title='Explode', value='None', options=['None'] + columns)
@@ -164,6 +179,7 @@ wdg['x'].on_change('value', update_sel)
 wdg['y'].on_change('value', update_sel)
 wdg['y_agg'].on_change('value', update_sel)
 wdg['series'].on_change('value', update_sel)
+wdg['series_stack'].on_change('active', update_sel)
 wdg['size'].on_change('value', update_sel)
 wdg['explode'].on_change('value', update_sel)
 wdg['plot_width'].on_change('value', update_sel)
