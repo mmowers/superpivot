@@ -127,7 +127,7 @@ def add_series(p, xs, ys, c, sz, y_bases=None):
 def build_series_legend():
     series_legend_string = '<div class="legend-header">Series Legend</div><div class="legend-body">'
     if wdg['series'].value != 'None':
-        for i, txt in enumerate(df[wdg['series'].value].unique().tolist()):
+        for i, txt in reversed(list(enumerate(df[wdg['series'].value].unique().tolist()))):
             series_legend_string += '<div class="legend-entry"><span class="legend-color" style="background-color:' + COLORS[i] + ';"></span>'
             series_legend_string += '<span class="legend-text">' + txt +'</span></div>'
     series_legend_string += '</div>'
