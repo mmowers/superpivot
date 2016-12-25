@@ -56,8 +56,6 @@ def create_figure(df_exploded, explode_val='None'):
 
     xs = df_exploded[x_col].values.tolist()
     ys = df_exploded[wdg['y'].value].values.tolist()
-    x_title = x_col.title()
-    y_title = wdg['y'].value.title()
 
     kw = dict()
     if wdg['x_group'].value != 'None':
@@ -73,13 +71,10 @@ def create_figure(df_exploded, explode_val='None'):
         kw['x_range'] = sorted(set(xs))
     if wdg['y'].value in discrete:
         kw['y_range'] = sorted(set(ys))
-    kw['title'] = "%s vs %s" % (x_title, y_title)
     if explode_val != 'None':
-        kw['title'] = kw['title'] + ", %s = %s" % (wdg['explode'].value, str(explode_val))
+        kw['title'] = "%s = %s" % (wdg['explode'].value, str(explode_val))
 
     p = bp.figure(plot_height=int(wdg['plot_height'].value), plot_width=int(wdg['plot_width'].value), tools='pan,box_zoom,reset', **kw)
-    p.xaxis.axis_label = x_title
-    p.yaxis.axis_label = y_title
     adjust_axes(p)
 
     if wdg['x'].value in discrete or wdg['x_group'].value != 'None':
