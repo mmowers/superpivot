@@ -39,6 +39,9 @@ def create_figures():
     if wdg['y_scale'].value != '' and wdg['y'].value in continuous:
         df_filtered[wdg['y'].value] = df_filtered[wdg['y'].value] * float(wdg['y_scale'].value)
 
+    if wdg['x_group'].value != 'None':
+        df_filtered[str(wdg['x_group'].value) + '_' + str(wdg['x'].value)] = df_filtered[wdg['x_group'].value].map(str) + ' ' + df_filtered[wdg['x'].value].map(str)
+
     if wdg['explode'].value == 'None':
         plot_list.append(create_figure(df_filtered))
     else:
@@ -49,13 +52,24 @@ def create_figures():
     return plot_list
 
 def create_figure(df_exploded, explode_val='None'):
-    xs = df_exploded[wdg['x'].value].values.tolist()
+    x_col = wdg['x'].value if wdg['x_group'].value == 'None' else str(wdg['x_group'].value) + '_' + str(wdg['x'].value)
+
+    xs = df_exploded[x_col].values.tolist()
     ys = df_exploded[wdg['y'].value].values.tolist()
-    x_title = wdg['x'].value.title()
+    x_title = x_col.title()
     y_title = wdg['y'].value.title()
 
     kw = dict()
-    if wdg['x'].value in discrete:
+    if wdg['x_group'].value != 'None':
+        kw['x_range'] = []
+        unique_groups = sorted(df[wdg['x_group'].value].unique().tolist())
+        unique_xs = sorted(df[wdg['x'].value].unique().tolist())
+        for i, ugr in enumerate(unique_groups):
+            for uxs in unique_xs:
+                kw['x_range'].append(str(ugr) + ' ' + str(uxs))
+            kw['x_range'].append(' ' * i) #increase number of spaces from one break to the next so that each blank entry is seen as unique
+
+    elif wdg['x'].value in discrete:
         kw['x_range'] = sorted(set(xs))
     if wdg['y'].value in discrete:
         kw['y_range'] = sorted(set(ys))
@@ -68,7 +82,7 @@ def create_figure(df_exploded, explode_val='None'):
     p.yaxis.axis_label = y_title
     adjust_axes(p)
 
-    if wdg['x'].value in discrete:
+    if wdg['x'].value in discrete or wdg['x_group'].value != 'None':
         p.xaxis.major_label_orientation = pd.np.pi / 4
 
     sz = SZ_NORM
@@ -82,21 +96,21 @@ def create_figure(df_exploded, explode_val='None'):
     c = C_NORM
     if wdg['series'].value == 'None':
         if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
-            df_exploded = df_exploded.groupby([wdg['x'].value], as_index=False, sort=False)[wdg['y'].value].sum()
-            xs = df_exploded[wdg['x'].value].values
+            df_exploded = df_exploded.groupby([x_col], as_index=False, sort=False)[wdg['y'].value].sum()
+            xs = df_exploded[x_col].values
             ys = df_exploded[wdg['y'].value].values
             xs, ys = (list(t) for t in zip(*sorted(zip(xs, ys))))
         add_series(p, xs, ys, c, sz)
     else:
         full_series = df[wdg['series'].value].unique().tolist() #for colors only
         if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
-            df_exploded = df_exploded.groupby([wdg['series'].value, wdg['x'].value], as_index=False, sort=False)[wdg['y'].value].sum()
+            df_exploded = df_exploded.groupby([wdg['series'].value, x_col], as_index=False, sort=False)[wdg['y'].value].sum()
         if wdg['series_stack'].active == 1:
-            x_bases = df_exploded[wdg['x'].value].unique().tolist()
+            x_bases = df_exploded[x_col].unique().tolist()
             y_bases = [0]*len(x_bases)
         for i, ser in enumerate(df_exploded[wdg['series'].value].unique()):
             df_series = df_exploded[df_exploded[wdg['series'].value].isin([ser])]
-            xs_ser = df_series[wdg['x'].value].values
+            xs_ser = df_series[x_col].values
             ys_ser = df_series[wdg['y'].value].values
             xs_ser, ys_ser = (list(t) for t in zip(*sorted(zip(xs_ser, ys_ser))))
             c = COLORS[full_series.index(ser)]
@@ -156,6 +170,7 @@ def update():
 wdg = collections.OrderedDict()
 wdg['chartType'] = bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES, name='hithere')
 wdg['x'] = bmw.Select(title='X-Axis', value='None', options=['None'] + columns)
+wdg['x_group'] = bmw.Select(title='Group X by', value='None', options=['None'] + filterable)
 wdg['y'] = bmw.Select(title='Y-Axis', value='None', options=['None'] + columns)
 wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='None', options=AGGREGATIONS)
 wdg['series'] = bmw.Select(title='Series', value='None', options=['None'] + columns)
@@ -181,6 +196,7 @@ wdg['y_max'] = bmw.TextInput(title='y max', value='', id='y_max_adjust')
 
 wdg['chartType'].on_change('value', update_sel)
 wdg['x'].on_change('value', update_sel)
+wdg['x_group'].on_change('value', update_sel)
 wdg['y'].on_change('value', update_sel)
 wdg['y_agg'].on_change('value', update_sel)
 wdg['series'].on_change('value', update_sel)
