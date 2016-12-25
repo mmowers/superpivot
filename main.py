@@ -61,7 +61,7 @@ def create_figure(df_exploded, explode_val='None'):
         kw['y_range'] = sorted(set(ys))
     kw['title'] = "%s vs %s" % (x_title, y_title)
     if explode_val != 'None':
-        kw['title'] = kw['title'] + ", " + wdg['explode'].value + "=" + str(explode_val)
+        kw['title'] = kw['title'] + ", %s = %s" % (wdg['explode'].value, str(explode_val))
 
     p = bp.figure(plot_height=int(wdg['plot_height'].value), plot_width=int(wdg['plot_width'].value), tools='pan,box_zoom,reset', **kw)
     p.xaxis.axis_label = x_title
