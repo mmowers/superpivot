@@ -29,7 +29,7 @@ def create_figures():
 
     df_filtered = df
     for col in filterable:
-        active = [wdg[col].labels[i] for i in wdg[col].active]
+        active = [wdg[col+'_filter'].labels[i] for i in wdg[col+'_filter'].active]
         if col in continuous:
             active = [int(i) for i in active]
         df_filtered = df_filtered[df_filtered[col].isin(active)]
@@ -43,15 +43,15 @@ def create_figures():
         df_filtered[str(wdg['x_group'].value) + '_' + str(wdg['x'].value)] = df_filtered[wdg['x_group'].value].map(str) + ' ' + df_filtered[wdg['x'].value].map(str)
 
     if wdg['explode'].value == 'None':
-        plot_list.append(create_figure(df_filtered))
+        plot_list.append(create_figure(df_filtered, df_filtered))
     else:
         explode_vals = list(sorted(set(df_filtered[wdg['explode'].value].values)))
         for explode_val in explode_vals:
             df_exploded = df_filtered[df_filtered[wdg['explode'].value].isin([explode_val])]
-            plot_list.append(create_figure(df_exploded, explode_val))
+            plot_list.append(create_figure(df_exploded, df_filtered, explode_val))
     return plot_list
 
-def create_figure(df_exploded, explode_val='None'):
+def create_figure(df_exploded, df_filtered, explode_val='None'):
     x_col = wdg['x'].value if wdg['x_group'].value == 'None' else str(wdg['x_group'].value) + '_' + str(wdg['x'].value)
 
     xs = df_exploded[x_col].values.tolist()
@@ -97,7 +97,7 @@ def create_figure(df_exploded, explode_val='None'):
             xs, ys = (list(t) for t in zip(*sorted(zip(xs, ys))))
         add_series(p, xs, ys, c, sz)
     else:
-        full_series = df[wdg['series'].value].unique().tolist() #for colors only
+        full_series = df_filtered[wdg['series'].value].unique().tolist() #for colors only
         if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
             df_exploded = df_exploded.groupby([wdg['series'].value, x_col], as_index=False, sort=False)[wdg['y'].value].sum()
         if wdg['series_stack'].active == 1:
@@ -141,9 +141,12 @@ def add_series(p, xs, ys, c, sz, y_bases=None):
 def build_series_legend():
     series_legend_string = '<div class="legend-header">Series Legend</div><div class="legend-body">'
     if wdg['series'].value != 'None':
-        for i, txt in reversed(list(enumerate(df[wdg['series'].value].unique().tolist()))):
-            series_legend_string += '<div class="legend-entry"><span class="legend-color" style="background-color:' + COLORS[i] + ';"></span>'
-            series_legend_string += '<span class="legend-text">' + txt +'</span></div>'
+        active_list = []
+        for i, val in enumerate(df[wdg['series'].value].unique().tolist()):
+            if(i in wdg[wdg['series'].value+'_filter'].active): active_list.append(val)
+        for i, txt in reversed(list(enumerate(active_list))):
+            series_legend_string += '<div class="legend-entry"><span class="legend-color" style="background-color:' + str(COLORS[i]) + ';"></span>'
+            series_legend_string += '<span class="legend-text">' + str(txt) +'</span></div>'
     series_legend_string += '</div>'
     return series_legend_string
 
@@ -177,7 +180,7 @@ wdg['filters'] = bmw.Div(text='Filters', id='filters')
 for col in filterable:
     val_list = [str(i) for i in df[col].unique().tolist()]
     wdg[col+'_heading'] = bmw.Div(text=col, id=col+'_filter_heading')
-    wdg[col] = bmw.CheckboxGroup(labels=val_list, active=range(len(val_list)), id=col+'_dropboxes')
+    wdg[col+'_filter'] = bmw.CheckboxGroup(labels=val_list, active=range(len(val_list)), id=col+'_dropboxes')
 wdg['update'] = bmw.Button(label='Update', button_type='success', id='update-button')
 wdg['adjustments'] = bmw.Div(text='Plot Adjustments', id='adjust_plots')
 wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value='300', id='plot_width_adjust')
