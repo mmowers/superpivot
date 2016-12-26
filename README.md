@@ -5,7 +5,8 @@ multiple filterable charts.
 
 The code was developed starting from Bokeh/examples/app/crossfilter.
 
-The code is data-agnostic, so any other data 
+The code is data-agnostic, so any other properly formatted data can
+be used in place of csv/data.csv (see below) and be visualized.
 
 ## Setting Up From Scratch
 Get Anaconda for python 2.7 at:
