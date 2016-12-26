@@ -1,3 +1,5 @@
+#Exploding Pivot Charts
+
 ## Intro
 This bokeh app creates pivot charts from data, similar to Excel's pivot
 chart functionality, but with the additional ability to explode into
