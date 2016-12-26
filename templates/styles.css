@@ -28,11 +28,11 @@ body {
 .bk-plot-layout{
     display: inline-block;
 }
-div[id$="_dropboxes"],
+div[id^="modelid_filter_"],
 div[id$="_adjust"]{
     display: none;
 }
-div[id$="_heading"]{
+div[id^="modelid_heading_"]{
     font-weight: bold;
     cursor: pointer;
     color: purple;

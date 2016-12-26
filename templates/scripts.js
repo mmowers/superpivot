@@ -1,16 +1,16 @@
 $(document).ready(function(){
     $('body').on('click', '#modelid_filters', function(){
-        $('[id$=_filter_heading]').toggle();
+        $('[id^=modelid_heading_filter_]').toggle();
         $('.select-all-none').hide();
-        $('.bk-widget[id$=_dropboxes]').hide();
+        $('.bk-widget[id^=modelid_filter_]').hide();
     });
-    $('body').on('click', '[id$=_filter_heading]', function(){
+    $('body').on('click', '[id^=modelid_heading_filter_]', function(){
         if($(this).next('.select-all-none').length == 0){
             $(this).after('<div class="select-all-none"><span class="select-all select-opt">All</span>|<span class="select-none select-opt">None</span>');
         }else{
             $(this).next(".select-all-none").toggle();
         }
-        $(this).next(".select-all-none").next(".bk-widget[id$=_dropboxes]").toggle();
+        $(this).next(".select-all-none").next(".bk-widget[id^=modelid_filter_]").toggle();
     });
     $('body').on('click', '#modelid_adjust_plots', function(){
         $('div[id$=_adjust]').toggle();

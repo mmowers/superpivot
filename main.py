@@ -20,6 +20,7 @@ columns = sorted(df.columns)
 discrete = [x for x in columns if df[x].dtype == object]
 continuous = [x for x in columns if x not in discrete]
 filterable = discrete+[x for x in continuous if df[x].dtype == np.int64 and len(df[x].unique()) < 500]
+seriesable = discrete+[x for x in continuous if df[x].dtype == np.int64 and len(df[x].unique()) < 60]
 
 def create_figures():
     plot_list = []
@@ -27,8 +28,8 @@ def create_figures():
         return plot_list
 
     df_filtered = df
-    for col in filterable:
-        active = [wdg[col+'_filter'].labels[i] for i in wdg[col+'_filter'].active]
+    for j, col in enumerate(filterable):
+        active = [wdg['filter_'+str(j)].labels[i] for i in wdg['filter_'+str(j)].active]
         if col in continuous:
             active = [int(i) for i in active]
         df_filtered = df_filtered[df_filtered[col].isin(active)]
@@ -141,8 +142,9 @@ def build_series_legend():
     series_legend_string = '<div class="legend-header">Series Legend</div><div class="legend-body">'
     if wdg['series'].value != 'None':
         active_list = []
+        filter_num = filterable.index(wdg['series'].value)
         for i, val in enumerate(df[wdg['series'].value].unique().tolist()):
-            if(i in wdg[wdg['series'].value+'_filter'].active): active_list.append(val)
+            if(i in wdg['filter_'+str(filter_num)].active): active_list.append(val)
         for i, txt in reversed(list(enumerate(active_list))):
             series_legend_string += '<div class="legend-entry"><span class="legend-color" style="background-color:' + str(COLORS[i]) + ';"></span>'
             series_legend_string += '<span class="legend-text">' + str(txt) +'</span></div>'
@@ -167,19 +169,19 @@ def update():
 wdg = collections.OrderedDict()
 wdg['chartType'] = bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES, name='hithere')
 wdg['x'] = bmw.Select(title='X-Axis', value='None', options=['None'] + columns)
-wdg['x_group'] = bmw.Select(title='Group X by', value='None', options=['None'] + filterable)
+wdg['x_group'] = bmw.Select(title='Group X by', value='None', options=['None'] + seriesable)
 wdg['y'] = bmw.Select(title='Y-Axis', value='None', options=['None'] + columns)
 wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='None', options=AGGREGATIONS)
-wdg['series'] = bmw.Select(title='Series', value='None', options=['None'] + columns)
+wdg['series'] = bmw.Select(title='Series', value='None', options=['None'] + seriesable)
 wdg['series_stack'] = bmw.RadioButtonGroup(labels=["Unstacked", "Stacked"], active=0)
 wdg['series_legend'] = bmw.Div(text=build_series_legend(), id='series_legend')
 wdg['size'] = bmw.Select(title='Size', value='None', options=['None'] + continuous)
-wdg['explode'] = bmw.Select(title='Explode', value='None', options=['None'] + columns)
+wdg['explode'] = bmw.Select(title='Explode', value='None', options=['None'] + seriesable)
 wdg['filters'] = bmw.Div(text='Filters', id='filters')
-for col in filterable:
+for j, col in enumerate(filterable):
     val_list = [str(i) for i in df[col].unique().tolist()]
-    wdg[col+'_heading'] = bmw.Div(text=col, id=col+'_filter_heading')
-    wdg[col+'_filter'] = bmw.CheckboxGroup(labels=val_list, active=range(len(val_list)), id=col+'_dropboxes')
+    wdg['heading_filter_'+str(j)] = bmw.Div(text=col, id='heading_filter_'+str(j))
+    wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=range(len(val_list)), id='filter_'+str(j))
 wdg['update'] = bmw.Button(label='Update', button_type='success', id='update-button')
 wdg['adjustments'] = bmw.Div(text='Plot Adjustments', id='adjust_plots')
 wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value='300', id='plot_width_adjust')
