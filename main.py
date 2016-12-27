@@ -115,20 +115,21 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
     return p
 
 def add_series(p, xs, ys, c, sz, y_bases=None):
+    alpha = float(wdg['opacity'].value)
     if wdg['chartType'].value == 'Scatter':
-        p.circle(x=xs, y=ys, color=c, size=sz, fill_alpha=0.5, line_color=None, line_width=None)
+        p.circle(x=xs, y=ys, color=c, size=sz, fill_alpha=alpha, line_color=None, line_width=None)
     elif wdg['chartType'].value == 'Line':
-        p.line(x=xs, y=ys, color=c, alpha=0.5, line_width=2)
+        p.line(x=xs, y=ys, color=c, alpha=alpha, line_width=2)
     elif wdg['chartType'].value == 'Bar':
         if y_bases is None: y_bases = [0]*len(ys)
         centers = [(ys[i] + y_bases[i])/2 for i in range(len(ys))]
         heights = [ys[i] - y_bases[i] for i in range(len(ys))]
-        p.rect(x=xs, y=centers, height=heights, color=c, fill_alpha=0.5, width=0.5, line_color=None, line_width=None)
+        p.rect(x=xs, y=centers, height=heights, color=c, fill_alpha=alpha, width=0.5, line_color=None, line_width=None)
     elif wdg['chartType'].value == 'Area':
         if y_bases is None: y_bases = [0]*len(ys)
         xs_around = xs + xs[::-1]
         ys_around = y_bases + ys[::-1]
-        p.patch(x=xs_around, y=ys_around, alpha=0.5, fill_color=c, line_color=None, line_width=None)
+        p.patch(x=xs_around, y=ys_around, alpha=alpha, fill_color=c, line_color=None, line_width=None)
 
 
 def build_series_legend():
@@ -199,10 +200,11 @@ def build_widgets():
     wdg['adjustments'] = bmw.Div(text='Plot Adjustments', id='adjust_plots'+str(uniq))
     wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value='300', id='adjust_plot_width'+str(uniq))
     wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value='300', id='adjust_plot_height'+str(uniq))
-    wdg['x_scale'] = bmw.TextInput(title='x scale', value='', id='adjust_plot_x_scale'+str(uniq))
+    wdg['opacity'] = bmw.TextInput(title='Opacity (0-1)', value='0.6', id='adjust_plot_opacity'+str(uniq))
+    wdg['x_scale'] = bmw.TextInput(title='x scale', value='1', id='adjust_plot_x_scale'+str(uniq))
     wdg['x_min'] = bmw.TextInput(title='x min', value='', id='adjust_plot_x_min'+str(uniq))
     wdg['x_max'] = bmw.TextInput(title='x max', value='', id='adjust_plot_x_max'+str(uniq))
-    wdg['y_scale'] = bmw.TextInput(title='y scale', value='', id='adjust_plot_y_scale'+str(uniq))
+    wdg['y_scale'] = bmw.TextInput(title='y scale', value='1', id='adjust_plot_y_scale'+str(uniq))
     wdg['y_min'] = bmw.TextInput(title='y min', value='', id='adjust_plot_y_min'+str(uniq))
     wdg['y_max'] = bmw.TextInput(title='y max', value='', id='adjust_plot_y_max'+str(uniq))
 
@@ -218,6 +220,7 @@ def build_widgets():
     wdg['explode'].on_change('value', update_sel)
     wdg['plot_width'].on_change('value', update_sel)
     wdg['plot_height'].on_change('value', update_sel)
+    wdg['opacity'].on_change('value', update_sel)
     wdg['x_min'].on_change('value', update_sel)
     wdg['x_max'].on_change('value', update_sel)
     wdg['x_scale'].on_change('value', update_sel)
