@@ -53,8 +53,8 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
     kw = dict()
     if wdg['x_group'].value != 'None':
         kw['x_range'] = []
-        unique_groups = sorted(df[wdg['x_group'].value].unique().tolist())
-        unique_xs = sorted(df[wdg['x'].value].unique().tolist())
+        unique_groups = sorted(df_filtered[wdg['x_group'].value].unique().tolist())
+        unique_xs = sorted(df_filtered[wdg['x'].value].unique().tolist())
         for i, ugr in enumerate(unique_groups):
             for uxs in unique_xs:
                 kw['x_range'].append(str(ugr) + ' ' + str(uxs))
