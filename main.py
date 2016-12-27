@@ -59,7 +59,6 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
             for uxs in unique_xs:
                 kw['x_range'].append(str(ugr) + ' ' + str(uxs))
             kw['x_range'].append(' ' * i) #increase number of spaces from one break to the next so that each blank entry is seen as unique
-
     elif wdg['x'].value in discrete:
         kw['x_range'] = sorted(set(xs))
     if wdg['y'].value in discrete:
@@ -90,13 +89,13 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
             xs, ys = (list(t) for t in zip(*sorted(zip(xs, ys))))
         add_series(p, xs, ys, c, sz)
     else:
-        full_series = df_filtered[wdg['series'].value].unique().tolist() #for colors only
+        full_series = sorted(df_filtered[wdg['series'].value].unique().tolist()) #for colors only
         if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
             df_exploded = df_exploded.groupby([wdg['series'].value, x_col], as_index=False, sort=False)[wdg['y'].value].sum()
         if wdg['series_stack'].active == 1:
-            x_bases = df_exploded[x_col].unique().tolist()
+            x_bases = sorted(df_exploded[x_col].unique().tolist())
             y_bases = [0]*len(x_bases)
-        for i, ser in enumerate(df_exploded[wdg['series'].value].unique()):
+        for i, ser in enumerate(sorted(df_exploded[wdg['series'].value].unique().tolist())):
             df_series = df_exploded[df_exploded[wdg['series'].value].isin([ser])]
             xs_ser = df_series[x_col].values
             ys_ser = df_series[wdg['y'].value].values
@@ -137,7 +136,7 @@ def build_series_legend():
     if wdg['series'].value != 'None':
         active_list = []
         filter_num = filterable.index(wdg['series'].value)
-        for i, val in enumerate(df[wdg['series'].value].unique().tolist()):
+        for i, val in enumerate(sorted(df[wdg['series'].value].unique().tolist())):
             if(i in wdg['filter_'+str(filter_num)].active): active_list.append(val)
         for i, txt in reversed(list(enumerate(active_list))):
             series_legend_string += '<div class="legend-entry"><span class="legend-color" style="background-color:' + str(COLORS[i]) + ';"></span>'
@@ -193,7 +192,7 @@ def build_widgets():
     wdg['explode'] = bmw.Select(title='Explode', value='None', options=['None'] + seriesable)
     wdg['filters'] = bmw.Div(text='Filters', id='filters'+str(uniq))
     for j, col in enumerate(filterable):
-        val_list = [str(i) for i in df[col].unique().tolist()]
+        val_list = [str(i) for i in sorted(df[col].unique().tolist())]
         wdg['heading_filter_'+str(j)] = bmw.Div(text=col, id='heading_filter_'+str(j)+'-'+str(uniq))
         wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=range(len(val_list)), id='filter_'+str(j)+'-'+str(uniq))
     wdg['update'] = bmw.Button(label='Update', button_type='success', id='update-button'+str(uniq))
