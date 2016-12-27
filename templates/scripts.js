@@ -1,5 +1,5 @@
 $(document).ready(function(){
-    $('body').on('click', '#modelid_filters', function(){
+    $('body').on('click', '[id^=modelid_filters]', function(){
         $('[id^=modelid_heading_filter_]').toggle();
         $('.select-all-none').hide();
         $('.bk-widget[id^=modelid_filter_]').hide();
@@ -12,8 +12,8 @@ $(document).ready(function(){
         }
         $(this).next(".select-all-none").next(".bk-widget[id^=modelid_filter_]").toggle();
     });
-    $('body').on('click', '#modelid_adjust_plots', function(){
-        $('div[id$=_adjust]').toggle();
+    $('body').on('click', '[id^=modelid_adjust_plots]', function(){
+        $('div[id^=modelid_adjust_plot_]').toggle();
     });
     $('body').on('click', '.select-opt', function(){
         var checked_bool = $(this).hasClass('select-all') ? true: false;

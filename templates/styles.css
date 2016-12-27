@@ -29,7 +29,7 @@ body {
     display: inline-block;
 }
 div[id^="modelid_filter_"],
-div[id$="_adjust"]{
+div[id^="modelid_adjust_plot_"]{
     display: none;
 }
 div[id^="modelid_heading_"]{
@@ -38,8 +38,8 @@ div[id^="modelid_heading_"]{
     color: purple;
     display: none;
 }
-#modelid_adjust_plots,
-#modelid_filters{
+div[id^="modelid_adjust_plots"],
+div[id^="modelid_filters"]{
     font-weight: bold;
     color: blue;
     cursor: pointer;

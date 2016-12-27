@@ -165,7 +165,7 @@ def update():
     plots.children = create_figures()
 
 def build_widgets():
-    global df, columns, discrete, continuous, filterable, seriesable, wdg
+    global df, columns, discrete, continuous, filterable, seriesable, wdg, uniq
 
     data_source = wdg['data'].value
 
@@ -177,6 +177,8 @@ def build_widgets():
     seriesable = discrete+[x for x in continuous if df[x].dtype == np.int64 and len(df[x].unique()) < 60]
 
     wdg.clear()
+    uniq += 1
+
     wdg['data'] = bmw.TextInput(title='Data Source', value=data_source)
     wdg['chartType'] = bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES)
     wdg['x'] = bmw.Select(title='X-Axis', value='None', options=['None'] + columns)
@@ -185,24 +187,24 @@ def build_widgets():
     wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='None', options=AGGREGATIONS)
     wdg['series'] = bmw.Select(title='Series', value='None', options=['None'] + seriesable)
     wdg['series_stack'] = bmw.RadioButtonGroup(labels=["Unstacked", "Stacked"], active=0)
-    wdg['series_legend'] = bmw.Div(text=build_series_legend(), id='series_legend')
+    wdg['series_legend'] = bmw.Div(text=build_series_legend(), id='series_legend'+str(uniq))
     wdg['size'] = bmw.Select(title='Size', value='None', options=['None'] + continuous)
     wdg['explode'] = bmw.Select(title='Explode', value='None', options=['None'] + seriesable)
-    wdg['filters'] = bmw.Div(text='Filters', id='filters')
+    wdg['filters'] = bmw.Div(text='Filters', id='filters'+str(uniq))
     for j, col in enumerate(filterable):
         val_list = [str(i) for i in df[col].unique().tolist()]
-        wdg['heading_filter_'+str(j)] = bmw.Div(text=col, id='heading_filter_'+str(j))
-        wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=range(len(val_list)), id='filter_'+str(j))
-    wdg['update'] = bmw.Button(label='Update', button_type='success', id='update-button')
-    wdg['adjustments'] = bmw.Div(text='Plot Adjustments', id='adjust_plots')
-    wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value='300', id='plot_width_adjust')
-    wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value='300', id='plot_height_adjust')
-    wdg['x_scale'] = bmw.TextInput(title='x scale', value='', id='x_scale_adjust')
-    wdg['x_min'] = bmw.TextInput(title='x min', value='', id='x_min_adjust')
-    wdg['x_max'] = bmw.TextInput(title='x max', value='', id='x_max_adjust')
-    wdg['y_scale'] = bmw.TextInput(title='y scale', value='', id='y_scale_adjust')
-    wdg['y_min'] = bmw.TextInput(title='y min', value='', id='y_min_adjust')
-    wdg['y_max'] = bmw.TextInput(title='y max', value='', id='y_max_adjust')
+        wdg['heading_filter_'+str(j)] = bmw.Div(text=col, id='heading_filter_'+str(j)+'-'+str(uniq))
+        wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=range(len(val_list)), id='filter_'+str(j)+'-'+str(uniq))
+    wdg['update'] = bmw.Button(label='Update', button_type='success', id='update-button'+str(uniq))
+    wdg['adjustments'] = bmw.Div(text='Plot Adjustments', id='adjust_plots'+str(uniq))
+    wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value='300', id='adjust_plot_width'+str(uniq))
+    wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value='300', id='adjust_plot_height'+str(uniq))
+    wdg['x_scale'] = bmw.TextInput(title='x scale', value='', id='adjust_plot_x_scale'+str(uniq))
+    wdg['x_min'] = bmw.TextInput(title='x min', value='', id='adjust_plot_x_min'+str(uniq))
+    wdg['x_max'] = bmw.TextInput(title='x max', value='', id='adjust_plot_x_max'+str(uniq))
+    wdg['y_scale'] = bmw.TextInput(title='y scale', value='', id='adjust_plot_y_scale'+str(uniq))
+    wdg['y_min'] = bmw.TextInput(title='y min', value='', id='adjust_plot_y_min'+str(uniq))
+    wdg['y_max'] = bmw.TextInput(title='y max', value='', id='adjust_plot_y_max'+str(uniq))
 
     wdg['data'].on_change('value', update_data)
     wdg['chartType'].on_change('value', update_sel)
@@ -226,6 +228,7 @@ def build_widgets():
 
 wdg = collections.OrderedDict()
 wdg['data'] = bmw.TextInput(title='Data Source', value='csv/data.csv')
+uniq = 0
 build_widgets()
 
 controls = bl.widgetbox(wdg.values(), id='widgets_section')
