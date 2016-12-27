@@ -30,6 +30,8 @@ bokeh serve --show .
 This will launch a browser window with the viewer. To see
 a plot, you'll have to select the columns to use for x-axis and y-axis.
 In addition you have these widgets:
+* Data Source: Enter a path to a properly formatted csv file (see below). The path is relative to the
+root of this repo, but absolute paths may be entered as well, e.g. 'C:/somefolder/somefile.csv'
 * Chart Type: Select Scatter, Line, Bar, or Area
 * Group X by: Select a column to group the x-axis (if both x-axis and grouping columns are discrete).
 * Y-axis aggregation: You may aggregate y-axis data if it is numeric. "Sum" is currently the only option.
@@ -42,11 +44,11 @@ exploded column values.
 * Filters: Each column can be used to filter data with checkboxes. After selecting Filters, you must press
 the Update button to apply the filters
 * Update: This is only used for updating the charts once filters have been changed
-* Plot adjustments: Make additional modifications to the chart size and x-axis/y-axis limits and scale.
+* Plot adjustments: Make additional modifications to the chart size, x-axis/y-axis limits and scale, etc.
 
 
 ## Viewing data from other csvs
-Simply put your data into csv/data.csv. Make sure that there are column headers (without spaces) and no row labels.
+Simply put your data into csv/data.csv. Make sure that there are column headers for each column and no row labels.
 
 ## Bokeh
 This tool uses bokeh, built on python:
