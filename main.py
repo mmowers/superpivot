@@ -7,7 +7,6 @@ import bokeh.layouts as bl
 import bokeh.models.widgets as bmw
 import bokeh.plotting as bp
 
-df = pd.read_csv('csv/data.csv')
 SZ_MIN = 6
 SZ_MAX = 20
 SZ_NORM = 9
@@ -15,12 +14,6 @@ COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fe
 C_NORM = "#31AADE"
 CHARTTYPES = ['Scatter', 'Line', 'Bar', 'Area']
 AGGREGATIONS = ['None', 'Sum']
-
-columns = sorted(df.columns)
-discrete = [x for x in columns if df[x].dtype == object]
-continuous = [x for x in columns if x not in discrete]
-filterable = discrete+[x for x in continuous if df[x].dtype == np.int64 and len(df[x].unique()) < 500]
-seriesable = discrete+[x for x in continuous if df[x].dtype == np.int64 and len(df[x].unique()) < 60]
 
 def create_figures():
     plot_list = []
@@ -159,6 +152,11 @@ def adjust_axes(p):
         if wdg['y_min'].value != '': p.y_range.start = float(wdg['y_min'].value)
         if wdg['y_max'].value != '': p.y_range.end = float(wdg['y_max'].value)
 
+def update_data(attr, old, new):
+    build_widgets()
+    controls.children = wdg.values()
+    update()
+
 def update_sel(attr, old, new):
     update()
 
@@ -166,51 +164,69 @@ def update():
     wdg['series_legend'].text = build_series_legend()
     plots.children = create_figures()
 
-wdg = collections.OrderedDict()
-wdg['chartType'] = bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES, name='hithere')
-wdg['x'] = bmw.Select(title='X-Axis', value='None', options=['None'] + columns)
-wdg['x_group'] = bmw.Select(title='Group X by', value='None', options=['None'] + seriesable)
-wdg['y'] = bmw.Select(title='Y-Axis', value='None', options=['None'] + columns)
-wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='None', options=AGGREGATIONS)
-wdg['series'] = bmw.Select(title='Series', value='None', options=['None'] + seriesable)
-wdg['series_stack'] = bmw.RadioButtonGroup(labels=["Unstacked", "Stacked"], active=0)
-wdg['series_legend'] = bmw.Div(text=build_series_legend(), id='series_legend')
-wdg['size'] = bmw.Select(title='Size', value='None', options=['None'] + continuous)
-wdg['explode'] = bmw.Select(title='Explode', value='None', options=['None'] + seriesable)
-wdg['filters'] = bmw.Div(text='Filters', id='filters')
-for j, col in enumerate(filterable):
-    val_list = [str(i) for i in df[col].unique().tolist()]
-    wdg['heading_filter_'+str(j)] = bmw.Div(text=col, id='heading_filter_'+str(j))
-    wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=range(len(val_list)), id='filter_'+str(j))
-wdg['update'] = bmw.Button(label='Update', button_type='success', id='update-button')
-wdg['adjustments'] = bmw.Div(text='Plot Adjustments', id='adjust_plots')
-wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value='300', id='plot_width_adjust')
-wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value='300', id='plot_height_adjust')
-wdg['x_scale'] = bmw.TextInput(title='x scale', value='', id='x_scale_adjust')
-wdg['x_min'] = bmw.TextInput(title='x min', value='', id='x_min_adjust')
-wdg['x_max'] = bmw.TextInput(title='x max', value='', id='x_max_adjust')
-wdg['y_scale'] = bmw.TextInput(title='y scale', value='', id='y_scale_adjust')
-wdg['y_min'] = bmw.TextInput(title='y min', value='', id='y_min_adjust')
-wdg['y_max'] = bmw.TextInput(title='y max', value='', id='y_max_adjust')
+def build_widgets():
+    global df, columns, discrete, continuous, filterable, seriesable, wdg
 
-wdg['chartType'].on_change('value', update_sel)
-wdg['x'].on_change('value', update_sel)
-wdg['x_group'].on_change('value', update_sel)
-wdg['y'].on_change('value', update_sel)
-wdg['y_agg'].on_change('value', update_sel)
-wdg['series'].on_change('value', update_sel)
-wdg['series_stack'].on_change('active', update_sel)
-wdg['size'].on_change('value', update_sel)
-wdg['explode'].on_change('value', update_sel)
-wdg['plot_width'].on_change('value', update_sel)
-wdg['plot_height'].on_change('value', update_sel)
-wdg['x_min'].on_change('value', update_sel)
-wdg['x_max'].on_change('value', update_sel)
-wdg['x_scale'].on_change('value', update_sel)
-wdg['y_min'].on_change('value', update_sel)
-wdg['y_max'].on_change('value', update_sel)
-wdg['y_scale'].on_change('value', update_sel)
-wdg['update'].on_click(update)
+    data_source = wdg['data'].value
+
+    df = pd.read_csv(data_source)
+    columns = sorted(df.columns)
+    discrete = [x for x in columns if df[x].dtype == object]
+    continuous = [x for x in columns if x not in discrete]
+    filterable = discrete+[x for x in continuous if df[x].dtype == np.int64 and len(df[x].unique()) < 500]
+    seriesable = discrete+[x for x in continuous if df[x].dtype == np.int64 and len(df[x].unique()) < 60]
+
+    wdg.clear()
+    wdg['data'] = bmw.TextInput(title='Data Source', value=data_source)
+    wdg['chartType'] = bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES)
+    wdg['x'] = bmw.Select(title='X-Axis', value='None', options=['None'] + columns)
+    wdg['x_group'] = bmw.Select(title='Group X by', value='None', options=['None'] + seriesable)
+    wdg['y'] = bmw.Select(title='Y-Axis', value='None', options=['None'] + columns)
+    wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='None', options=AGGREGATIONS)
+    wdg['series'] = bmw.Select(title='Series', value='None', options=['None'] + seriesable)
+    wdg['series_stack'] = bmw.RadioButtonGroup(labels=["Unstacked", "Stacked"], active=0)
+    wdg['series_legend'] = bmw.Div(text=build_series_legend(), id='series_legend')
+    wdg['size'] = bmw.Select(title='Size', value='None', options=['None'] + continuous)
+    wdg['explode'] = bmw.Select(title='Explode', value='None', options=['None'] + seriesable)
+    wdg['filters'] = bmw.Div(text='Filters', id='filters')
+    for j, col in enumerate(filterable):
+        val_list = [str(i) for i in df[col].unique().tolist()]
+        wdg['heading_filter_'+str(j)] = bmw.Div(text=col, id='heading_filter_'+str(j))
+        wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=range(len(val_list)), id='filter_'+str(j))
+    wdg['update'] = bmw.Button(label='Update', button_type='success', id='update-button')
+    wdg['adjustments'] = bmw.Div(text='Plot Adjustments', id='adjust_plots')
+    wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value='300', id='plot_width_adjust')
+    wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value='300', id='plot_height_adjust')
+    wdg['x_scale'] = bmw.TextInput(title='x scale', value='', id='x_scale_adjust')
+    wdg['x_min'] = bmw.TextInput(title='x min', value='', id='x_min_adjust')
+    wdg['x_max'] = bmw.TextInput(title='x max', value='', id='x_max_adjust')
+    wdg['y_scale'] = bmw.TextInput(title='y scale', value='', id='y_scale_adjust')
+    wdg['y_min'] = bmw.TextInput(title='y min', value='', id='y_min_adjust')
+    wdg['y_max'] = bmw.TextInput(title='y max', value='', id='y_max_adjust')
+
+    wdg['data'].on_change('value', update_data)
+    wdg['chartType'].on_change('value', update_sel)
+    wdg['x'].on_change('value', update_sel)
+    wdg['x_group'].on_change('value', update_sel)
+    wdg['y'].on_change('value', update_sel)
+    wdg['y_agg'].on_change('value', update_sel)
+    wdg['series'].on_change('value', update_sel)
+    wdg['series_stack'].on_change('active', update_sel)
+    wdg['size'].on_change('value', update_sel)
+    wdg['explode'].on_change('value', update_sel)
+    wdg['plot_width'].on_change('value', update_sel)
+    wdg['plot_height'].on_change('value', update_sel)
+    wdg['x_min'].on_change('value', update_sel)
+    wdg['x_max'].on_change('value', update_sel)
+    wdg['x_scale'].on_change('value', update_sel)
+    wdg['y_min'].on_change('value', update_sel)
+    wdg['y_max'].on_change('value', update_sel)
+    wdg['y_scale'].on_change('value', update_sel)
+    wdg['update'].on_click(update)
+
+wdg = collections.OrderedDict()
+wdg['data'] = bmw.TextInput(title='Data Source', value='csv/data.csv')
+build_widgets()
 
 controls = bl.widgetbox(wdg.values(), id='widgets_section')
 plots = bl.column(create_figures(), id='plots_section')
