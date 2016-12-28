@@ -7,14 +7,12 @@ import bokeh.layouts as bl
 import bokeh.models.widgets as bmw
 import bokeh.plotting as bp
 
-SZ_NORM = 9
-SZ_MIN = 6
-SZ_MAX = 20
 PLOT_WIDTH = 300
 PLOT_HEIGHT = 300
 OPACITY = 0.6
 X_SCALE = 1
 Y_SCALE = 1
+CIRCLE_SIZE = 9
 BAR_WIDTH = 0.5
 LINE_WIDTH = 2
 COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142']*10
@@ -64,8 +62,7 @@ def build_widgets():
     wdg['y_scale'] = bmw.TextInput(title='Y Scale', value=str(Y_SCALE), id='adjust_plot_y_scale'+str(uniq))
     wdg['y_min'] = bmw.TextInput(title='Y  Min', value='', id='adjust_plot_y_min'+str(uniq))
     wdg['y_max'] = bmw.TextInput(title='Y Max', value='', id='adjust_plot_y_max'+str(uniq))
-    wdg['size_auto'] = bmw.Select(title='Circle Size Auto (Scatter Only)', value='None', options=['None'] + continuous, id='adjust_plot_circle_size_auto'+str(uniq))
-    wdg['size_man'] = bmw.TextInput(title='Circle Size Manual (Scatter Only)', value=str(SZ_NORM), id='adjust_plot_circle_size_man'+str(uniq))
+    wdg['circle_size'] = bmw.TextInput(title='Circle Size (Scatter Only)', value=str(CIRCLE_SIZE), id='adjust_plot_circle_size'+str(uniq))
     wdg['bar_width'] = bmw.TextInput(title='Bar Width (Bar Only)', value=str(BAR_WIDTH), id='adjust_plot_bar_width'+str(uniq))
     wdg['line_width'] = bmw.TextInput(title='Line Width (Line Only)', value=str(LINE_WIDTH), id='adjust_plot_line_width'+str(uniq))
 
@@ -87,8 +84,7 @@ def build_widgets():
     wdg['y_min'].on_change('value', update_sel)
     wdg['y_max'].on_change('value', update_sel)
     wdg['y_scale'].on_change('value', update_sel)
-    wdg['size_auto'].on_change('value', update_sel)
-    wdg['size_man'].on_change('value', update_sel)
+    wdg['circle_size'].on_change('value', update_sel)
     wdg['bar_width'].on_change('value', update_sel)
     wdg['line_width'].on_change('value', update_sel)
     wdg['update'].on_click(update)
@@ -150,14 +146,6 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
     if wdg['x'].value in discrete or wdg['x_group'].value != 'None':
         p.xaxis.major_label_orientation = pd.np.pi / 4
 
-    sz = int(wdg['size_man'].value)
-    if wdg['size_auto'].value != 'None':
-        max_val = df_exploded[wdg['size_auto'].value].max()
-        min_val = df_exploded[wdg['size_auto'].value].min()
-        vals = df_exploded[wdg['size_auto'].value]
-        sz = SZ_MIN + (SZ_MAX - SZ_MIN)/(max_val - min_val)*(vals - min_val)
-        sz = sz.tolist()
-
     c = C_NORM
     if wdg['series'].value == 'None':
         if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
@@ -165,7 +153,7 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
             xs = df_exploded[x_col].values.tolist()
             ys = df_exploded[wdg['y'].value].values.tolist()
             xs, ys = (list(t) for t in zip(*sorted(zip(xs, ys))))
-        add_glyph(p, xs, ys, c, sz)
+        add_glyph(p, xs, ys, c)
     else:
         full_series = sorted(df_filtered[wdg['series'].value].unique().tolist()) #for colors only
         if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
@@ -181,22 +169,22 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
             ys_ser = df_series[wdg['y'].value].values.tolist()
             if wdg['series_stack'].active == 0:
                 xs_ser, ys_ser = (list(t) for t in zip(*sorted(zip(xs_ser, ys_ser))))
-                add_glyph(p, xs_ser, ys_ser, c, sz)
+                add_glyph(p, xs_ser, ys_ser, c)
             else:
                 ys_pos = [ys_ser[xs_ser.index(x)] if x in xs_ser and ys_ser[xs_ser.index(x)] > 0 else 0 for i, x in enumerate(xs_full)]
                 ys_neg = [ys_ser[xs_ser.index(x)] if x in xs_ser and ys_ser[xs_ser.index(x)] < 0 else 0 for i, x in enumerate(xs_full)]
                 ys_stacked_pos = [ys_pos[i] + y_bases_pos[i] for i in range(len(xs_full))]
                 ys_stacked_neg = [ys_neg[i] + y_bases_neg[i] for i in range(len(xs_full))]
-                add_glyph(p, xs_full, ys_stacked_pos, c, sz, y_bases=y_bases_pos)
-                add_glyph(p, xs_full, ys_stacked_neg, c, sz, y_bases=y_bases_neg)
+                add_glyph(p, xs_full, ys_stacked_pos, c, y_bases=y_bases_pos)
+                add_glyph(p, xs_full, ys_stacked_neg, c, y_bases=y_bases_neg)
                 y_bases_pos = ys_stacked_pos
                 y_bases_neg = ys_stacked_neg
     return p
 
-def add_glyph(p, xs, ys, c, sz, y_bases=None):
+def add_glyph(p, xs, ys, c, y_bases=None):
     alpha = float(wdg['opacity'].value)
     if wdg['chartType'].value == 'Scatter':
-        p.circle(x=xs, y=ys, color=c, size=sz, fill_alpha=alpha, line_color=None, line_width=None)
+        p.circle(x=xs, y=ys, color=c, size=int(wdg['circle_size'].value), fill_alpha=alpha, line_color=None, line_width=None)
     elif wdg['chartType'].value == 'Line':
         p.line(x=xs, y=ys, color=c, alpha=alpha, line_width=float(wdg['line_width'].value))
     elif wdg['chartType'].value == 'Bar':
