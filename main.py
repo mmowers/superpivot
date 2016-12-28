@@ -140,7 +140,7 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
     if explode_val != 'None':
         kw['title'] = "%s = %s" % (wdg['explode'].value, str(explode_val))
 
-    p = bp.figure(plot_height=int(wdg['plot_height'].value), plot_width=int(wdg['plot_width'].value), tools='pan,box_zoom,reset', **kw)
+    p = bp.figure(plot_height=int(wdg['plot_height'].value), plot_width=int(wdg['plot_width'].value), tools='pan,box_zoom,reset,save', **kw)
     adjust_axes(p)
 
     if wdg['x'].value in discrete or wdg['x_group'].value != 'None':
