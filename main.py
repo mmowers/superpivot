@@ -7,9 +7,16 @@ import bokeh.layouts as bl
 import bokeh.models.widgets as bmw
 import bokeh.plotting as bp
 
+SZ_NORM = 9
 SZ_MIN = 6
 SZ_MAX = 20
-SZ_NORM = 9
+PLOT_WIDTH = 300
+PLOT_HEIGHT = 300
+OPACITY = 0.6
+X_SCALE = 1
+Y_SCALE = 1
+BAR_WIDTH = 0.5
+LINE_WIDTH = 2
 COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142']*10
 C_NORM = "#31AADE"
 CHARTTYPES = ['Scatter', 'Line', 'Bar', 'Area']
@@ -40,7 +47,6 @@ def build_widgets():
     wdg['series'] = bmw.Select(title='Series', value='None', options=['None'] + seriesable)
     wdg['series_stack'] = bmw.RadioButtonGroup(labels=["Unstacked", "Stacked"], active=0)
     wdg['series_legend'] = bmw.Div(text=build_series_legend(), id='series_legend'+str(uniq))
-    wdg['size'] = bmw.Select(title='Size', value='None', options=['None'] + continuous)
     wdg['explode'] = bmw.Select(title='Explode', value='None', options=['None'] + seriesable)
     wdg['filters'] = bmw.Div(text='Filters', id='filters'+str(uniq))
     for j, col in enumerate(filterable):
@@ -49,15 +55,19 @@ def build_widgets():
         wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=range(len(val_list)), id='filter_'+str(j)+'-'+str(uniq))
     wdg['update'] = bmw.Button(label='Update', button_type='success', id='update-button'+str(uniq))
     wdg['adjustments'] = bmw.Div(text='Plot Adjustments', id='adjust_plots'+str(uniq))
-    wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value='300', id='adjust_plot_width'+str(uniq))
-    wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value='300', id='adjust_plot_height'+str(uniq))
-    wdg['opacity'] = bmw.TextInput(title='Opacity (0-1)', value='0.6', id='adjust_plot_opacity'+str(uniq))
-    wdg['x_scale'] = bmw.TextInput(title='x scale', value='1', id='adjust_plot_x_scale'+str(uniq))
-    wdg['x_min'] = bmw.TextInput(title='x min', value='', id='adjust_plot_x_min'+str(uniq))
-    wdg['x_max'] = bmw.TextInput(title='x max', value='', id='adjust_plot_x_max'+str(uniq))
-    wdg['y_scale'] = bmw.TextInput(title='y scale', value='1', id='adjust_plot_y_scale'+str(uniq))
-    wdg['y_min'] = bmw.TextInput(title='y min', value='', id='adjust_plot_y_min'+str(uniq))
-    wdg['y_max'] = bmw.TextInput(title='y max', value='', id='adjust_plot_y_max'+str(uniq))
+    wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value=str(PLOT_WIDTH), id='adjust_plot_width'+str(uniq))
+    wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value=str(PLOT_HEIGHT), id='adjust_plot_height'+str(uniq))
+    wdg['opacity'] = bmw.TextInput(title='Opacity (0-1)', value=str(OPACITY), id='adjust_plot_opacity'+str(uniq))
+    wdg['x_scale'] = bmw.TextInput(title='X Scale', value=str(X_SCALE), id='adjust_plot_x_scale'+str(uniq))
+    wdg['x_min'] = bmw.TextInput(title='X Min', value='', id='adjust_plot_x_min'+str(uniq))
+    wdg['x_max'] = bmw.TextInput(title='X Max', value='', id='adjust_plot_x_max'+str(uniq))
+    wdg['y_scale'] = bmw.TextInput(title='Y Scale', value=str(Y_SCALE), id='adjust_plot_y_scale'+str(uniq))
+    wdg['y_min'] = bmw.TextInput(title='Y  Min', value='', id='adjust_plot_y_min'+str(uniq))
+    wdg['y_max'] = bmw.TextInput(title='Y Max', value='', id='adjust_plot_y_max'+str(uniq))
+    wdg['size_auto'] = bmw.Select(title='Circle Size Auto (Scatter Only)', value='None', options=['None'] + continuous, id='adjust_plot_circle_size_auto'+str(uniq))
+    wdg['size_man'] = bmw.TextInput(title='Circle Size Manual (Scatter Only)', value=str(SZ_NORM), id='adjust_plot_circle_size_man'+str(uniq))
+    wdg['bar_width'] = bmw.TextInput(title='Bar Width (Bar Only)', value=str(BAR_WIDTH), id='adjust_plot_bar_width'+str(uniq))
+    wdg['line_width'] = bmw.TextInput(title='Line Width (Line Only)', value=str(LINE_WIDTH), id='adjust_plot_line_width'+str(uniq))
 
     wdg['data'].on_change('value', update_data)
     wdg['chartType'].on_change('value', update_sel)
@@ -67,7 +77,6 @@ def build_widgets():
     wdg['y_agg'].on_change('value', update_sel)
     wdg['series'].on_change('value', update_sel)
     wdg['series_stack'].on_change('active', update_sel)
-    wdg['size'].on_change('value', update_sel)
     wdg['explode'].on_change('value', update_sel)
     wdg['plot_width'].on_change('value', update_sel)
     wdg['plot_height'].on_change('value', update_sel)
@@ -78,6 +87,10 @@ def build_widgets():
     wdg['y_min'].on_change('value', update_sel)
     wdg['y_max'].on_change('value', update_sel)
     wdg['y_scale'].on_change('value', update_sel)
+    wdg['size_auto'].on_change('value', update_sel)
+    wdg['size_man'].on_change('value', update_sel)
+    wdg['bar_width'].on_change('value', update_sel)
+    wdg['line_width'].on_change('value', update_sel)
     wdg['update'].on_click(update)
 
 def create_figures():
@@ -137,11 +150,11 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
     if wdg['x'].value in discrete or wdg['x_group'].value != 'None':
         p.xaxis.major_label_orientation = pd.np.pi / 4
 
-    sz = SZ_NORM
-    if wdg['size'].value != 'None':
-        max_val = df_exploded[wdg['size'].value].max()
-        min_val = df_exploded[wdg['size'].value].min()
-        vals = df_exploded[wdg['size'].value]
+    sz = int(wdg['size_man'].value)
+    if wdg['size_auto'].value != 'None':
+        max_val = df_exploded[wdg['size_auto'].value].max()
+        min_val = df_exploded[wdg['size_auto'].value].min()
+        vals = df_exploded[wdg['size_auto'].value]
         sz = SZ_MIN + (SZ_MAX - SZ_MIN)/(max_val - min_val)*(vals - min_val)
         sz = sz.tolist()
 
@@ -185,12 +198,12 @@ def add_glyph(p, xs, ys, c, sz, y_bases=None):
     if wdg['chartType'].value == 'Scatter':
         p.circle(x=xs, y=ys, color=c, size=sz, fill_alpha=alpha, line_color=None, line_width=None)
     elif wdg['chartType'].value == 'Line':
-        p.line(x=xs, y=ys, color=c, alpha=alpha, line_width=2)
+        p.line(x=xs, y=ys, color=c, alpha=alpha, line_width=float(wdg['line_width'].value))
     elif wdg['chartType'].value == 'Bar':
         if y_bases is None: y_bases = [0]*len(ys)
         centers = [(ys[i] + y_bases[i])/2 for i in range(len(ys))]
         heights = [abs(ys[i] - y_bases[i]) for i in range(len(ys))]
-        p.rect(x=xs, y=centers, height=heights, color=c, fill_alpha=alpha, width=0.5, line_color=None, line_width=None)
+        p.rect(x=xs, y=centers, height=heights, color=c, fill_alpha=alpha, width=float(wdg['bar_width'].value), line_color=None, line_width=None)
     elif wdg['chartType'].value == 'Area':
         if y_bases is None: y_bases = [0]*len(ys)
         xs_around = xs + xs[::-1]
