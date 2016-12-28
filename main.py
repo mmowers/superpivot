@@ -157,25 +157,25 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
         full_series = sorted(df_filtered[wdg['series'].value].unique().tolist()) #for colors only
         if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
             df_exploded = df_exploded.groupby([wdg['series'].value, x_col], as_index=False, sort=False)[wdg['y'].value].sum()
-        if wdg['series_stack'].active == 1:
-            x_bases = sorted(df_exploded[x_col].unique().tolist())
-            y_bases = [0]*len(x_bases)
+        if wdg['y'].value in continuous:
+            xs_full = sorted(df_exploded[x_col].unique().tolist())
+            y_bases = [0]*len(xs_full)
         for i, ser in enumerate(sorted(df_exploded[wdg['series'].value].unique().tolist())):
+            c = COLORS[full_series.index(ser)]
             df_series = df_exploded[df_exploded[wdg['series'].value].isin([ser])]
             xs_ser = df_series[x_col].values.tolist()
             ys_ser = df_series[wdg['y'].value].values.tolist()
-            xs_ser, ys_ser = (list(t) for t in zip(*sorted(zip(xs_ser, ys_ser))))
-            c = COLORS[full_series.index(ser)]
-            if wdg['series_stack'].active == 0:
+            if wdg['y'].value not in continuous:
+                xs_ser, ys_ser = (list(t) for t in zip(*sorted(zip(xs_ser, ys_ser))))
                 add_glyph(p, xs_ser, ys_ser, c, sz)
             else:
-                y_ser_bases = []
-                for j, x in enumerate(xs_ser):
-                    base_index = x_bases.index(x)
-                    y_ser_bases.append(y_bases[base_index])
-                    y_bases[base_index] += ys_ser[j]
-                    ys_ser[j] = y_bases[base_index]
-                add_glyph(p, xs_ser, ys_ser, c, sz, y_bases=y_ser_bases)
+                ys_full = [ys_ser[xs_ser.index(x)] if x in xs_ser else 0 for i, x in enumerate(xs_full)] #fill missing y values with 0
+                if wdg['series_stack'].active == 0:
+                    add_glyph(p, xs_full, ys_full, c, sz)
+                else:
+                    ys_stacked = [ys_full[i] + y_bases[i] for i in range(len(xs_full))]
+                    add_glyph(p, xs_full, ys_stacked, c, sz, y_bases=y_bases)
+                    y_bases = ys_stacked
     return p
 
 def add_glyph(p, xs, ys, c, sz, y_bases=None):
