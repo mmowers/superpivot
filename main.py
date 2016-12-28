@@ -87,7 +87,7 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
             xs = df_exploded[x_col].values.tolist()
             ys = df_exploded[wdg['y'].value].values.tolist()
             xs, ys = (list(t) for t in zip(*sorted(zip(xs, ys))))
-        add_series(p, xs, ys, c, sz)
+        add_glyph(p, xs, ys, c, sz)
     else:
         full_series = sorted(df_filtered[wdg['series'].value].unique().tolist()) #for colors only
         if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
@@ -102,7 +102,7 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
             xs_ser, ys_ser = (list(t) for t in zip(*sorted(zip(xs_ser, ys_ser))))
             c = COLORS[full_series.index(ser)]
             if wdg['series_stack'].active == 0:
-                add_series(p, xs_ser, ys_ser, c, sz)
+                add_glyph(p, xs_ser, ys_ser, c, sz)
             else:
                 y_ser_bases = []
                 for j, x in enumerate(xs_ser):
@@ -110,10 +110,10 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
                     y_ser_bases.append(y_bases[base_index])
                     y_bases[base_index] += ys_ser[j]
                     ys_ser[j] = y_bases[base_index]
-                add_series(p, xs_ser, ys_ser, c, sz, y_bases=y_ser_bases)
+                add_glyph(p, xs_ser, ys_ser, c, sz, y_bases=y_ser_bases)
     return p
 
-def add_series(p, xs, ys, c, sz, y_bases=None):
+def add_glyph(p, xs, ys, c, sz, y_bases=None):
     alpha = float(wdg['opacity'].value)
     if wdg['chartType'].value == 'Scatter':
         p.circle(x=xs, y=ys, color=c, size=sz, fill_alpha=alpha, line_color=None, line_width=None)
