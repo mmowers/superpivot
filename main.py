@@ -153,6 +153,7 @@ def adjust_axes(p):
         if wdg['y_max'].value != '': p.y_range.end = float(wdg['y_max'].value)
 
 def update_data(attr, old, new):
+    get_data()
     build_widgets()
     controls.children = wdg.values()
     update()
@@ -164,11 +165,9 @@ def update():
     wdg['series_legend'].text = build_series_legend()
     plots.children = create_figures()
 
-def build_widgets():
-    global df, columns, discrete, continuous, filterable, seriesable, wdg, uniq
-
+def get_data():
+    global df, columns, discrete, continuous, filterable, seriesable
     data_source = wdg['data'].value
-
     df = pd.read_csv(data_source)
     columns = sorted(df.columns)
     discrete = [x for x in columns if df[x].dtype == object]
@@ -176,6 +175,9 @@ def build_widgets():
     filterable = discrete+[x for x in continuous if df[x].dtype == np.int64 and len(df[x].unique()) < 500]
     seriesable = discrete+[x for x in continuous if df[x].dtype == np.int64 and len(df[x].unique()) < 60]
 
+def build_widgets():
+    global uniq, wdg
+    data_source = wdg['data'].value
     wdg.clear()
     uniq += 1
 
@@ -230,6 +232,7 @@ def build_widgets():
 
 wdg = collections.OrderedDict()
 wdg['data'] = bmw.TextInput(title='Data Source', value='csv/data.csv')
+get_data()
 uniq = 0
 build_widgets()
 
