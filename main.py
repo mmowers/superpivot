@@ -159,7 +159,8 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
             df_exploded = df_exploded.groupby([wdg['series'].value, x_col], as_index=False, sort=False)[wdg['y'].value].sum()
         if wdg['series_stack'].active == 1:
             xs_full = sorted(df_exploded[x_col].unique().tolist())
-            y_bases = [0]*len(xs_full)
+            y_bases_pos = [0]*len(xs_full)
+            y_bases_neg = [0]*len(xs_full)
         for i, ser in enumerate(sorted(df_exploded[wdg['series'].value].unique().tolist())):
             c = COLORS[full_series.index(ser)]
             df_series = df_exploded[df_exploded[wdg['series'].value].isin([ser])]
@@ -169,10 +170,14 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
                 xs_ser, ys_ser = (list(t) for t in zip(*sorted(zip(xs_ser, ys_ser))))
                 add_glyph(p, xs_ser, ys_ser, c, sz)
             else:
-                ys_full = [ys_ser[xs_ser.index(x)] if x in xs_ser else 0 for i, x in enumerate(xs_full)] #fill missing y values with 0
-                ys_stacked = [ys_full[i] + y_bases[i] for i in range(len(xs_full))]
-                add_glyph(p, xs_full, ys_stacked, c, sz, y_bases=y_bases)
-                y_bases = ys_stacked
+                ys_pos = [ys_ser[xs_ser.index(x)] if x in xs_ser and ys_ser[xs_ser.index(x)] > 0 else 0 for i, x in enumerate(xs_full)]
+                ys_neg = [ys_ser[xs_ser.index(x)] if x in xs_ser and ys_ser[xs_ser.index(x)] < 0 else 0 for i, x in enumerate(xs_full)]
+                ys_stacked_pos = [ys_pos[i] + y_bases_pos[i] for i in range(len(xs_full))]
+                ys_stacked_neg = [ys_neg[i] + y_bases_neg[i] for i in range(len(xs_full))]
+                add_glyph(p, xs_full, ys_stacked_pos, c, sz, y_bases=y_bases_pos)
+                add_glyph(p, xs_full, ys_stacked_neg, c, sz, y_bases=y_bases_neg)
+                y_bases_pos = ys_stacked_pos
+                y_bases_neg = ys_stacked_neg
     return p
 
 def add_glyph(p, xs, ys, c, sz, y_bases=None):
@@ -184,7 +189,7 @@ def add_glyph(p, xs, ys, c, sz, y_bases=None):
     elif wdg['chartType'].value == 'Bar':
         if y_bases is None: y_bases = [0]*len(ys)
         centers = [(ys[i] + y_bases[i])/2 for i in range(len(ys))]
-        heights = [ys[i] - y_bases[i] for i in range(len(ys))]
+        heights = [abs(ys[i] - y_bases[i]) for i in range(len(ys))]
         p.rect(x=xs, y=centers, height=heights, color=c, fill_alpha=alpha, width=0.5, line_color=None, line_width=None)
     elif wdg['chartType'].value == 'Area':
         if y_bases is None: y_bases = [0]*len(ys)
