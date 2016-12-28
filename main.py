@@ -157,7 +157,7 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
         full_series = sorted(df_filtered[wdg['series'].value].unique().tolist()) #for colors only
         if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
             df_exploded = df_exploded.groupby([wdg['series'].value, x_col], as_index=False, sort=False)[wdg['y'].value].sum()
-        if wdg['y'].value in continuous:
+        if wdg['series_stack'].active == 1:
             xs_full = sorted(df_exploded[x_col].unique().tolist())
             y_bases = [0]*len(xs_full)
         for i, ser in enumerate(sorted(df_exploded[wdg['series'].value].unique().tolist())):
@@ -165,17 +165,14 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
             df_series = df_exploded[df_exploded[wdg['series'].value].isin([ser])]
             xs_ser = df_series[x_col].values.tolist()
             ys_ser = df_series[wdg['y'].value].values.tolist()
-            if wdg['y'].value not in continuous:
+            if wdg['series_stack'].active == 0:
                 xs_ser, ys_ser = (list(t) for t in zip(*sorted(zip(xs_ser, ys_ser))))
                 add_glyph(p, xs_ser, ys_ser, c, sz)
             else:
                 ys_full = [ys_ser[xs_ser.index(x)] if x in xs_ser else 0 for i, x in enumerate(xs_full)] #fill missing y values with 0
-                if wdg['series_stack'].active == 0:
-                    add_glyph(p, xs_full, ys_full, c, sz)
-                else:
-                    ys_stacked = [ys_full[i] + y_bases[i] for i in range(len(xs_full))]
-                    add_glyph(p, xs_full, ys_stacked, c, sz, y_bases=y_bases)
-                    y_bases = ys_stacked
+                ys_stacked = [ys_full[i] + y_bases[i] for i in range(len(xs_full))]
+                add_glyph(p, xs_full, ys_stacked, c, sz, y_bases=y_bases)
+                y_bases = ys_stacked
     return p
 
 def add_glyph(p, xs, ys, c, sz, y_bases=None):
