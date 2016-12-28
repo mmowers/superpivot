@@ -13,6 +13,7 @@ SZ_NORM = 9
 COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142']*10
 C_NORM = "#31AADE"
 CHARTTYPES = ['Scatter', 'Line', 'Bar', 'Area']
+CHARTTYPES_CONNECTED = ['Line', 'Area']
 AGGREGATIONS = ['None', 'Sum']
 
 def create_figures():
@@ -49,7 +50,6 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
 
     xs = df_exploded[x_col].values.tolist()
     ys = df_exploded[wdg['y'].value].values.tolist()
-
     kw = dict()
     if wdg['x_group'].value != 'None':
         kw['x_range'] = []
@@ -92,9 +92,8 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
         full_series = sorted(df_filtered[wdg['series'].value].unique().tolist()) #for colors only
         if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
             df_exploded = df_exploded.groupby([wdg['series'].value, x_col], as_index=False, sort=False)[wdg['y'].value].sum()
-        if wdg['series_stack'].active == 1:
-            x_bases = sorted(df_exploded[x_col].unique().tolist())
-            y_bases = [0]*len(x_bases)
+        x_bases = sorted(df_exploded[x_col].unique().tolist())
+        y_bases = [0]*len(x_bases)
         for i, ser in enumerate(sorted(df_exploded[wdg['series'].value].unique().tolist())):
             df_series = df_exploded[df_exploded[wdg['series'].value].isin([ser])]
             xs_ser = df_series[x_col].values.tolist()
@@ -102,7 +101,7 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
             xs_ser, ys_ser = (list(t) for t in zip(*sorted(zip(xs_ser, ys_ser))))
             c = COLORS[full_series.index(ser)]
             if wdg['series_stack'].active == 0:
-                add_series(p, xs_ser, ys_ser, c, sz)
+                add_series(p, xs_ser, ys_ser, c, sz, x_bases=x_bases)
             else:
                 y_ser_bases = []
                 for j, x in enumerate(xs_ser):
@@ -110,10 +109,24 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
                     y_ser_bases.append(y_bases[base_index])
                     y_bases[base_index] += ys_ser[j]
                     ys_ser[j] = y_bases[base_index]
-                add_series(p, xs_ser, ys_ser, c, sz, y_bases=y_ser_bases)
+                add_series(p, xs_ser, ys_ser, c, sz, x_bases=x_bases, y_bases=y_ser_bases)
     return p
 
-def add_series(p, xs, ys, c, sz, y_bases=None):
+def add_series(p, xs, ys, c, sz, x_bases=None, y_bases=None):
+    if wdg['chartType'].value in CHARTTYPES_CONNECTED and x_bases is not None and y_bases is not None:
+        #fill missing values with 0 for line charts, area charts, etc.
+        ys_, yb_ = [], []
+        for i, xf in enumerate(x_bases):
+            if xf in xs:
+                ys_.append(ys[xs.index(xf)])
+                yb_.append(y_bases[xs.index(xf)])
+            else:
+                ys_.append(0)
+                yb_.append(0)
+        xs = x_bases[:]
+        ys = ys_[:]
+        y_bases = yb_[:]
+
     alpha = float(wdg['opacity'].value)
     if wdg['chartType'].value == 'Scatter':
         p.circle(x=xs, y=ys, color=c, size=sz, fill_alpha=alpha, line_color=None, line_width=None)
