@@ -84,8 +84,8 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
     if wdg['series'].value == 'None':
         if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
             df_exploded = df_exploded.groupby([x_col], as_index=False, sort=False)[wdg['y'].value].sum()
-            xs = df_exploded[x_col].values
-            ys = df_exploded[wdg['y'].value].values
+            xs = df_exploded[x_col].values.tolist()
+            ys = df_exploded[wdg['y'].value].values.tolist()
             xs, ys = (list(t) for t in zip(*sorted(zip(xs, ys))))
         add_series(p, xs, ys, c, sz)
     else:
@@ -97,8 +97,8 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
             y_bases = [0]*len(x_bases)
         for i, ser in enumerate(sorted(df_exploded[wdg['series'].value].unique().tolist())):
             df_series = df_exploded[df_exploded[wdg['series'].value].isin([ser])]
-            xs_ser = df_series[x_col].values
-            ys_ser = df_series[wdg['y'].value].values
+            xs_ser = df_series[x_col].values.tolist()
+            ys_ser = df_series[wdg['y'].value].values.tolist()
             xs_ser, ys_ser = (list(t) for t in zip(*sorted(zip(xs_ser, ys_ser))))
             c = COLORS[full_series.index(ser)]
             if wdg['series_stack'].active == 0:
