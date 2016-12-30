@@ -50,7 +50,7 @@ def build_widgets():
     for j, col in enumerate(filterable):
         val_list = [str(i) for i in sorted(df[col].unique().tolist())]
         wdg['heading_filter_'+str(j)] = bmw.Div(text=col, id='heading_filter_'+str(j)+'-'+str(uniq))
-        wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=range(len(val_list)), id='filter_'+str(j)+'-'+str(uniq))
+        wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=list(range(len(val_list))), id='filter_'+str(j)+'-'+str(uniq))
     wdg['update'] = bmw.Button(label='Update', button_type='success', id='update-button'+str(uniq))
     wdg['adjustments'] = bmw.Div(text='Plot Adjustments', id='adjust_plots'+str(uniq))
     wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value=str(PLOT_WIDTH), id='adjust_plot_width'+str(uniq))
@@ -223,7 +223,7 @@ def adjust_axes(p):
 def update_data(attr, old, new):
     get_data()
     build_widgets()
-    controls.children = wdg.values()
+    controls.children = list(wdg.values())
     update()
 
 def update_sel(attr, old, new):
@@ -239,7 +239,7 @@ get_data()
 uniq = 0
 build_widgets()
 
-controls = bl.widgetbox(wdg.values(), id='widgets_section')
+controls = bl.widgetbox(list(wdg.values()), id='widgets_section')
 plots = bl.column(create_figures(), id='plots_section')
 layout = bl.row(controls, plots, id='layout')
 

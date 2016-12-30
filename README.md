@@ -11,7 +11,7 @@ The code is data-agnostic, so any other properly formatted data can
 be used in place of csv/data.csv (see below) and be visualized.
 
 ## Setting Up From Scratch
-Get Anaconda for python 2.7 at:
+Get Anaconda for python 2.7 or 3.5 at:
 https://www.continuum.io/downloads
 
 Then, here are the Bokeh installation instructions:
@@ -60,3 +60,4 @@ https://groups.google.com/a/continuum.io/forum/#!forum/bokeh
 
 And of course, python has pretty good documentation too:
 https://docs.python.org/2.7/tutorial/
+https://docs.python.org/3.5/tutorial/
