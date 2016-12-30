@@ -234,7 +234,7 @@ def update():
     plots.children = create_figures()
 
 wdg = collections.OrderedDict()
-wdg['data'] = bmw.TextInput(title='Data Source', value='csv/data.csv')
+wdg['data'] = bmw.TextInput(title='Data Source', value='csv/power.csv')
 get_data()
 uniq = 0
 build_widgets()

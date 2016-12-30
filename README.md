@@ -8,7 +8,7 @@ multiple filterable charts.
 The code was developed starting from Bokeh/examples/app/crossfilter.
 
 The code is data-agnostic, so any other properly formatted data can
-be used in place of csv/data.csv (see below) and be visualized.
+be used in place of csv/power.csv (see below) and be visualized.
 
 ## Setting Up From Scratch
 Get Anaconda for python 2.7 or 3.5 at:
@@ -31,7 +31,8 @@ This will launch a browser window with the viewer. To see
 a plot, you'll have to select the columns to use for x-axis and y-axis.
 In addition you have these widgets:
 * Data Source: Enter a path to a properly formatted csv file (see below). The path is relative to the
-root of this repo, but absolute paths may be entered as well, e.g. 'C:/somefolder/somefile.csv'
+root of this repo, but absolute paths may be entered as well, e.g. 'C:/somefolder/somefile.csv'. Make sure
+that there are column headers for each column in the csv file and no row labels.
 * Chart Type: Select Scatter, Line, Bar, or Area
 * Group X by: Select a column to group the x-axis (if both x-axis and grouping columns are discrete).
 * Y-axis aggregation: You may aggregate y-axis data if it is numeric. "Sum" is currently the only option.
@@ -45,10 +46,6 @@ exploded column values.
 the Update button to apply the filters
 * Update: This is only used for updating the charts once filters have been changed
 * Plot adjustments: Make additional modifications to the chart size, x-axis/y-axis limits and scale, etc.
-
-
-## Viewing data from other csvs
-Simply put your data into csv/data.csv. Make sure that there are column headers for each column and no row labels.
 
 ## Bokeh
 This tool uses bokeh, built on python:
