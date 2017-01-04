@@ -92,36 +92,49 @@ def build_widgets():
     wdg['line_width'].on_change('value', update_sel)
     wdg['update'].on_click(update)
 
-def create_figures():
-    plot_list = []
-    if wdg['x'].value == 'None' or wdg['y'].value == 'None':
-        return plot_list
-
-    df_filtered = df
+def set_df_plots():
+    global df_plots
+    df_plots = df.copy()
     for j, col in enumerate(filterable):
         active = [wdg['filter_'+str(j)].labels[i] for i in wdg['filter_'+str(j)].active]
         if col in continuous:
             active = [int(i) for i in active]
-        df_filtered = df_filtered[df_filtered[col].isin(active)]
+        df_plots = df_plots[df_plots[col].isin(active)]
 
     if wdg['x_scale'].value != '' and wdg['x'].value in continuous:
-        df_filtered[wdg['x'].value] = df_filtered[wdg['x'].value] * float(wdg['x_scale'].value)
+        df_plots[wdg['x'].value] = df_plots[wdg['x'].value] * float(wdg['x_scale'].value)
     if wdg['y_scale'].value != '' and wdg['y'].value in continuous:
-        df_filtered[wdg['y'].value] = df_filtered[wdg['y'].value] * float(wdg['y_scale'].value)
+        df_plots[wdg['y'].value] = df_plots[wdg['y'].value] * float(wdg['y_scale'].value)
 
+    x_col = wdg['x'].value
     if wdg['x_group'].value != 'None':
-        df_filtered[str(wdg['x_group'].value) + '_' + str(wdg['x'].value)] = df_filtered[wdg['x_group'].value].map(str) + ' ' + df_filtered[wdg['x'].value].map(str)
+        x_col = str(wdg['x_group'].value) + '_' + str(wdg['x'].value)
+        df_plots[x_col] = df_plots[wdg['x_group'].value].map(str) + ' ' + df_plots[wdg['x'].value].map(str)
+
+    if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
+        groupby_cols = [x_col]
+        if wdg['series'].value != 'None': groupby_cols = [wdg['series'].value] + groupby_cols
+        if wdg['explode'].value != 'None': groupby_cols = [wdg['explode'].value] + groupby_cols
+        df_plots = df_plots.groupby(groupby_cols, as_index=False, sort=False)[wdg['y'].value].sum()
+
+    sortby_cols = [x_col]
+    if wdg['series'].value != 'None': sortby_cols = [wdg['series'].value] + sortby_cols
+    if wdg['explode'].value != 'None': sortby_cols = [wdg['explode'].value] + sortby_cols
+    df_plots = df_plots.sort_values(sortby_cols).reset_index(drop=True)
+
+def create_figures():
+    plot_list = []
 
     if wdg['explode'].value == 'None':
-        plot_list.append(create_figure(df_filtered, df_filtered))
+        plot_list.append(create_figure(df_plots))
     else:
-        explode_vals = list(sorted(set(df_filtered[wdg['explode'].value].values)))
+        explode_vals = list(set(df_plots[wdg['explode'].value].values))
         for explode_val in explode_vals:
-            df_exploded = df_filtered[df_filtered[wdg['explode'].value].isin([explode_val])]
-            plot_list.append(create_figure(df_exploded, df_filtered, explode_val))
+            df_exploded = df_plots[df_plots[wdg['explode'].value].isin([explode_val])]
+            plot_list.append(create_figure(df_exploded, explode_val))
     return plot_list
 
-def create_figure(df_exploded, df_filtered, explode_val='None'):
+def create_figure(df_exploded, explode_val='None'):
     x_col = wdg['x'].value if wdg['x_group'].value == 'None' else str(wdg['x_group'].value) + '_' + str(wdg['x'].value)
 
     xs = df_exploded[x_col].values.tolist()
@@ -130,8 +143,8 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
     kw = dict()
     if wdg['x_group'].value != 'None':
         kw['x_range'] = []
-        unique_groups = sorted(df_filtered[wdg['x_group'].value].unique().tolist())
-        unique_xs = sorted(df_filtered[wdg['x'].value].unique().tolist())
+        unique_groups = df_plots[wdg['x_group'].value].unique().tolist()
+        unique_xs = df_plots[wdg['x'].value].unique().tolist()
         for i, ugr in enumerate(unique_groups):
             for uxs in unique_xs:
                 kw['x_range'].append(str(ugr) + ' ' + str(uxs))
@@ -160,26 +173,21 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
     c = C_NORM
     if wdg['series'].value == 'None':
         if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
-            df_exploded = df_exploded.groupby([x_col], as_index=False, sort=False)[wdg['y'].value].sum()
             xs = df_exploded[x_col].values.tolist()
             ys = df_exploded[wdg['y'].value].values.tolist()
-            xs, ys = (list(t) for t in zip(*sorted(zip(xs, ys))))
         add_glyph(p, xs, ys, c)
     else:
-        full_series = sorted(df_filtered[wdg['series'].value].unique().tolist()) #for colors only
-        if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
-            df_exploded = df_exploded.groupby([wdg['series'].value, x_col], as_index=False, sort=False)[wdg['y'].value].sum()
+        full_series = df_plots[wdg['series'].value].unique().tolist() #for colors only
         if wdg['series_stack'].active == 1:
-            xs_full = sorted(df_exploded[x_col].unique().tolist())
+            xs_full = df_exploded[x_col].unique().tolist()
             y_bases_pos = [0]*len(xs_full)
             y_bases_neg = [0]*len(xs_full)
-        for i, ser in enumerate(sorted(df_exploded[wdg['series'].value].unique().tolist())):
+        for i, ser in enumerate(df_exploded[wdg['series'].value].unique().tolist()):
             c = COLORS[full_series.index(ser)]
             df_series = df_exploded[df_exploded[wdg['series'].value].isin([ser])]
             xs_ser = df_series[x_col].values.tolist()
             ys_ser = df_series[wdg['y'].value].values.tolist()
             if wdg['series_stack'].active == 0:
-                xs_ser, ys_ser = (list(t) for t in zip(*sorted(zip(xs_ser, ys_ser))))
                 add_glyph(p, xs_ser, ys_ser, c, series=ser)
             else:
                 ys_pos = [ys_ser[xs_ser.index(x)] if x in xs_ser and ys_ser[xs_ser.index(x)] > 0 else 0 for i, x in enumerate(xs_full)]
@@ -219,10 +227,7 @@ def add_glyph(p, xs, ys, c, y_bases=None, series=None):
 def build_series_legend():
     series_legend_string = '<div class="legend-header">Series Legend</div><div class="legend-body">'
     if wdg['series'].value != 'None':
-        active_list = []
-        filter_num = filterable.index(wdg['series'].value)
-        for i, val in enumerate(sorted(df[wdg['series'].value].unique().tolist())):
-            if(i in wdg['filter_'+str(filter_num)].active): active_list.append(val)
+        active_list = df_plots[wdg['series'].value].unique().tolist()
         for i, txt in reversed(list(enumerate(active_list))):
             series_legend_string += '<div class="legend-entry"><span class="legend-color" style="background-color:' + str(COLORS[i]) + ';"></span>'
             series_legend_string += '<span class="legend-text">' + str(txt) +'</span></div>'
@@ -247,6 +252,10 @@ def update_sel(attr, old, new):
     update()
 
 def update():
+    if wdg['x'].value == 'None' or wdg['y'].value == 'None':
+        plots.children = []
+        return
+    set_df_plots()
     wdg['series_legend'].text = build_series_legend()
     plots.children = create_figures()
 
@@ -257,7 +266,7 @@ uniq = 0
 build_widgets()
 
 controls = bl.widgetbox(list(wdg.values()), id='widgets_section')
-plots = bl.column(create_figures(), id='plots_section')
+plots = bl.column([], id='plots_section')
 layout = bl.row(controls, plots, id='layout')
 
 bio.curdoc().add_root(layout)
