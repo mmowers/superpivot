@@ -4,7 +4,10 @@ import pandas as pd
 import collections
 import bokeh.io as bio
 import bokeh.layouts as bl
+import bokeh.models as bm
 import bokeh.models.widgets as bmw
+import bokeh.models.sources as bms
+import bokeh.models.tools as bmt
 import bokeh.plotting as bp
 
 PLOT_WIDTH = 300
@@ -140,7 +143,15 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
     if explode_val != 'None':
         kw['title'] = "%s = %s" % (wdg['explode'].value, str(explode_val))
 
-    p = bp.figure(plot_height=int(wdg['plot_height'].value), plot_width=int(wdg['plot_width'].value), tools='pan,box_zoom,reset,save', **kw)
+    hover = bmt.HoverTool(
+            tooltips=[
+                ("ser", "@ser_legend"),
+                ("x", "@x_legend"),
+                ("y", "@y_legend"),
+            ]
+    )
+    TOOLS = [bmt.BoxSelectTool(), bmt.PanTool(), hover, bmt.TapTool(), bmt.ResetTool(), bmt.SaveTool()]
+    p = bp.figure(plot_height=int(wdg['plot_height'].value), plot_width=int(wdg['plot_width'].value), tools=TOOLS, **kw)
     adjust_axes(p)
 
     if wdg['x'].value in discrete or wdg['x_group'].value != 'None':
@@ -169,34 +180,40 @@ def create_figure(df_exploded, df_filtered, explode_val='None'):
             ys_ser = df_series[wdg['y'].value].values.tolist()
             if wdg['series_stack'].active == 0:
                 xs_ser, ys_ser = (list(t) for t in zip(*sorted(zip(xs_ser, ys_ser))))
-                add_glyph(p, xs_ser, ys_ser, c)
+                add_glyph(p, xs_ser, ys_ser, c, series=ser)
             else:
                 ys_pos = [ys_ser[xs_ser.index(x)] if x in xs_ser and ys_ser[xs_ser.index(x)] > 0 else 0 for i, x in enumerate(xs_full)]
                 ys_neg = [ys_ser[xs_ser.index(x)] if x in xs_ser and ys_ser[xs_ser.index(x)] < 0 else 0 for i, x in enumerate(xs_full)]
                 ys_stacked_pos = [ys_pos[i] + y_bases_pos[i] for i in range(len(xs_full))]
                 ys_stacked_neg = [ys_neg[i] + y_bases_neg[i] for i in range(len(xs_full))]
-                add_glyph(p, xs_full, ys_stacked_pos, c, y_bases=y_bases_pos)
-                add_glyph(p, xs_full, ys_stacked_neg, c, y_bases=y_bases_neg)
+                add_glyph(p, xs_full, ys_stacked_pos, c, y_bases=y_bases_pos, series=ser)
+                add_glyph(p, xs_full, ys_stacked_neg, c, y_bases=y_bases_neg, series=ser)
                 y_bases_pos = ys_stacked_pos
                 y_bases_neg = ys_stacked_neg
     return p
 
-def add_glyph(p, xs, ys, c, y_bases=None):
+def add_glyph(p, xs, ys, c, y_bases=None, series=None):
     alpha = float(wdg['opacity'].value)
+    y_unstacked = list(ys) if y_bases is None else [ys[i] - y_bases[i] for i in range(len(ys))]
+    ser = ['None']*len(xs) if series is None else [series]*len(xs)
     if wdg['chartType'].value == 'Scatter':
-        p.circle(x=xs, y=ys, color=c, size=int(wdg['circle_size'].value), fill_alpha=alpha, line_color=None, line_width=None)
+        source = bms.ColumnDataSource({'x': xs, 'y': ys, 'x_legend': xs, 'y_legend': y_unstacked, 'ser_legend': ser})
+        p.circle('x', 'y', source=source, color=c, size=int(wdg['circle_size'].value), fill_alpha=alpha, line_color=None, line_width=None)
     elif wdg['chartType'].value == 'Line':
-        p.line(x=xs, y=ys, color=c, alpha=alpha, line_width=float(wdg['line_width'].value))
+        source = bms.ColumnDataSource({'x': xs, 'y': ys, 'x_legend': xs, 'y_legend': y_unstacked, 'ser_legend': ser})
+        p.line('x', 'y', source=source, color=c, alpha=alpha, line_width=float(wdg['line_width'].value))
     elif wdg['chartType'].value == 'Bar':
         if y_bases is None: y_bases = [0]*len(ys)
         centers = [(ys[i] + y_bases[i])/2 for i in range(len(ys))]
         heights = [abs(ys[i] - y_bases[i]) for i in range(len(ys))]
-        p.rect(x=xs, y=centers, height=heights, color=c, fill_alpha=alpha, width=float(wdg['bar_width'].value), line_color=None, line_width=None)
+        source = bms.ColumnDataSource({'x': xs, 'y': centers, 'x_legend': xs, 'y_legend': y_unstacked, 'h': heights, 'ser_legend': ser})
+        p.rect('x', 'y', source=source, height='h', color=c, fill_alpha=alpha, width=float(wdg['bar_width'].value), line_color=None, line_width=None)
     elif wdg['chartType'].value == 'Area':
         if y_bases is None: y_bases = [0]*len(ys)
         xs_around = xs + xs[::-1]
         ys_around = y_bases + ys[::-1]
-        p.patch(x=xs_around, y=ys_around, alpha=alpha, fill_color=c, line_color=None, line_width=None)
+        source = bms.ColumnDataSource({'x': xs_around, 'y': ys_around})
+        p.patch('x', 'y', source=source, alpha=alpha, fill_color=c, line_color=None, line_width=None)
 
 
 def build_series_legend():
