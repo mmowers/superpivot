@@ -108,16 +108,17 @@ def set_df_plots():
     if wdg['y_scale'].value != '' and wdg['y'].value in continuous:
         df_plots[wdg['y'].value] = df_plots[wdg['y'].value] * float(wdg['y_scale'].value)
 
+    if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
+        groupby_cols = [wdg['x'].value]
+        if wdg['x_group'].value != 'None': groupby_cols = [wdg['x_group'].value] + groupby_cols
+        if wdg['series'].value != 'None': groupby_cols = [wdg['series'].value] + groupby_cols
+        if wdg['explode'].value != 'None': groupby_cols = [wdg['explode'].value] + groupby_cols
+        df_plots = df_plots.groupby(groupby_cols, as_index=False, sort=False)[wdg['y'].value].sum()
+
     x_col = wdg['x'].value
     if wdg['x_group'].value != 'None':
         x_col = str(wdg['x_group'].value) + '_' + str(wdg['x'].value)
         df_plots[x_col] = df_plots[wdg['x_group'].value].map(str) + ' ' + df_plots[wdg['x'].value].map(str)
-
-    if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
-        groupby_cols = [x_col]
-        if wdg['series'].value != 'None': groupby_cols = [wdg['series'].value] + groupby_cols
-        if wdg['explode'].value != 'None': groupby_cols = [wdg['explode'].value] + groupby_cols
-        df_plots = df_plots.groupby(groupby_cols, as_index=False, sort=False)[wdg['y'].value].sum()
 
     sortby_cols = [x_col]
     if wdg['series'].value != 'None': sortby_cols = [wdg['series'].value] + sortby_cols
