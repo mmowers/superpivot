@@ -68,6 +68,7 @@ def build_widgets():
     wdg['circle_size'] = bmw.TextInput(title='Circle Size (Scatter Only)', value=str(CIRCLE_SIZE), id='adjust_plot_circle_size'+str(uniq))
     wdg['bar_width'] = bmw.TextInput(title='Bar Width (Bar Only)', value=str(BAR_WIDTH), id='adjust_plot_bar_width'+str(uniq))
     wdg['line_width'] = bmw.TextInput(title='Line Width (Line Only)', value=str(LINE_WIDTH), id='adjust_plot_line_width'+str(uniq))
+    wdg['download'] = bmw.Button(label='Download csv', button_type='success')
 
     wdg['data'].on_change('value', update_data)
     wdg['chartType'].on_change('value', update_sel)
@@ -91,6 +92,7 @@ def build_widgets():
     wdg['bar_width'].on_change('value', update_sel)
     wdg['line_width'].on_change('value', update_sel)
     wdg['update'].on_click(update)
+    wdg['download'].on_click(download)
 
 def set_df_plots():
     global df_plots
@@ -257,6 +259,9 @@ def update():
     set_df_plots()
     wdg['series_legend'].text = build_series_legend()
     plots.children = create_figures()
+
+def download():
+    df_plots.to_csv('downloads/out.csv', index=False)
 
 wdg = collections.OrderedDict()
 wdg['data'] = bmw.TextInput(title='Data Source', value='csv/power.csv')
