@@ -28,8 +28,8 @@ From command line, cd into this git repo and type:
 bokeh serve --show .
 ```
 This will launch a browser window with the viewer. To see
-a plot, you'll have to select the columns to use for x-axis and y-axis.
-In addition you have these widgets:
+a plot, you'll have to select the columns to use for x-axis and y-axis, which are two of the widgets
+on the left-hand side of the screen. In addition, you have these widgets:
 * Data Source: Enter a path to a properly formatted csv file (see below). The path is relative to the
 root of this repo, but absolute paths may be entered as well, e.g. 'C:/somefolder/somefile.csv'. Make sure
 that there are column headers for each column in the csv file and no row labels.
@@ -46,6 +46,8 @@ exploded column values.
 the Update button to apply the filters
 * Update: This is only used for updating the charts once filters have been changed
 * Plot adjustments: Make additional modifications to the chart size, x-axis/y-axis limits and scale, etc.
+* Download csv: This will download the data you are viewing (after applying filters, aggregation, etc.) into
+a csv file in the downloads/ folder
 
 ## Bokeh
 This tool uses bokeh, built on python:
