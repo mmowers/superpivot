@@ -128,8 +128,7 @@ def create_figures():
     if wdg['explode'].value == 'None':
         plot_list.append(create_figure(df_plots))
     else:
-        explode_vals = list(set(df_plots[wdg['explode'].value].values))
-        for explode_val in explode_vals:
+        for explode_val in df_plots[wdg['explode'].value].unique().tolist():
             df_exploded = df_plots[df_plots[wdg['explode'].value].isin([explode_val])]
             plot_list.append(create_figure(df_exploded, explode_val))
     return plot_list
@@ -179,7 +178,7 @@ def create_figure(df_exploded, explode_val='None'):
     else:
         full_series = df_plots[wdg['series'].value].unique().tolist() #for colors only
         if wdg['series_stack'].active == 1:
-            xs_full = df_exploded[x_col].unique().tolist()
+            xs_full = sorted(df_exploded[x_col].unique().tolist())
             y_bases_pos = [0]*len(xs_full)
             y_bases_neg = [0]*len(xs_full)
         for i, ser in enumerate(df_exploded[wdg['series'].value].unique().tolist()):
