@@ -91,7 +91,7 @@ def build_widgets():
     wdg['circle_size'].on_change('value', update_sel)
     wdg['bar_width'].on_change('value', update_sel)
     wdg['line_width'].on_change('value', update_sel)
-    wdg['update'].on_click(update)
+    wdg['update'].on_click(update_plots)
     wdg['download'].on_click(download)
 
 def set_df_plots():
@@ -247,12 +247,12 @@ def update_data(attr, old, new):
     get_data()
     build_widgets()
     controls.children = list(wdg.values())
-    update()
+    update_plots()
 
 def update_sel(attr, old, new):
-    update()
+    update_plots()
 
-def update():
+def update_plots():
     if wdg['x'].value == 'None' or wdg['y'].value == 'None':
         plots.children = []
         return
