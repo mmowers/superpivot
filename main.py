@@ -115,29 +115,28 @@ def set_df_plots():
         if wdg['explode'].value != 'None': groupby_cols = [wdg['explode'].value] + groupby_cols
         df_plots = df_plots.groupby(groupby_cols, as_index=False, sort=False)[wdg['y'].value].sum()
 
-    x_col = wdg['x'].value
-    if wdg['x_group'].value != 'None':
-        x_col = str(wdg['x_group'].value) + '_' + str(wdg['x'].value)
-        df_plots[x_col] = df_plots[wdg['x_group'].value].map(str) + ' ' + df_plots[wdg['x'].value].map(str)
-
-    sortby_cols = [x_col]
+    sortby_cols = [wdg['x'].value]
+    if wdg['x_group'].value != 'None': sortby_cols = [wdg['x_group'].value] + sortby_cols
     if wdg['series'].value != 'None': sortby_cols = [wdg['series'].value] + sortby_cols
     if wdg['explode'].value != 'None': sortby_cols = [wdg['explode'].value] + sortby_cols
     df_plots = df_plots.sort_values(sortby_cols).reset_index(drop=True)
 
 def create_figures():
     plot_list = []
-
+    df_plots_cp = df_plots.copy()
     if wdg['explode'].value == 'None':
-        plot_list.append(create_figure(df_plots))
+        plot_list.append(create_figure(df_plots_cp))
     else:
-        for explode_val in df_plots[wdg['explode'].value].unique().tolist():
-            df_exploded = df_plots[df_plots[wdg['explode'].value].isin([explode_val])]
+        for explode_val in df_plots_cp[wdg['explode'].value].unique().tolist():
+            df_exploded = df_plots_cp[df_plots_cp[wdg['explode'].value].isin([explode_val])]
             plot_list.append(create_figure(df_exploded, explode_val))
     return plot_list
 
 def create_figure(df_exploded, explode_val='None'):
-    x_col = wdg['x'].value if wdg['x_group'].value == 'None' else str(wdg['x_group'].value) + '_' + str(wdg['x'].value)
+    x_col = wdg['x'].value
+    if wdg['x_group'].value != 'None':
+        x_col = str(wdg['x_group'].value) + '_' + str(wdg['x'].value)
+        df_exploded[x_col] = df_exploded[wdg['x_group'].value].map(str) + ' ' + df_exploded[wdg['x'].value].map(str)
 
     xs = df_exploded[x_col].values.tolist()
     ys = df_exploded[wdg['y'].value].values.tolist()
@@ -145,8 +144,8 @@ def create_figure(df_exploded, explode_val='None'):
     kw = dict()
     if wdg['x_group'].value != 'None':
         kw['x_range'] = []
-        unique_groups = df_plots[wdg['x_group'].value].unique().tolist()
-        unique_xs = df_plots[wdg['x'].value].unique().tolist()
+        unique_groups = df_exploded[wdg['x_group'].value].unique().tolist()
+        unique_xs = df_exploded[wdg['x'].value].unique().tolist()
         for i, ugr in enumerate(unique_groups):
             for uxs in unique_xs:
                 kw['x_range'].append(str(ugr) + ' ' + str(uxs))
