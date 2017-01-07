@@ -165,7 +165,7 @@ def create_figure(df_exploded, explode_val='None'):
                 ("y", "@y_legend"),
             ]
     )
-    TOOLS = [bmt.BoxSelectTool(), bmt.PanTool(), hover, bmt.TapTool(), bmt.ResetTool(), bmt.SaveTool()]
+    TOOLS = [bmt.BoxZoomTool(), bmt.PanTool(), hover, bmt.ResetTool(), bmt.SaveTool()]
     p = bp.figure(plot_height=int(wdg['plot_height'].value), plot_width=int(wdg['plot_width'].value), tools=TOOLS, **kw)
     adjust_axes(p)
 
