@@ -3,7 +3,7 @@
 ## Intro
 This bokeh app creates pivot charts from data, similar to Excel's pivot
 chart functionality, but with the additional ability to explode into
-multiple filterable charts.
+multiple pivot charts.
 
 The code was developed starting from Bokeh/examples/app/crossfilter.
 
