@@ -9,6 +9,7 @@ import bokeh.models.widgets as bmw
 import bokeh.models.sources as bms
 import bokeh.models.tools as bmt
 import bokeh.plotting as bp
+import datetime
 
 PLOT_WIDTH = 300
 PLOT_HEIGHT = 300
@@ -261,7 +262,7 @@ def update_plots():
     plots.children = create_figures()
 
 def download():
-    df_plots.to_csv('downloads/out.csv', index=False)
+    df_plots.to_csv('downloads/out '+datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
 
 wdg = collections.OrderedDict()
 wdg['data'] = bmw.TextInput(title='Data Source', value='csv/power.csv')
