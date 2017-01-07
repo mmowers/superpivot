@@ -40,22 +40,22 @@ def build_widgets():
     wdg.clear()
     uniq += 1
 
-    wdg['data'] = bmw.TextInput(title='Data Source', value=data_source)
-    wdg['chartType'] = bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES)
-    wdg['x'] = bmw.Select(title='X-Axis', value='None', options=['None'] + columns)
-    wdg['x_group'] = bmw.Select(title='Group X by', value='None', options=['None'] + seriesable)
-    wdg['y'] = bmw.Select(title='Y-Axis', value='None', options=['None'] + columns)
-    wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='None', options=AGGREGATIONS)
-    wdg['series'] = bmw.Select(title='Series', value='None', options=['None'] + seriesable)
-    wdg['series_stack'] = bmw.RadioButtonGroup(labels=["Unstacked", "Stacked"], active=0)
+    wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source)
+    wdg['x'] = bmw.Select(title='X-Axis (required)', value='None', options=['None'] + columns)
+    wdg['y'] = bmw.Select(title='Y-Axis (required)', value='None', options=['None'] + columns)
+    wdg['series'] = bmw.Select(title='Separate Series By', value='None', options=['None'] + seriesable)
     wdg['series_legend'] = bmw.Div(text=build_series_legend(), id='series_legend'+str(uniq))
-    wdg['explode'] = bmw.Select(title='Explode', value='None', options=['None'] + seriesable)
+    wdg['explode'] = bmw.Select(title='Separate Charts By', value='None', options=['None'] + seriesable)
+    wdg['x_group'] = bmw.Select(title='Group X-Axis By', value='None', options=['None'] + seriesable)
+    wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='None', options=AGGREGATIONS)
+    wdg['series_stack'] = bmw.Select(title='Series Stacking', value='Unstacked', options=['Unstacked', 'Stacked'])
+    wdg['chartType'] = bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES)
     wdg['filters'] = bmw.Div(text='Filters', id='filters'+str(uniq))
     for j, col in enumerate(filterable):
         val_list = [str(i) for i in sorted(df[col].unique().tolist())]
         wdg['heading_filter_'+str(j)] = bmw.Div(text=col, id='heading_filter_'+str(j)+'-'+str(uniq))
         wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=list(range(len(val_list))), id='filter_'+str(j)+'-'+str(uniq))
-    wdg['update'] = bmw.Button(label='Update', button_type='success', id='update-button'+str(uniq))
+    wdg['update'] = bmw.Button(label='Update Filters', button_type='success', id='update-button'+str(uniq))
     wdg['adjustments'] = bmw.Div(text='Plot Adjustments', id='adjust_plots'+str(uniq))
     wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value=str(PLOT_WIDTH), id='adjust_plot_width'+str(uniq))
     wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value=str(PLOT_HEIGHT), id='adjust_plot_height'+str(uniq))
@@ -78,7 +78,7 @@ def build_widgets():
     wdg['y'].on_change('value', update_sel)
     wdg['y_agg'].on_change('value', update_sel)
     wdg['series'].on_change('value', update_sel)
-    wdg['series_stack'].on_change('active', update_sel)
+    wdg['series_stack'].on_change('value', update_sel)
     wdg['explode'].on_change('value', update_sel)
     wdg['plot_width'].on_change('value', update_sel)
     wdg['plot_height'].on_change('value', update_sel)
@@ -180,7 +180,7 @@ def create_figure(df_exploded, explode_val='None'):
         add_glyph(p, xs, ys, c)
     else:
         full_series = df_plots[wdg['series'].value].unique().tolist() #for colors only
-        if wdg['series_stack'].active == 1:
+        if wdg['series_stack'].value == 'Stacked':
             xs_full = sorted(df_exploded[x_col].unique().tolist())
             y_bases_pos = [0]*len(xs_full)
             y_bases_neg = [0]*len(xs_full)
@@ -189,7 +189,7 @@ def create_figure(df_exploded, explode_val='None'):
             df_series = df_exploded[df_exploded[wdg['series'].value].isin([ser])]
             xs_ser = df_series[x_col].values.tolist()
             ys_ser = df_series[wdg['y'].value].values.tolist()
-            if wdg['series_stack'].active == 0:
+            if wdg['series_stack'].value == 'Unstacked':
                 add_glyph(p, xs_ser, ys_ser, c, series=ser)
             else:
                 ys_pos = [ys_ser[xs_ser.index(x)] if x in xs_ser and ys_ser[xs_ser.index(x)] > 0 else 0 for i, x in enumerate(xs_full)]
