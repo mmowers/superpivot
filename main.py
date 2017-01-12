@@ -21,7 +21,7 @@ BAR_WIDTH = 0.5
 LINE_WIDTH = 2
 COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142']*10
 C_NORM = "#31AADE"
-CHARTTYPES = ['Scatter', 'Line', 'Bar', 'Area']
+CHARTTYPES = ['Dot', 'Line', 'Bar', 'Area']
 AGGREGATIONS = ['None', 'Sum']
 
 def get_data():
@@ -62,14 +62,22 @@ def build_widgets():
     wdg['adjustments'] = bmw.Div(text='Plot Adjustments', id='adjust_plots'+str(uniq))
     wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value=str(PLOT_WIDTH), id='adjust_plot_width'+str(uniq))
     wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value=str(PLOT_HEIGHT), id='adjust_plot_height'+str(uniq))
+    wdg['plot_title'] = bmw.TextInput(title='Plot Title', value='', id='adjust_plot_title'+str(uniq))
+    wdg['plot_title_size'] = bmw.TextInput(title='Plot Title Font Size', value='10', id='adjust_plot_title_size'+str(uniq))
     wdg['opacity'] = bmw.TextInput(title='Opacity (0-1)', value=str(OPACITY), id='adjust_plot_opacity'+str(uniq))
     wdg['x_scale'] = bmw.TextInput(title='X Scale', value=str(X_SCALE), id='adjust_plot_x_scale'+str(uniq))
     wdg['x_min'] = bmw.TextInput(title='X Min', value='', id='adjust_plot_x_min'+str(uniq))
     wdg['x_max'] = bmw.TextInput(title='X Max', value='', id='adjust_plot_x_max'+str(uniq))
+    wdg['x_title'] = bmw.TextInput(title='X Title', value='', id='adjust_plot_x_title'+str(uniq))
+    wdg['x_title_size'] = bmw.TextInput(title='X Title Font Size', value='10', id='adjust_plot_x_title_size'+str(uniq))
+    wdg['x_major_label_size'] = bmw.TextInput(title='X Labels Font Size', value='8', id='adjust_plot_x_labels_size'+str(uniq))
     wdg['y_scale'] = bmw.TextInput(title='Y Scale', value=str(Y_SCALE), id='adjust_plot_y_scale'+str(uniq))
     wdg['y_min'] = bmw.TextInput(title='Y  Min', value='', id='adjust_plot_y_min'+str(uniq))
     wdg['y_max'] = bmw.TextInput(title='Y Max', value='', id='adjust_plot_y_max'+str(uniq))
-    wdg['circle_size'] = bmw.TextInput(title='Circle Size (Scatter Only)', value=str(CIRCLE_SIZE), id='adjust_plot_circle_size'+str(uniq))
+    wdg['y_title'] = bmw.TextInput(title='Y Title', value='', id='adjust_plot_y_title'+str(uniq))
+    wdg['y_title_size'] = bmw.TextInput(title='Y Title Font Size', value='10', id='adjust_plot_y_title_size'+str(uniq))
+    wdg['y_major_label_size'] = bmw.TextInput(title='Y Labels Font Size', value='8', id='adjust_plot_y_labels_size'+str(uniq))
+    wdg['circle_size'] = bmw.TextInput(title='Circle Size (Dot Only)', value=str(CIRCLE_SIZE), id='adjust_plot_circle_size'+str(uniq))
     wdg['bar_width'] = bmw.TextInput(title='Bar Width (Bar Only)', value=str(BAR_WIDTH), id='adjust_plot_bar_width'+str(uniq))
     wdg['line_width'] = bmw.TextInput(title='Line Width (Line Only)', value=str(LINE_WIDTH), id='adjust_plot_line_width'+str(uniq))
     wdg['download'] = bmw.Button(label='Download csv', button_type='success')
@@ -84,15 +92,23 @@ def build_widgets():
     wdg['series_stack'].on_change('value', update_sel)
     wdg['explode'].on_change('value', update_sel)
     wdg['explode_group'].on_change('value', update_sel)
+    wdg['plot_title'].on_change('value', update_sel)
+    wdg['plot_title_size'].on_change('value', update_sel)
     wdg['plot_width'].on_change('value', update_sel)
     wdg['plot_height'].on_change('value', update_sel)
     wdg['opacity'].on_change('value', update_sel)
     wdg['x_min'].on_change('value', update_sel)
     wdg['x_max'].on_change('value', update_sel)
     wdg['x_scale'].on_change('value', update_sel)
+    wdg['x_title'].on_change('value', update_sel)
+    wdg['x_title_size'].on_change('value', update_sel)
+    wdg['x_major_label_size'].on_change('value', update_sel)
     wdg['y_min'].on_change('value', update_sel)
     wdg['y_max'].on_change('value', update_sel)
     wdg['y_scale'].on_change('value', update_sel)
+    wdg['y_title'].on_change('value', update_sel)
+    wdg['y_title_size'].on_change('value', update_sel)
+    wdg['y_major_label_size'].on_change('value', update_sel)
     wdg['circle_size'].on_change('value', update_sel)
     wdg['bar_width'].on_change('value', update_sel)
     wdg['line_width'].on_change('value', update_sel)
@@ -102,18 +118,22 @@ def build_widgets():
 def set_df_plots():
     global df_plots
     df_plots = df.copy()
+
+    #Apply filters
     for j, col in enumerate(filterable):
         active = [wdg['filter_'+str(j)].labels[i] for i in wdg['filter_'+str(j)].active]
         if col in continuous:
             active = [float(i) for i in active]
         df_plots = df_plots[df_plots[col].isin(active)]
 
+    #Scale Axes
     if wdg['x_scale'].value != '' and wdg['x'].value in continuous:
         df_plots[wdg['x'].value] = df_plots[wdg['x'].value] * float(wdg['x_scale'].value)
     if wdg['y_scale'].value != '' and wdg['y'].value in continuous:
         df_plots[wdg['y'].value] = df_plots[wdg['y'].value] * float(wdg['y_scale'].value)
 
-    if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
+    #Apply Aggregation
+    if wdg['y_agg'].value == 'Sum' and wdg['y'].value in continuous:
         groupby_cols = [wdg['x'].value]
         if wdg['x_group'].value != 'None': groupby_cols = [wdg['x_group'].value] + groupby_cols
         if wdg['series'].value != 'None': groupby_cols = [wdg['series'].value] + groupby_cols
@@ -121,6 +141,7 @@ def set_df_plots():
         if wdg['explode_group'].value != 'None': groupby_cols = [wdg['explode_group'].value] + groupby_cols
         df_plots = df_plots.groupby(groupby_cols, as_index=False, sort=False)[wdg['y'].value].sum()
 
+    #Sort Dataframe
     sortby_cols = [wdg['x'].value]
     if wdg['x_group'].value != 'None': sortby_cols = [wdg['x_group'].value] + sortby_cols
     if wdg['series'].value != 'None': sortby_cols = [wdg['series'].value] + sortby_cols
@@ -147,15 +168,18 @@ def create_figures():
     return plot_list
 
 def create_figure(df_exploded, explode_val=None, explode_group=None):
+    # If x_group has a value, create a combined column in the dataframe for x and x_group
     x_col = wdg['x'].value
     if wdg['x_group'].value != 'None':
         x_col = str(wdg['x_group'].value) + '_' + str(wdg['x'].value)
         df_exploded[x_col] = df_exploded[wdg['x_group'].value].map(str) + ' ' + df_exploded[wdg['x'].value].map(str)
 
+    #Build x and y ranges and figure title
+    kw = dict()
+
+    #Set x and y ranges. When x is grouped, there is added complication of separating the groups
     xs = df_exploded[x_col].values.tolist()
     ys = df_exploded[wdg['y'].value].values.tolist()
-
-    kw = dict()
     if wdg['x_group'].value != 'None':
         kw['x_range'] = []
         unique_groups = df_exploded[wdg['x_group'].value].unique().tolist()
@@ -163,17 +187,24 @@ def create_figure(df_exploded, explode_val=None, explode_group=None):
         for i, ugr in enumerate(unique_groups):
             for uxs in unique_xs:
                 kw['x_range'].append(str(ugr) + ' ' + str(uxs))
-            kw['x_range'].append(' ' * i) #increase number of spaces from one break to the next so that each blank entry is seen as unique
+            #Between groups, add entries that consist of spaces. Increase number of spaces from
+            #one break to the next so that each entry is unique
+            kw['x_range'].append(' ' * (i + 1))
     elif wdg['x'].value in discrete:
         kw['x_range'] = sorted(set(xs))
     if wdg['y'].value in discrete:
         kw['y_range'] = sorted(set(ys))
-    kw['title'] = ''
-    if explode_val is not None:
-        kw['title'] = "%s = %s" % (wdg['explode'].value, str(explode_val))
-        if explode_group is not None:
-            kw['title'] = "%s = %s, " % (wdg['explode_group'].value, str(explode_group)) + kw['title']
 
+    #Set figure title
+    kw['title'] = wdg['plot_title'].value
+    seperator = '' if kw['title'] == '' else ', '
+    if explode_val is not None:
+        if explode_group is not None:
+            kw['title'] = kw['title'] + seperator + "%s = %s" % (wdg['explode_group'].value, str(explode_group))
+        seperator = '' if kw['title'] == '' else ', '
+        kw['title'] = kw['title'] + seperator + "%s = %s" % (wdg['explode'].value, str(explode_val))
+
+    #Add figure tools
     hover = bmt.HoverTool(
             tooltips=[
                 ("ser", "@ser_legend"),
@@ -182,12 +213,27 @@ def create_figure(df_exploded, explode_val=None, explode_group=None):
             ]
     )
     TOOLS = [bmt.BoxZoomTool(), bmt.PanTool(), hover, bmt.ResetTool(), bmt.SaveTool()]
-    p = bp.figure(plot_height=int(wdg['plot_height'].value), plot_width=int(wdg['plot_width'].value), tools=TOOLS, **kw)
-    adjust_axes(p)
 
+    #Create figure with the ranges, titles, and tools, and adjust formatting and labels
+    p = bp.figure(plot_height=int(wdg['plot_height'].value), plot_width=int(wdg['plot_width'].value), tools=TOOLS, **kw)
+    p.toolbar.active_drag = TOOLS[0]
+    p.title.text_font_size = wdg['plot_title_size'].value + 'pt'
+    p.xaxis.axis_label = wdg['x_title'].value
+    p.yaxis.axis_label = wdg['y_title'].value
+    p.xaxis.axis_label_text_font_size = wdg['x_title_size'].value + 'pt'
+    p.yaxis.axis_label_text_font_size = wdg['y_title_size'].value + 'pt'
+    p.xaxis.major_label_text_font_size = wdg['x_major_label_size'].value + 'pt'
+    p.yaxis.major_label_text_font_size = wdg['y_major_label_size'].value + 'pt'
     if wdg['x'].value in discrete or wdg['x_group'].value != 'None':
         p.xaxis.major_label_orientation = pd.np.pi / 4
+    if wdg['x'].value in continuous:
+        if wdg['x_min'].value != '': p.x_range.start = float(wdg['x_min'].value)
+        if wdg['x_max'].value != '': p.x_range.end = float(wdg['x_max'].value)
+    if wdg['y'].value in continuous:
+        if wdg['y_min'].value != '': p.y_range.start = float(wdg['y_min'].value)
+        if wdg['y_max'].value != '': p.y_range.end = float(wdg['y_max'].value)
 
+    #Add glyphs to figure
     c = C_NORM
     if wdg['series'].value == 'None':
         if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
@@ -222,7 +268,7 @@ def add_glyph(p, xs, ys, c, y_bases=None, series=None):
     alpha = float(wdg['opacity'].value)
     y_unstacked = list(ys) if y_bases is None else [ys[i] - y_bases[i] for i in range(len(ys))]
     ser = ['None']*len(xs) if series is None else [series]*len(xs)
-    if wdg['chartType'].value == 'Scatter':
+    if wdg['chartType'].value == 'Dot':
         source = bms.ColumnDataSource({'x': xs, 'y': ys, 'x_legend': xs, 'y_legend': y_unstacked, 'ser_legend': ser})
         p.circle('x', 'y', source=source, color=c, size=int(wdg['circle_size'].value), fill_alpha=alpha, line_color=None, line_width=None)
     elif wdg['chartType'].value == 'Line':
@@ -252,13 +298,6 @@ def build_series_legend():
     series_legend_string += '</div>'
     return series_legend_string
 
-def adjust_axes(p):
-    if wdg['x'].value in continuous:
-        if wdg['x_min'].value != '': p.x_range.start = float(wdg['x_min'].value)
-        if wdg['x_max'].value != '': p.x_range.end = float(wdg['x_max'].value)
-    if wdg['y'].value in continuous:
-        if wdg['y_min'].value != '': p.y_range.start = float(wdg['y_min'].value)
-        if wdg['y_max'].value != '': p.y_range.end = float(wdg['y_max'].value)
 
 def update_data(attr, old, new):
     get_data()
