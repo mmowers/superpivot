@@ -1,4 +1,5 @@
 from __future__ import division
+import math
 import numpy as np
 import pandas as pd
 import collections
@@ -13,6 +14,9 @@ import datetime
 
 PLOT_WIDTH = 300
 PLOT_HEIGHT = 300
+PLOT_FONT_SIZE = 10
+PLOT_AXIS_LABEL_SIZE = 8
+PLOT_LABEL_ORIENTATION = 45
 OPACITY = 0.6
 X_SCALE = 1
 Y_SCALE = 1
@@ -63,20 +67,21 @@ def build_widgets():
     wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value=str(PLOT_WIDTH), id='adjust_plot_width'+str(uniq))
     wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value=str(PLOT_HEIGHT), id='adjust_plot_height'+str(uniq))
     wdg['plot_title'] = bmw.TextInput(title='Plot Title', value='', id='adjust_plot_title'+str(uniq))
-    wdg['plot_title_size'] = bmw.TextInput(title='Plot Title Font Size', value='10', id='adjust_plot_title_size'+str(uniq))
+    wdg['plot_title_size'] = bmw.TextInput(title='Plot Title Font Size', value=str(PLOT_FONT_SIZE), id='adjust_plot_title_size'+str(uniq))
     wdg['opacity'] = bmw.TextInput(title='Opacity (0-1)', value=str(OPACITY), id='adjust_plot_opacity'+str(uniq))
     wdg['x_scale'] = bmw.TextInput(title='X Scale', value=str(X_SCALE), id='adjust_plot_x_scale'+str(uniq))
     wdg['x_min'] = bmw.TextInput(title='X Min', value='', id='adjust_plot_x_min'+str(uniq))
     wdg['x_max'] = bmw.TextInput(title='X Max', value='', id='adjust_plot_x_max'+str(uniq))
     wdg['x_title'] = bmw.TextInput(title='X Title', value='', id='adjust_plot_x_title'+str(uniq))
-    wdg['x_title_size'] = bmw.TextInput(title='X Title Font Size', value='10', id='adjust_plot_x_title_size'+str(uniq))
-    wdg['x_major_label_size'] = bmw.TextInput(title='X Labels Font Size', value='8', id='adjust_plot_x_labels_size'+str(uniq))
+    wdg['x_title_size'] = bmw.TextInput(title='X Title Font Size', value=str(PLOT_FONT_SIZE), id='adjust_plot_x_title_size'+str(uniq))
+    wdg['x_major_label_size'] = bmw.TextInput(title='X Labels Font Size', value=str(PLOT_AXIS_LABEL_SIZE), id='adjust_plot_x_labels_size'+str(uniq))
+    wdg['x_major_label_orientation'] = bmw.TextInput(title='X Labels Degrees', value=str(PLOT_LABEL_ORIENTATION), id='adjust_plot_x_labels_orientation'+str(uniq))
     wdg['y_scale'] = bmw.TextInput(title='Y Scale', value=str(Y_SCALE), id='adjust_plot_y_scale'+str(uniq))
     wdg['y_min'] = bmw.TextInput(title='Y  Min', value='', id='adjust_plot_y_min'+str(uniq))
     wdg['y_max'] = bmw.TextInput(title='Y Max', value='', id='adjust_plot_y_max'+str(uniq))
     wdg['y_title'] = bmw.TextInput(title='Y Title', value='', id='adjust_plot_y_title'+str(uniq))
-    wdg['y_title_size'] = bmw.TextInput(title='Y Title Font Size', value='10', id='adjust_plot_y_title_size'+str(uniq))
-    wdg['y_major_label_size'] = bmw.TextInput(title='Y Labels Font Size', value='8', id='adjust_plot_y_labels_size'+str(uniq))
+    wdg['y_title_size'] = bmw.TextInput(title='Y Title Font Size', value=str(PLOT_FONT_SIZE), id='adjust_plot_y_title_size'+str(uniq))
+    wdg['y_major_label_size'] = bmw.TextInput(title='Y Labels Font Size', value=str(PLOT_AXIS_LABEL_SIZE), id='adjust_plot_y_labels_size'+str(uniq))
     wdg['circle_size'] = bmw.TextInput(title='Circle Size (Dot Only)', value=str(CIRCLE_SIZE), id='adjust_plot_circle_size'+str(uniq))
     wdg['bar_width'] = bmw.TextInput(title='Bar Width (Bar Only)', value=str(BAR_WIDTH), id='adjust_plot_bar_width'+str(uniq))
     wdg['line_width'] = bmw.TextInput(title='Line Width (Line Only)', value=str(LINE_WIDTH), id='adjust_plot_line_width'+str(uniq))
@@ -103,6 +108,7 @@ def build_widgets():
     wdg['x_title'].on_change('value', update_sel)
     wdg['x_title_size'].on_change('value', update_sel)
     wdg['x_major_label_size'].on_change('value', update_sel)
+    wdg['x_major_label_orientation'].on_change('value', update_sel)
     wdg['y_min'].on_change('value', update_sel)
     wdg['y_max'].on_change('value', update_sel)
     wdg['y_scale'].on_change('value', update_sel)
@@ -224,8 +230,7 @@ def create_figure(df_exploded, explode_val=None, explode_group=None):
     p.yaxis.axis_label_text_font_size = wdg['y_title_size'].value + 'pt'
     p.xaxis.major_label_text_font_size = wdg['x_major_label_size'].value + 'pt'
     p.yaxis.major_label_text_font_size = wdg['y_major_label_size'].value + 'pt'
-    if wdg['x'].value in discrete or wdg['x_group'].value != 'None':
-        p.xaxis.major_label_orientation = pd.np.pi / 4
+    p.xaxis.major_label_orientation = 'horizontal' if wdg['x_major_label_orientation'].value == '0' else math.radians(float(wdg['x_major_label_orientation'].value))
     if wdg['x'].value in continuous:
         if wdg['x_min'].value != '': p.x_range.start = float(wdg['x_min'].value)
         if wdg['x_max'].value != '': p.x_range.end = float(wdg['x_max'].value)
