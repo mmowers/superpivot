@@ -31,8 +31,10 @@ def get_data():
     columns = sorted(df.columns)
     discrete = [x for x in columns if df[x].dtype == object]
     continuous = [x for x in columns if x not in discrete]
-    filterable = discrete+[x for x in continuous if df[x].dtype == np.int64 and len(df[x].unique()) < 500]
-    seriesable = discrete+[x for x in continuous if df[x].dtype == np.int64 and len(df[x].unique()) < 60]
+    filterable = discrete+[x for x in continuous if len(df[x].unique()) < 500]
+    seriesable = discrete+[x for x in continuous if len(df[x].unique()) < 60]
+    df[discrete] = df[discrete].fillna('{BLANK}')
+    df[continuous] = df[continuous].fillna(0)
 
 def build_widgets():
     global uniq, wdg
@@ -103,7 +105,7 @@ def set_df_plots():
     for j, col in enumerate(filterable):
         active = [wdg['filter_'+str(j)].labels[i] for i in wdg['filter_'+str(j)].active]
         if col in continuous:
-            active = [int(i) for i in active]
+            active = [float(i) for i in active]
         df_plots = df_plots[df_plots[col].isin(active)]
 
     if wdg['x_scale'].value != '' and wdg['x'].value in continuous:
