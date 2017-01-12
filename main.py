@@ -46,6 +46,7 @@ def build_widgets():
     wdg['series'] = bmw.Select(title='Separate Series By', value='None', options=['None'] + seriesable)
     wdg['series_legend'] = bmw.Div(text=build_series_legend(), id='series_legend'+str(uniq))
     wdg['explode'] = bmw.Select(title='Separate Charts By', value='None', options=['None'] + seriesable)
+    wdg['explode_group'] = bmw.Select(title='Group Charts By', value='None', options=['None'] + seriesable)
     wdg['x_group'] = bmw.Select(title='Group X-Axis By', value='None', options=['None'] + seriesable)
     wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='None', options=AGGREGATIONS)
     wdg['series_stack'] = bmw.Select(title='Series Stacking', value='Unstacked', options=['Unstacked', 'Stacked'])
@@ -80,6 +81,7 @@ def build_widgets():
     wdg['series'].on_change('value', update_sel)
     wdg['series_stack'].on_change('value', update_sel)
     wdg['explode'].on_change('value', update_sel)
+    wdg['explode_group'].on_change('value', update_sel)
     wdg['plot_width'].on_change('value', update_sel)
     wdg['plot_height'].on_change('value', update_sel)
     wdg['opacity'].on_change('value', update_sel)
@@ -114,12 +116,14 @@ def set_df_plots():
         if wdg['x_group'].value != 'None': groupby_cols = [wdg['x_group'].value] + groupby_cols
         if wdg['series'].value != 'None': groupby_cols = [wdg['series'].value] + groupby_cols
         if wdg['explode'].value != 'None': groupby_cols = [wdg['explode'].value] + groupby_cols
+        if wdg['explode_group'].value != 'None': groupby_cols = [wdg['explode_group'].value] + groupby_cols
         df_plots = df_plots.groupby(groupby_cols, as_index=False, sort=False)[wdg['y'].value].sum()
 
     sortby_cols = [wdg['x'].value]
     if wdg['x_group'].value != 'None': sortby_cols = [wdg['x_group'].value] + sortby_cols
     if wdg['series'].value != 'None': sortby_cols = [wdg['series'].value] + sortby_cols
     if wdg['explode'].value != 'None': sortby_cols = [wdg['explode'].value] + sortby_cols
+    if wdg['explode_group'].value != 'None': sortby_cols = [wdg['explode_group'].value] + sortby_cols
     df_plots = df_plots.sort_values(sortby_cols).reset_index(drop=True)
 
 def create_figures():
@@ -128,12 +132,19 @@ def create_figures():
     if wdg['explode'].value == 'None':
         plot_list.append(create_figure(df_plots_cp))
     else:
-        for explode_val in df_plots_cp[wdg['explode'].value].unique().tolist():
-            df_exploded = df_plots_cp[df_plots_cp[wdg['explode'].value].isin([explode_val])]
-            plot_list.append(create_figure(df_exploded, explode_val))
+        if wdg['explode_group'].value == 'None':
+            for explode_val in df_plots_cp[wdg['explode'].value].unique().tolist():
+                df_exploded = df_plots_cp[df_plots_cp[wdg['explode'].value].isin([explode_val])]
+                plot_list.append(create_figure(df_exploded, explode_val))
+        else:
+            for explode_group in df_plots_cp[wdg['explode_group'].value].unique().tolist():
+                df_exploded_group = df_plots_cp[df_plots_cp[wdg['explode_group'].value].isin([explode_group])]
+                for explode_val in df_exploded_group[wdg['explode'].value].unique().tolist():
+                    df_exploded = df_exploded_group[df_exploded_group[wdg['explode'].value].isin([explode_val])]
+                    plot_list.append(create_figure(df_exploded, explode_val, explode_group))
     return plot_list
 
-def create_figure(df_exploded, explode_val='None'):
+def create_figure(df_exploded, explode_val=None, explode_group=None):
     x_col = wdg['x'].value
     if wdg['x_group'].value != 'None':
         x_col = str(wdg['x_group'].value) + '_' + str(wdg['x'].value)
@@ -155,8 +166,11 @@ def create_figure(df_exploded, explode_val='None'):
         kw['x_range'] = sorted(set(xs))
     if wdg['y'].value in discrete:
         kw['y_range'] = sorted(set(ys))
-    if explode_val != 'None':
+    kw['title'] = ''
+    if explode_val is not None:
         kw['title'] = "%s = %s" % (wdg['explode'].value, str(explode_val))
+        if explode_group is not None:
+            kw['title'] = "%s = %s, " % (wdg['explode_group'].value, str(explode_group)) + kw['title']
 
     hover = bmt.HoverTool(
             tooltips=[
