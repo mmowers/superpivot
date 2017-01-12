@@ -1,6 +1,19 @@
 $(document).ready(function(){
+    $('body').on('click', '[id^=modelid_x_dropdown]', function(){
+        $('div[id^=modelid_x_drop_]').toggle();
+    });
+    $('body').on('click', '[id^=modelid_y_dropdown]', function(){
+        $('div[id^=modelid_y_drop_]').toggle();
+    });
+    $('body').on('click', '[id^=modelid_series_dropdown]', function(){
+        $('div[id^=modelid_series_drop_]').toggle();
+    });
+    $('body').on('click', '[id^=modelid_explode_dropdown]', function(){
+        $('div[id^=modelid_explode_drop_]').toggle();
+    });
     $('body').on('click', '[id^=modelid_filters]', function(){
         $('[id^=modelid_heading_filter_]').toggle();
+        $('[id^=modelid_update_button]').toggle();
         $('.select-all-none').hide();
         $('.bk-widget[id^=modelid_filter_]').hide();
     });

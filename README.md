@@ -45,18 +45,18 @@ on the left-hand side of the screen. Here is the full list of widgets:
 * Data Source (required): Enter a path to a properly formatted csv file (see below). The path is relative to the
 root of this repo, but absolute paths may be entered as well, e.g. 'C:/somefolder/somefile.csv'. Make sure
 that there are column headers for each column in the csv file and no row labels.
+* Chart Type: Select Scatter, Line, Bar, or Area
 * X-axis (required): Select a column to use as x-axis
-* Y-axis (required: Select a column to use as y-axis
+* Group X By: Select a column to group the x-axis (if both x-axis and grouping columns are discrete).
+* Y-axis (required): Select a column to use as y-axis
+* Y-axis aggregation: You may aggregate y-axis data if it is numeric. "Sum" is currently the only option.
 * Series: Pick a column to split the data into separate, color-coded series
+* Series Stacking: You may stack/unstack series vertically with this switch
 * Series Legend: Click on this to see the color and name of each series
 * Explode Charts By: Select a discrete column to split into multiple charts. The charts' titles will correspond to the
 exploded column values.
 * Group Exploded Charts By: Select a discrete column to group exploded charts. Play around with plot sizes (see below)
 and/or resize your browser screen to make a nice 2d array of charts.
-* Group X By: Select a column to group the x-axis (if both x-axis and grouping columns are discrete).
-* Y-axis aggregation: You may aggregate y-axis data if it is numeric. "Sum" is currently the only option.
-* Series Stacking: You may stack/unstack series vertically with this switch
-* Chart Type: Select Scatter, Line, Bar, or Area
 * Filters: Each column can be used to filter data with checkboxes. After selecting Filters, you must press
 the Update button to apply the filters
 * Update Filters: This is only used for updating the charts once filters have been changed

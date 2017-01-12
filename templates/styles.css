@@ -28,7 +28,13 @@ body {
 .bk-plot-layout{
     display: inline-block;
 }
+
+div[id^="modelid_x_drop_"],
+div[id^="modelid_y_drop_"],
+div[id^="modelid_series_drop_"],
+div[id^="modelid_explode_drop_"],
 div[id^="modelid_filter_"],
+div[id^="modelid_update_button"],
 div[id^="modelid_adjust_plot_"]{
     display: none;
 }
@@ -38,6 +44,10 @@ div[id^="modelid_heading_"]{
     color: purple;
     display: none;
 }
+div[id^="modelid_x_dropdown"],
+div[id^="modelid_y_dropdown"],
+div[id^="modelid_series_dropdown"],
+div[id^="modelid_explode_dropdown"],
 div[id^="modelid_adjust_plots"],
 div[id^="modelid_filters"]{
     font-weight: bold;
