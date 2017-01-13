@@ -159,6 +159,10 @@ def set_df_plots():
     if wdg['explode_group'].value != 'None': sortby_cols = [wdg['explode_group'].value] + sortby_cols
     df_plots = df_plots.sort_values(sortby_cols).reset_index(drop=True)
 
+    #Rearrange column order for csv download
+    unsorted_columns = [col for col in df_plots.columns if col not in sortby_cols + [wdg['y'].value]]
+    df_plots = df_plots[sortby_cols + unsorted_columns + [wdg['y'].value]]
+
 def create_figures():
     plot_list = []
     df_plots_cp = df_plots.copy()
