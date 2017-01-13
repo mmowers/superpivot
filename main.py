@@ -23,7 +23,7 @@ Y_SCALE = 1
 CIRCLE_SIZE = 9
 BAR_WIDTH = 0.5
 LINE_WIDTH = 2
-COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142']*10
+COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142']*10
 C_NORM = "#31AADE"
 CHARTTYPES = ['Dot', 'Line', 'Bar', 'Area']
 AGGREGATIONS = ['None', 'Sum']
@@ -47,7 +47,6 @@ def build_widgets():
     uniq += 1
 
     wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source)
-    wdg['chartType'] = bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES)
     wdg['x_dropdown'] = bmw.Div(text='X-Axis (required)', id='x_dropdown'+str(uniq))
     wdg['x'] = bmw.Select(title='X-Axis (required)', value='None', options=['None'] + columns, id='x_drop_x'+str(uniq))
     wdg['x_group'] = bmw.Select(title='Group X-Axis By', value='None', options=['None'] + seriesable, id='x_drop_xgroup'+str(uniq))
@@ -55,9 +54,9 @@ def build_widgets():
     wdg['y'] = bmw.Select(title='Y-Axis (required)', value='None', options=['None'] + columns, id='y_drop_y'+str(uniq))
     wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='None', options=AGGREGATIONS, id='y_drop_y_agg'+str(uniq))
     wdg['series_dropdown'] = bmw.Div(text='Series', id='series_dropdown'+str(uniq))
+    wdg['series_legend'] = bmw.Div(text='', id='series_drop_legend'+str(uniq))
     wdg['series'] = bmw.Select(title='Separate Series By', value='None', options=['None'] + seriesable, id='series_drop_series'+str(uniq))
     wdg['series_stack'] = bmw.Select(title='Series Stacking', value='Unstacked', options=['Unstacked', 'Stacked'], id='series_drop_stack'+str(uniq))
-    wdg['series_legend'] = bmw.Div(text=build_series_legend(), id='series_drop_legend'+str(uniq))
     wdg['explode_dropdown'] = bmw.Div(text='Explode', id='explode_dropdown'+str(uniq))
     wdg['explode'] = bmw.Select(title='Explode By', value='None', options=['None'] + seriesable, id='explode_drop_explode'+str(uniq))
     wdg['explode_group'] = bmw.Select(title='Group Exploded Charts By', value='None', options=['None'] + seriesable, id='explode_drop_group'+str(uniq))
@@ -68,6 +67,7 @@ def build_widgets():
         wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=list(range(len(val_list))), id='filter_'+str(j)+'-'+str(uniq))
     wdg['update'] = bmw.Button(label='Update Filters', button_type='success', id='update_button'+str(uniq))
     wdg['adjustments'] = bmw.Div(text='Plot Adjustments', id='adjust_plots'+str(uniq))
+    wdg['chartType'] = bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES, id='adjust_plot_chart_type'+str(uniq))
     wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value=str(PLOT_WIDTH), id='adjust_plot_width'+str(uniq))
     wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value=str(PLOT_HEIGHT), id='adjust_plot_height'+str(uniq))
     wdg['plot_title'] = bmw.TextInput(title='Plot Title', value='', id='adjust_plot_title'+str(uniq))
@@ -90,6 +90,7 @@ def build_widgets():
     wdg['bar_width'] = bmw.TextInput(title='Bar Width (Bar Only)', value=str(BAR_WIDTH), id='adjust_plot_bar_width'+str(uniq))
     wdg['line_width'] = bmw.TextInput(title='Line Width (Line Only)', value=str(LINE_WIDTH), id='adjust_plot_line_width'+str(uniq))
     wdg['download'] = bmw.Button(label='Download csv', button_type='success')
+    wdg['series_legend'].text = build_series_legend()
 
     wdg['data'].on_change('value', update_data)
     wdg['chartType'].on_change('value', update_sel)

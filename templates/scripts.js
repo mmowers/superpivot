@@ -6,6 +6,7 @@ $(document).ready(function(){
         $('div[id^=modelid_y_drop_]').toggle();
     });
     $('body').on('click', '[id^=modelid_series_dropdown]', function(){
+        $('.legend-body').hide();
         $('div[id^=modelid_series_drop_]').toggle();
     });
     $('body').on('click', '[id^=modelid_explode_dropdown]', function(){

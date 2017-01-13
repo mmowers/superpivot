@@ -53,9 +53,10 @@ that there are column headers for each column in the csv file and no row labels.
 * X-axis (required): Select a column to use as x-axis
 * Group X By: Select a column to group the x-axis (if both x-axis and grouping columns are discrete).
 * Y-axis (required): Select a column to use as y-axis
-* Y-axis aggregation: You may aggregate y-axis data if it is numeric. "Sum" is currently the only option.
+* Y-axis aggregation: You may aggregate y-axis data (for each series) if it is numeric. "Sum" is currently the only option.
 * Series: Pick a column to split the data into separate, color-coded series
-* Series Stacking: You may stack/unstack series vertically with this switch
+* Series Stacking: You may stack/unstack series vertically with this switch. Make sure to use Y-axis Aggregation if, 
+for any series, there are multiple y-values for a given x-value.
 * Series Legend: Click on this to see the color and name of each series
 * Explode Charts By: Select a discrete column to split into multiple charts. The charts' titles will correspond to the
 exploded column values.
