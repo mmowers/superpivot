@@ -41,7 +41,11 @@ bokeh serve --show .
 ```
 This will launch a browser window with the viewer. To see
 a plot, you'll have to select the columns to use for x-axis and y-axis, which are two of the widgets
-on the left-hand side of the screen. Here is the full list of widgets:
+on the left-hand side of the screen. Plots will automatically update as most values are changed, with the 
+exception of Filters (see below). For select boxes, this means that making a new selection will trigger plot updates. For
+text boxes, after an entry is changed, you must press either Enter or defocus on the field to trigger the plot update.
+
+Here is the full list of widgets:
 * Data Source (required): Enter a path to a properly formatted csv file (see below). The path is relative to the
 root of this repo, but absolute paths may be entered as well, e.g. 'C:/somefolder/somefile.csv'. Make sure
 that there are column headers for each column in the csv file and no row labels.
