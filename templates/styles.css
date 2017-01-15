@@ -62,7 +62,8 @@ div[id^="modelid_filters"]{
     margin-left: 5px;
     margin-right: 5px;
 }
-.legend-header{
+.legend-header,
+div[id^="modelid_export_config"]{
     color: blue;
     cursor: pointer;
 }

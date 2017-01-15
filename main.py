@@ -1,5 +1,8 @@
 from __future__ import division
 import math
+import json
+import re
+import urllib
 import numpy as np
 import pandas as pd
 import collections
@@ -41,56 +44,68 @@ def get_data():
     df[continuous] = df[continuous].fillna(0)
 
 def build_widgets():
-    global uniq, wdg
+    global uniq, wdg, init_load
     data_source = wdg['data'].value
     wdg.clear()
     uniq += 1
 
-    wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source)
-    wdg['x_dropdown'] = bmw.Div(text='X-Axis (required)', id='x_dropdown'+str(uniq))
-    wdg['x'] = bmw.Select(title='X-Axis (required)', value='None', options=['None'] + columns, id='x_drop_x'+str(uniq))
-    wdg['x_group'] = bmw.Select(title='Group X-Axis By', value='None', options=['None'] + seriesable, id='x_drop_xgroup'+str(uniq))
-    wdg['y_dropdown'] = bmw.Div(text='Y-Axis (required)', id='y_dropdown'+str(uniq))
-    wdg['y'] = bmw.Select(title='Y-Axis (required)', value='None', options=['None'] + columns, id='y_drop_y'+str(uniq))
-    wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='None', options=AGGREGATIONS, id='y_drop_y_agg'+str(uniq))
-    wdg['series_dropdown'] = bmw.Div(text='Series', id='series_dropdown'+str(uniq))
-    wdg['series_legend'] = bmw.Div(text='', id='series_drop_legend'+str(uniq))
-    wdg['series'] = bmw.Select(title='Separate Series By', value='None', options=['None'] + seriesable, id='series_drop_series'+str(uniq))
-    wdg['series_stack'] = bmw.Select(title='Series Stacking', value='Unstacked', options=['Unstacked', 'Stacked'], id='series_drop_stack'+str(uniq))
-    wdg['explode_dropdown'] = bmw.Div(text='Explode', id='explode_dropdown'+str(uniq))
-    wdg['explode'] = bmw.Select(title='Explode By', value='None', options=['None'] + seriesable, id='explode_drop_explode'+str(uniq))
-    wdg['explode_group'] = bmw.Select(title='Group Exploded Charts By', value='None', options=['None'] + seriesable, id='explode_drop_group'+str(uniq))
-    wdg['filters'] = bmw.Div(text='Filters', id='filters'+str(uniq))
+    wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source, id='data_source-'+str(uniq))
+    wdg['x_dropdown'] = bmw.Div(text='X-Axis (required)', id='x_dropdown-'+str(uniq))
+    wdg['x'] = bmw.Select(title='X-Axis (required)', value='None', options=['None'] + columns, id='x_drop_x-'+str(uniq))
+    wdg['x_group'] = bmw.Select(title='Group X-Axis By', value='None', options=['None'] + seriesable, id='x_drop_xgroup-'+str(uniq))
+    wdg['y_dropdown'] = bmw.Div(text='Y-Axis (required)', id='y_dropdown-'+str(uniq))
+    wdg['y'] = bmw.Select(title='Y-Axis (required)', value='None', options=['None'] + columns, id='y_drop_y-'+str(uniq))
+    wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='None', options=AGGREGATIONS, id='y_drop_y_agg-'+str(uniq))
+    wdg['series_dropdown'] = bmw.Div(text='Series', id='series_dropdown-'+str(uniq))
+    wdg['series_legend'] = bmw.Div(text='', id='series_drop_legend-'+str(uniq))
+    wdg['series'] = bmw.Select(title='Separate Series By', value='None', options=['None'] + seriesable, id='series_drop_series-'+str(uniq))
+    wdg['series_stack'] = bmw.Select(title='Series Stacking', value='Unstacked', options=['Unstacked', 'Stacked'], id='series_drop_stack-'+str(uniq))
+    wdg['explode_dropdown'] = bmw.Div(text='Explode', id='explode_dropdown-'+str(uniq))
+    wdg['explode'] = bmw.Select(title='Explode By', value='None', options=['None'] + seriesable, id='explode_drop_explode-'+str(uniq))
+    wdg['explode_group'] = bmw.Select(title='Group Exploded Charts By', value='None', options=['None'] + seriesable, id='explode_drop_group-'+str(uniq))
+    wdg['filters'] = bmw.Div(text='Filters', id='filters-'+str(uniq))
     for j, col in enumerate(filterable):
         val_list = [str(i) for i in sorted(df[col].unique().tolist())]
         wdg['heading_filter_'+str(j)] = bmw.Div(text=col, id='heading_filter_'+str(j)+'-'+str(uniq))
         wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=list(range(len(val_list))), id='filter_'+str(j)+'-'+str(uniq))
-    wdg['update'] = bmw.Button(label='Update Filters', button_type='success', id='update_button'+str(uniq))
-    wdg['adjustments'] = bmw.Div(text='Plot Adjustments', id='adjust_plots'+str(uniq))
-    wdg['chartType'] = bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES, id='adjust_plot_chart_type'+str(uniq))
-    wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value=str(PLOT_WIDTH), id='adjust_plot_width'+str(uniq))
-    wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value=str(PLOT_HEIGHT), id='adjust_plot_height'+str(uniq))
-    wdg['plot_title'] = bmw.TextInput(title='Plot Title', value='', id='adjust_plot_title'+str(uniq))
-    wdg['plot_title_size'] = bmw.TextInput(title='Plot Title Font Size', value=str(PLOT_FONT_SIZE), id='adjust_plot_title_size'+str(uniq))
-    wdg['opacity'] = bmw.TextInput(title='Opacity (0-1)', value=str(OPACITY), id='adjust_plot_opacity'+str(uniq))
-    wdg['x_scale'] = bmw.TextInput(title='X Scale', value=str(X_SCALE), id='adjust_plot_x_scale'+str(uniq))
-    wdg['x_min'] = bmw.TextInput(title='X Min', value='', id='adjust_plot_x_min'+str(uniq))
-    wdg['x_max'] = bmw.TextInput(title='X Max', value='', id='adjust_plot_x_max'+str(uniq))
-    wdg['x_title'] = bmw.TextInput(title='X Title', value='', id='adjust_plot_x_title'+str(uniq))
-    wdg['x_title_size'] = bmw.TextInput(title='X Title Font Size', value=str(PLOT_FONT_SIZE), id='adjust_plot_x_title_size'+str(uniq))
-    wdg['x_major_label_size'] = bmw.TextInput(title='X Labels Font Size', value=str(PLOT_AXIS_LABEL_SIZE), id='adjust_plot_x_labels_size'+str(uniq))
-    wdg['x_major_label_orientation'] = bmw.TextInput(title='X Labels Degrees', value=str(PLOT_LABEL_ORIENTATION), id='adjust_plot_x_labels_orientation'+str(uniq))
-    wdg['y_scale'] = bmw.TextInput(title='Y Scale', value=str(Y_SCALE), id='adjust_plot_y_scale'+str(uniq))
-    wdg['y_min'] = bmw.TextInput(title='Y  Min', value='', id='adjust_plot_y_min'+str(uniq))
-    wdg['y_max'] = bmw.TextInput(title='Y Max', value='', id='adjust_plot_y_max'+str(uniq))
-    wdg['y_title'] = bmw.TextInput(title='Y Title', value='', id='adjust_plot_y_title'+str(uniq))
-    wdg['y_title_size'] = bmw.TextInput(title='Y Title Font Size', value=str(PLOT_FONT_SIZE), id='adjust_plot_y_title_size'+str(uniq))
-    wdg['y_major_label_size'] = bmw.TextInput(title='Y Labels Font Size', value=str(PLOT_AXIS_LABEL_SIZE), id='adjust_plot_y_labels_size'+str(uniq))
-    wdg['circle_size'] = bmw.TextInput(title='Circle Size (Dot Only)', value=str(CIRCLE_SIZE), id='adjust_plot_circle_size'+str(uniq))
-    wdg['bar_width'] = bmw.TextInput(title='Bar Width (Bar Only)', value=str(BAR_WIDTH), id='adjust_plot_bar_width'+str(uniq))
-    wdg['line_width'] = bmw.TextInput(title='Line Width (Line Only)', value=str(LINE_WIDTH), id='adjust_plot_line_width'+str(uniq))
+    wdg['update'] = bmw.Button(label='Update Filters', button_type='success', id='update_button-'+str(uniq))
+    wdg['adjustments'] = bmw.Div(text='Plot Adjustments', id='adjust_plots-'+str(uniq))
+    wdg['chartType'] = bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES, id='adjust_plot_chart_type-'+str(uniq))
+    wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value=str(PLOT_WIDTH), id='adjust_plot_width-'+str(uniq))
+    wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value=str(PLOT_HEIGHT), id='adjust_plot_height-'+str(uniq))
+    wdg['plot_title'] = bmw.TextInput(title='Plot Title', value='', id='adjust_plot_title-'+str(uniq))
+    wdg['plot_title_size'] = bmw.TextInput(title='Plot Title Font Size', value=str(PLOT_FONT_SIZE), id='adjust_plot_title_size-'+str(uniq))
+    wdg['opacity'] = bmw.TextInput(title='Opacity (0-1)', value=str(OPACITY), id='adjust_plot_opacity-'+str(uniq))
+    wdg['x_scale'] = bmw.TextInput(title='X Scale', value=str(X_SCALE), id='adjust_plot_x_scale-'+str(uniq))
+    wdg['x_min'] = bmw.TextInput(title='X Min', value='', id='adjust_plot_x_min-'+str(uniq))
+    wdg['x_max'] = bmw.TextInput(title='X Max', value='', id='adjust_plot_x_max-'+str(uniq))
+    wdg['x_title'] = bmw.TextInput(title='X Title', value='', id='adjust_plot_x_title-'+str(uniq))
+    wdg['x_title_size'] = bmw.TextInput(title='X Title Font Size', value=str(PLOT_FONT_SIZE), id='adjust_plot_x_title_size-'+str(uniq))
+    wdg['x_major_label_size'] = bmw.TextInput(title='X Labels Font Size', value=str(PLOT_AXIS_LABEL_SIZE), id='adjust_plot_x_labels_size-'+str(uniq))
+    wdg['x_major_label_orientation'] = bmw.TextInput(title='X Labels Degrees', value=str(PLOT_LABEL_ORIENTATION), id='adjust_plot_x_labels_orientation-'+str(uniq))
+    wdg['y_scale'] = bmw.TextInput(title='Y Scale', value=str(Y_SCALE), id='adjust_plot_y_scale-'+str(uniq))
+    wdg['y_min'] = bmw.TextInput(title='Y  Min', value='', id='adjust_plot_y_min-'+str(uniq))
+    wdg['y_max'] = bmw.TextInput(title='Y Max', value='', id='adjust_plot_y_max-'+str(uniq))
+    wdg['y_title'] = bmw.TextInput(title='Y Title', value='', id='adjust_plot_y_title-'+str(uniq))
+    wdg['y_title_size'] = bmw.TextInput(title='Y Title Font Size', value=str(PLOT_FONT_SIZE), id='adjust_plot_y_title_size-'+str(uniq))
+    wdg['y_major_label_size'] = bmw.TextInput(title='Y Labels Font Size', value=str(PLOT_AXIS_LABEL_SIZE), id='adjust_plot_y_labels_size-'+str(uniq))
+    wdg['circle_size'] = bmw.TextInput(title='Circle Size (Dot Only)', value=str(CIRCLE_SIZE), id='adjust_plot_circle_size-'+str(uniq))
+    wdg['bar_width'] = bmw.TextInput(title='Bar Width (Bar Only)', value=str(BAR_WIDTH), id='adjust_plot_bar_width-'+str(uniq))
+    wdg['line_width'] = bmw.TextInput(title='Line Width (Line Only)', value=str(LINE_WIDTH), id='adjust_plot_line_width-'+str(uniq))
     wdg['download'] = bmw.Button(label='Download csv', button_type='success')
+    wdg['export_config'] = bmw.Div(text='Export Config to URL', id='export_config-'+str(uniq))
+
     wdg['series_legend'].text = build_series_legend()
+
+    if init_load:
+        for wc_key in wdg_config:
+            for w_key in wdg:
+                if str(re.sub(r'[0-9]+$', '', wdg[w_key]._id)) == str(wc_key):
+                    if hasattr(wdg[w_key], 'value'):
+                        wdg[w_key].value = str(wdg_config[wc_key])
+                    elif hasattr(wdg[w_key], 'active'):
+                        wdg[w_key].active = wdg_config[wc_key]
+        init_load = False
 
     wdg['data'].on_change('value', update_data)
     wdg['chartType'].on_change('value', update_sel)
@@ -333,14 +348,24 @@ def update_plots():
 def download():
     df_plots.to_csv('downloads/out '+datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
 
+init_load = True
+wdg_config = {}
+data_file = 'csv/power.csv'
+args = bio.curdoc().session_context.request.arguments
+wdg_arr = args.get('widgets')
+if wdg_arr is not None:
+    wdg_config = json.loads(urllib.unquote(wdg_arr[0]))
+    if 'data_source-' in wdg_config:
+        data_file = str(wdg_config['data_source-'])
+
 wdg = collections.OrderedDict()
-wdg['data'] = bmw.TextInput(title='Data Source', value='csv/power.csv')
+wdg['data'] = bmw.TextInput(title='Data Source', value=data_file)
 get_data()
 uniq = 0
 build_widgets()
-
 controls = bl.widgetbox(list(wdg.values()), id='widgets_section')
 plots = bl.column([], id='plots_section')
+update_plots()
 layout = bl.row(controls, plots, id='layout')
 
 bio.curdoc().add_root(layout)
