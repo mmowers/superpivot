@@ -2,7 +2,6 @@ from __future__ import division
 import math
 import json
 import re
-import urllib
 import numpy as np
 import pandas as pd
 import collections
@@ -14,6 +13,10 @@ import bokeh.models.sources as bms
 import bokeh.models.tools as bmt
 import bokeh.plotting as bp
 import datetime
+try:
+    import urllib.parse as urlp
+except ImportError:
+    import urllib as urlp
 
 PLOT_WIDTH = 300
 PLOT_HEIGHT = 300
@@ -354,7 +357,7 @@ data_file = 'csv/power.csv'
 args = bio.curdoc().session_context.request.arguments
 wdg_arr = args.get('widgets')
 if wdg_arr is not None:
-    wdg_config = json.loads(urllib.unquote(wdg_arr[0]))
+    wdg_config = json.loads(urlp.unquote(wdg_arr[0]))
     if 'data_source-' in wdg_config:
         data_file = str(wdg_config['data_source-'])
 
