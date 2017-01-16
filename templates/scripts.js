@@ -39,11 +39,6 @@ $(document).ready(function(){
         $(this).next('.legend-body').toggle();
     });
 
-    // var widgets = {'filter_0': [0,1,2], 'filter_1': [3,4]}
-    // var widgets_string = encodeURIComponent(JSON.stringify(widgets))
-    // window.history.pushState({}, "", "superpivot?widgets=" + widgets_string);
-    // window.open('superpivot?params=' + widgets_string);
-    // ?widgets=%7B"filter_0"%3A%5B0%2C1%2C2%5D%2C"filter_1"%3A%5B3%2C4%5D%7D
     $('body').on('click', '[id^=modelid_export_config]', function(){
         var wdg_obj = {}
         $('select, input[type=text]').each(function(){
