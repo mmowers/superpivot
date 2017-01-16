@@ -68,6 +68,9 @@ the Update button to apply the filters
 * Plot adjustments: Make additional modifications to the chart size, x-axis/y-axis limits and scale, etc.
 * Download csv: This will download the data you are viewing (after applying filters, aggregation, etc.) into
 a csv file in the downloads/ folder
+* Export config to URL: Clicking this will take the widget configurations and dump them into the URL address bar. You can use this URL
+to automatically set the widgets as they were when exported. Try copying & pasting the URL into a new window/tab to prove that
+it works.
 
 ## Resources
 This tool uses bokeh, built on python:

@@ -100,6 +100,7 @@ def build_widgets():
 
     wdg['series_legend'].text = build_series_legend()
 
+    #use wdg_config (from 'widgets' parameter in URL query string) to configure widgets.
     if init_load:
         for wc_key in wdg_config:
             for w_key in wdg:
@@ -351,6 +352,8 @@ def update_plots():
 def download():
     df_plots.to_csv('downloads/out '+datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
 
+#read 'widgets' parameter from URL query string and use to set data source (data_file)
+#and widget configuration object (wdg_config)
 init_load = True
 wdg_config = {}
 data_file = 'csv/power.csv'
@@ -361,6 +364,7 @@ if wdg_arr is not None:
     if 'data_source-' in wdg_config:
         data_file = str(wdg_config['data_source-'])
 
+#build widgets and plots
 wdg = collections.OrderedDict()
 wdg['data'] = bmw.TextInput(title='Data Source', value=data_file)
 get_data()
