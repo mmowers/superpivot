@@ -43,7 +43,7 @@ def get_data():
     df[continuous] = df[continuous].fillna(0)
 
 def build_widgets():
-    global wdg, init_load
+    global init_load
     data_source = wdg['data'].value
     wdg.clear()
 
@@ -139,6 +139,8 @@ def build_widgets():
     wdg['update'].on_click(update_plots)
     wdg['download'].on_click(download)
 
+    controls.children = list(wdg.values())
+
 def set_df_plots():
     global df_plots
     df_plots = df.copy()
@@ -193,7 +195,7 @@ def create_figures():
                 for explode_val in df_exploded_group[wdg['explode'].value].unique().tolist():
                     df_exploded = df_exploded_group[df_exploded_group[wdg['explode'].value].isin([explode_val])]
                     plot_list.append(create_figure(df_exploded, explode_val, explode_group))
-    return plot_list
+    plots.children = plot_list
 
 def create_figure(df_exploded, explode_val=None, explode_group=None):
     # If x_group has a value, create a combined column in the dataframe for x and x_group
@@ -323,13 +325,12 @@ def build_series_legend():
             series_legend_string += '<div class="legend-entry"><span class="legend-color" style="background-color:' + str(COLORS[i]) + ';"></span>'
             series_legend_string += '<span class="legend-text">' + str(txt) +'</span></div>'
     series_legend_string += '</div>'
-    return series_legend_string
+    wdg['series_legend'].text =  series_legend_string
 
 
 def update_data(attr, old, new):
     get_data()
     build_widgets()
-    controls.children = list(wdg.values())
     update_plots()
 
 def update_sel(attr, old, new):
@@ -340,8 +341,8 @@ def update_plots():
         plots.children = []
         return
     set_df_plots()
-    wdg['series_legend'].text = build_series_legend()
-    plots.children = create_figures()
+    build_series_legend()
+    create_figures()
 
 def download():
     df_plots.to_csv('downloads/out '+datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
@@ -362,8 +363,8 @@ if wdg_arr is not None:
 wdg = collections.OrderedDict()
 wdg['data'] = bmw.TextInput(title='Data Source', value=data_file)
 get_data()
+controls = bl.widgetbox([], id='widgets_section')
 build_widgets()
-controls = bl.widgetbox(list(wdg.values()), id='widgets_section')
 plots = bl.column([], id='plots_section')
 update_plots()
 layout = bl.row(controls, plots, id='layout')
