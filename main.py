@@ -12,10 +12,7 @@ import bokeh.models.sources as bms
 import bokeh.models.tools as bmt
 import bokeh.plotting as bp
 import datetime
-try:
-    import urllib.parse as urlp
-except ImportError:
-    import urllib as urlp
+import six.moves.urllib.parse as urlp
 
 PLOT_WIDTH = 300
 PLOT_HEIGHT = 300
