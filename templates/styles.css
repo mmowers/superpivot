@@ -28,28 +28,27 @@ body {
 .bk-plot-layout{
     display: inline-block;
 }
-
-div[id^="modelid_x_drop_"],
-div[id^="modelid_y_drop_"],
-div[id^="modelid_series_drop_"],
-div[id^="modelid_explode_drop_"],
-div[id^="modelid_filter_"],
-div[id^="modelid_update_button"],
-div[id^="modelid_adjust_plot_"]{
+.x-drop,
+.y-drop,
+.series-drop,
+.explode-drop,
+.filter,
+.filters-update,
+.adjust-drop{
     display: none;
 }
-div[id^="modelid_heading_"]{
+.filter-head{
     font-weight: bold;
     cursor: pointer;
     color: purple;
     display: none;
 }
-div[id^="modelid_x_dropdown"],
-div[id^="modelid_y_dropdown"],
-div[id^="modelid_series_dropdown"],
-div[id^="modelid_explode_dropdown"],
-div[id^="modelid_adjust_plots"],
-div[id^="modelid_filters"]{
+.x-dropdown,
+.y-dropdown,
+.series-dropdown,
+.explode-dropdown,
+.filters-dropdown,
+.adjust-dropdown{
     font-weight: bold;
     color: blue;
     cursor: pointer;
@@ -63,7 +62,7 @@ div[id^="modelid_filters"]{
     margin-right: 5px;
 }
 .legend-header,
-div[id^="modelid_export_config"]{
+.export-config{
     color: blue;
     cursor: pointer;
 }
