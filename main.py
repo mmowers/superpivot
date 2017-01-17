@@ -359,8 +359,8 @@ args = bio.curdoc().session_context.request.arguments
 wdg_arr = args.get('widgets')
 if wdg_arr is not None:
     wdg_config = json.loads(urlp.unquote(wdg_arr[0].decode('utf-8')))
-    if 'data_source-' in wdg_config:
-        data_file = str(wdg_config['data_source-'])
+    if 'data' in wdg_config:
+        data_file = str(wdg_config['data'])
 
 #build widgets and plots
 wdg = collections.OrderedDict()
