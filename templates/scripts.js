@@ -42,12 +42,12 @@ $(document).ready(function(){
     $('body').on('click', '[id^=modelid_export_config]', function(){
         var wdg_obj = {}
         $('select, input[type=text]').each(function(){
-            var wdg_name = $(this).attr('id').replace(/[0-9]+$/, '');
+            var wdg_name = $(this).parent().attr('class').match(/wdgkey-([^ ]*)/)[1];
             var selected_val = $(this).val();
             wdg_obj[wdg_name] = selected_val;
         });
         $('[id^=modelid_filter_]').each(function(){
-            var wdg_name = $(this).attr('id').replace(/[0-9]+$/, '').replace(/^modelid_/, '');
+            var wdg_name = $(this).attr('class').match(/wdgkey-([^ ]*)/)[1];
             wdg_obj[wdg_name] = []
             $(this).find('input').each(function(){
                 if($(this).is(":checked")){
@@ -58,5 +58,4 @@ $(document).ready(function(){
         var widgets_string = encodeURIComponent(JSON.stringify(wdg_obj));
         window.history.pushState({}, "", "superpivot?widgets=" + widgets_string);
     });
-
 });
