@@ -1,4 +1,5 @@
 from __future__ import division
+import os
 import math
 import json
 import numpy as np
@@ -351,7 +352,7 @@ def download():
 #and widget configuration object (wdg_config)
 init_load = True
 wdg_config = {}
-data_file = 'csv/power.csv'
+data_file = os.path.dirname(os.path.realpath(__file__)) + '/csv/power.csv'
 args = bio.curdoc().session_context.request.arguments
 wdg_arr = args.get('widgets')
 if wdg_arr is not None:
