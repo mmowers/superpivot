@@ -54,7 +54,7 @@ def build_widgets():
     wdg['x_group'] = bmw.Select(title='Group X-Axis By', value='None', options=['None'] + seriesable, css_classes=['wdgkey-x_group', 'x-drop'])
     wdg['y_dropdown'] = bmw.Div(text='Y-Axis (required)', css_classes=['y-dropdown'])
     wdg['y'] = bmw.Select(title='Y-Axis (required)', value='None', options=['None'] + columns, css_classes=['wdgkey-y', 'y-drop'])
-    wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='None', options=AGGREGATIONS, css_classes=['wdgkey-y_agg', 'y-drop'])
+    wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='Sum', options=AGGREGATIONS, css_classes=['wdgkey-y_agg', 'y-drop'])
     wdg['series_dropdown'] = bmw.Div(text='Series', css_classes=['series-dropdown'])
     wdg['series_legend'] = bmw.Div(text='', css_classes=['series-drop'])
     wdg['series'] = bmw.Select(title='Separate Series By', value='None', options=['None'] + seriesable, css_classes=['wdgkey-series', 'series-drop'])
