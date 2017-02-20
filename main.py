@@ -32,39 +32,37 @@ CHARTTYPES = ['Dot', 'Line', 'Bar', 'Area']
 AGGREGATIONS = ['None', 'Sum']
 
 def get_data():
-    global df, columns, discrete, continuous, filterable, seriesable
     data_source = wdg['data'].value
-    df = pd.read_csv(data_source)
-    columns = sorted(df.columns)
-    discrete = [x for x in columns if df[x].dtype == object]
-    continuous = [x for x in columns if x not in discrete]
-    filterable = discrete+[x for x in continuous if len(df[x].unique()) < 500]
-    seriesable = discrete+[x for x in continuous if len(df[x].unique()) < 60]
-    df[discrete] = df[discrete].fillna('{BLANK}')
-    df[continuous] = df[continuous].fillna(0)
+    dfs['df'] = pd.read_csv(data_source)
+    cols['all'] = sorted(dfs['df'].columns)
+    cols['discrete'] = [x for x in cols['all'] if dfs['df'][x].dtype == object]
+    cols['continuous'] = [x for x in cols['all'] if x not in cols['discrete']]
+    cols['filterable'] = cols['discrete']+[x for x in cols['continuous'] if len(dfs['df'][x].unique()) < 500]
+    cols['seriesable'] = cols['discrete']+[x for x in cols['continuous'] if len(dfs['df'][x].unique()) < 60]
+    dfs['df'][cols['discrete']] = dfs['df'][cols['discrete']].fillna('{BLANK}')
+    dfs['df'][cols['continuous']] = dfs['df'][cols['continuous']].fillna(0)
 
 def build_widgets():
-    global init_load
     data_source = wdg['data'].value
     wdg.clear()
 
     wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source, css_classes=['wdgkey-data'])
     wdg['x_dropdown'] = bmw.Div(text='X-Axis (required)', css_classes=['x-dropdown'])
-    wdg['x'] = bmw.Select(title='X-Axis (required)', value='None', options=['None'] + columns, css_classes=['wdgkey-x', 'x-drop'])
-    wdg['x_group'] = bmw.Select(title='Group X-Axis By', value='None', options=['None'] + seriesable, css_classes=['wdgkey-x_group', 'x-drop'])
+    wdg['x'] = bmw.Select(title='X-Axis (required)', value='None', options=['None'] + cols['all'], css_classes=['wdgkey-x', 'x-drop'])
+    wdg['x_group'] = bmw.Select(title='Group X-Axis By', value='None', options=['None'] + cols['seriesable'], css_classes=['wdgkey-x_group', 'x-drop'])
     wdg['y_dropdown'] = bmw.Div(text='Y-Axis (required)', css_classes=['y-dropdown'])
-    wdg['y'] = bmw.Select(title='Y-Axis (required)', value='None', options=['None'] + columns, css_classes=['wdgkey-y', 'y-drop'])
+    wdg['y'] = bmw.Select(title='Y-Axis (required)', value='None', options=['None'] + cols['all'], css_classes=['wdgkey-y', 'y-drop'])
     wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='Sum', options=AGGREGATIONS, css_classes=['wdgkey-y_agg', 'y-drop'])
     wdg['series_dropdown'] = bmw.Div(text='Series', css_classes=['series-dropdown'])
     wdg['series_legend'] = bmw.Div(text='', css_classes=['series-drop'])
-    wdg['series'] = bmw.Select(title='Separate Series By', value='None', options=['None'] + seriesable, css_classes=['wdgkey-series', 'series-drop'])
+    wdg['series'] = bmw.Select(title='Separate Series By', value='None', options=['None'] + cols['seriesable'], css_classes=['wdgkey-series', 'series-drop'])
     wdg['series_stack'] = bmw.Select(title='Series Stacking', value='Unstacked', options=['Unstacked', 'Stacked'], css_classes=['wdgkey-series_stack', 'series-drop'])
     wdg['explode_dropdown'] = bmw.Div(text='Explode', css_classes=['explode-dropdown'])
-    wdg['explode'] = bmw.Select(title='Explode By', value='None', options=['None'] + seriesable, css_classes=['wdgkey-explode', 'explode-drop'])
-    wdg['explode_group'] = bmw.Select(title='Group Exploded Charts By', value='None', options=['None'] + seriesable, css_classes=['wdgkey-explode_group', 'explode-drop'])
+    wdg['explode'] = bmw.Select(title='Explode By', value='None', options=['None'] + cols['seriesable'], css_classes=['wdgkey-explode', 'explode-drop'])
+    wdg['explode_group'] = bmw.Select(title='Group Exploded Charts By', value='None', options=['None'] + cols['seriesable'], css_classes=['wdgkey-explode_group', 'explode-drop'])
     wdg['filters'] = bmw.Div(text='Filters', css_classes=['filters-dropdown'])
-    for j, col in enumerate(filterable):
-        val_list = [str(i) for i in sorted(df[col].unique().tolist())]
+    for j, col in enumerate(cols['filterable']):
+        val_list = [str(i) for i in sorted(dfs['df'][col].unique().tolist())]
         wdg['heading_filter_'+str(j)] = bmw.Div(text=col, css_classes=['filter-head'])
         wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=list(range(len(val_list))), css_classes=['wdgkey-filter_'+str(j), 'filter'])
     wdg['update'] = bmw.Button(label='Update Filters', button_type='success', css_classes=['filters-update'])
@@ -97,14 +95,14 @@ def build_widgets():
     wdg['series_legend'].text = build_series_legend()
 
     #use wdg_config (from 'widgets' parameter in URL query string) to configure widgets.
-    if init_load:
+    if init['init_load']:
         for key in wdg_config:
             if key in wdg:
                 if hasattr(wdg[key], 'value'):
                     wdg[key].value = str(wdg_config[key])
                 elif hasattr(wdg[key], 'active'):
                     wdg[key].active = wdg_config[key]
-        init_load = False
+        init['init_load'] = False
 
     wdg['data'].on_change('value', update_data)
     wdg['chart_type'].on_change('value', update_sel)
@@ -143,30 +141,29 @@ def build_widgets():
     controls.children = list(wdg.values())
 
 def set_df_plots():
-    global df_plots
-    df_plots = df.copy()
+    dfs['df_plots'] = dfs['df'].copy()
 
     #Apply filters
-    for j, col in enumerate(filterable):
+    for j, col in enumerate(cols['filterable']):
         active = [wdg['filter_'+str(j)].labels[i] for i in wdg['filter_'+str(j)].active]
-        if col in continuous:
+        if col in cols['continuous']:
             active = [float(i) for i in active]
-        df_plots = df_plots[df_plots[col].isin(active)]
+        dfs['df_plots'] = dfs['df_plots'][dfs['df_plots'][col].isin(active)]
 
     #Scale Axes
-    if wdg['x_scale'].value != '' and wdg['x'].value in continuous:
-        df_plots[wdg['x'].value] = df_plots[wdg['x'].value] * float(wdg['x_scale'].value)
-    if wdg['y_scale'].value != '' and wdg['y'].value in continuous:
-        df_plots[wdg['y'].value] = df_plots[wdg['y'].value] * float(wdg['y_scale'].value)
+    if wdg['x_scale'].value != '' and wdg['x'].value in cols['continuous']:
+        dfs['df_plots'][wdg['x'].value] = dfs['df_plots'][wdg['x'].value] * float(wdg['x_scale'].value)
+    if wdg['y_scale'].value != '' and wdg['y'].value in cols['continuous']:
+        dfs['df_plots'][wdg['y'].value] = dfs['df_plots'][wdg['y'].value] * float(wdg['y_scale'].value)
 
     #Apply Aggregation
-    if wdg['y_agg'].value == 'Sum' and wdg['y'].value in continuous:
+    if wdg['y_agg'].value == 'Sum' and wdg['y'].value in cols['continuous']:
         groupby_cols = [wdg['x'].value]
         if wdg['x_group'].value != 'None': groupby_cols = [wdg['x_group'].value] + groupby_cols
         if wdg['series'].value != 'None': groupby_cols = [wdg['series'].value] + groupby_cols
         if wdg['explode'].value != 'None': groupby_cols = [wdg['explode'].value] + groupby_cols
         if wdg['explode_group'].value != 'None': groupby_cols = [wdg['explode_group'].value] + groupby_cols
-        df_plots = df_plots.groupby(groupby_cols, as_index=False, sort=False)[wdg['y'].value].sum()
+        dfs['df_plots'] = dfs['df_plots'].groupby(groupby_cols, as_index=False, sort=False)[wdg['y'].value].sum()
 
     #Sort Dataframe
     sortby_cols = [wdg['x'].value]
@@ -174,15 +171,15 @@ def set_df_plots():
     if wdg['series'].value != 'None': sortby_cols = [wdg['series'].value] + sortby_cols
     if wdg['explode'].value != 'None': sortby_cols = [wdg['explode'].value] + sortby_cols
     if wdg['explode_group'].value != 'None': sortby_cols = [wdg['explode_group'].value] + sortby_cols
-    df_plots = df_plots.sort_values(sortby_cols).reset_index(drop=True)
+    dfs['df_plots'] = dfs['df_plots'].sort_values(sortby_cols).reset_index(drop=True)
 
     #Rearrange column order for csv download
-    unsorted_columns = [col for col in df_plots.columns if col not in sortby_cols + [wdg['y'].value]]
-    df_plots = df_plots[sortby_cols + unsorted_columns + [wdg['y'].value]]
+    unsorted_columns = [col for col in dfs['df_plots'].columns if col not in sortby_cols + [wdg['y'].value]]
+    dfs['df_plots'] = dfs['df_plots'][sortby_cols + unsorted_columns + [wdg['y'].value]]
 
 def create_figures():
     plot_list = []
-    df_plots_cp = df_plots.copy()
+    df_plots_cp = dfs['df_plots'].copy()
     if wdg['explode'].value == 'None':
         plot_list.append(create_figure(df_plots_cp))
     else:
@@ -221,9 +218,9 @@ def create_figure(df_exploded, explode_val=None, explode_group=None):
             #Between groups, add entries that consist of spaces. Increase number of spaces from
             #one break to the next so that each entry is unique
             kw['x_range'].append(' ' * (i + 1))
-    elif wdg['x'].value in discrete:
+    elif wdg['x'].value in cols['discrete']:
         kw['x_range'] = sorted(set(xs))
-    if wdg['y'].value in discrete:
+    if wdg['y'].value in cols['discrete']:
         kw['y_range'] = sorted(set(ys))
 
     #Set figure title
@@ -256,22 +253,22 @@ def create_figure(df_exploded, explode_val=None, explode_group=None):
     p.xaxis.major_label_text_font_size = wdg['x_major_label_size'].value + 'pt'
     p.yaxis.major_label_text_font_size = wdg['y_major_label_size'].value + 'pt'
     p.xaxis.major_label_orientation = 'horizontal' if wdg['x_major_label_orientation'].value == '0' else math.radians(float(wdg['x_major_label_orientation'].value))
-    if wdg['x'].value in continuous:
+    if wdg['x'].value in cols['continuous']:
         if wdg['x_min'].value != '': p.x_range.start = float(wdg['x_min'].value)
         if wdg['x_max'].value != '': p.x_range.end = float(wdg['x_max'].value)
-    if wdg['y'].value in continuous:
+    if wdg['y'].value in cols['continuous']:
         if wdg['y_min'].value != '': p.y_range.start = float(wdg['y_min'].value)
         if wdg['y_max'].value != '': p.y_range.end = float(wdg['y_max'].value)
 
     #Add glyphs to figure
     c = C_NORM
     if wdg['series'].value == 'None':
-        if wdg['y_agg'].value != 'None' and wdg['y'].value in continuous:
+        if wdg['y_agg'].value != 'None' and wdg['y'].value in cols['continuous']:
             xs = df_exploded[x_col].values.tolist()
             ys = df_exploded[wdg['y'].value].values.tolist()
         add_glyph(p, xs, ys, c)
     else:
-        full_series = df_plots[wdg['series'].value].unique().tolist() #for colors only
+        full_series = dfs['df_plots'][wdg['series'].value].unique().tolist() #for colors only
         if wdg['series_stack'].value == 'Stacked':
             xs_full = sorted(df_exploded[x_col].unique().tolist())
             y_bases_pos = [0]*len(xs_full)
@@ -321,7 +318,7 @@ def add_glyph(p, xs, ys, c, y_bases=None, series=None):
 def build_series_legend():
     series_legend_string = '<div class="legend-header">Series Legend</div><div class="legend-body">'
     if wdg['series'].value != 'None':
-        active_list = df_plots[wdg['series'].value].unique().tolist()
+        active_list = dfs['df_plots'][wdg['series'].value].unique().tolist()
         for i, txt in reversed(list(enumerate(active_list))):
             series_legend_string += '<div class="legend-entry"><span class="legend-color" style="background-color:' + str(COLORS[i]) + ';"></span>'
             series_legend_string += '<span class="legend-text">' + str(txt) +'</span></div>'
@@ -346,11 +343,12 @@ def update_plots():
     create_figures()
 
 def download():
-    df_plots.to_csv('downloads/out '+datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
+    dfs['df_plots'].to_csv('downloads/out '+datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
 
-#read 'widgets' parameter from URL query string and use to set data source (data_file)
+
+#On initial load, read 'widgets' parameter from URL query string and use to set data source (data_file)
 #and widget configuration object (wdg_config)
-init_load = True
+init = {'init_load':True}
 wdg_config = {}
 data_file = os.path.dirname(os.path.realpath(__file__)) + '/csv/power.csv'
 args = bio.curdoc().session_context.request.arguments
@@ -359,6 +357,11 @@ if wdg_arr is not None:
     wdg_config = json.loads(urlp.unquote(wdg_arr[0].decode('utf-8')))
     if 'data' in wdg_config:
         data_file = str(wdg_config['data'])
+
+
+#initialize dict to hold the global dataframes and lists of column headers
+dfs = {'df': None, 'df_plots': None}
+cols = {'all': None, 'discrete': None, 'continuous':None, 'filterable':None, 'seriesable':None}
 
 #build widgets and plots
 wdg = collections.OrderedDict()
