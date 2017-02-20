@@ -56,6 +56,7 @@ $(document).ready(function(){
             });
         });
         var widgets_string = encodeURIComponent(JSON.stringify(wdg_obj));
-        window.history.pushState({}, "", "superpivot?widgets=" + widgets_string);
+        var pathname = window.location.pathname.replace('/',''); //remove just the first slash
+        window.history.pushState({}, "", pathname+"?widgets=" + widgets_string);
     });
 });
