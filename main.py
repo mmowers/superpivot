@@ -343,7 +343,7 @@ def update_plots():
     create_figures()
 
 def download():
-    dfs['df_plots'].to_csv('downloads/out '+datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
+    dfs['df_plots'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
 
 
 #On initial load, read 'widgets' parameter from URL query string and use to set data source (data_file)
