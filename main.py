@@ -2,12 +2,10 @@ from __future__ import division
 import os
 import math
 import json
-import numpy as np
 import pandas as pd
 import collections
 import bokeh.io as bio
 import bokeh.layouts as bl
-import bokeh.models as bm
 import bokeh.models.widgets as bmw
 import bokeh.models.sources as bms
 import bokeh.models.tools as bmt
