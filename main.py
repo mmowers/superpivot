@@ -348,7 +348,7 @@ def download():
 #and widget configuration object (wdg_config)
 init = {'init_load':True}
 wdg_config = {}
-data_file = os.path.dirname(os.path.realpath(__file__)) + '/csv/electricity generation.csv'
+data_file = os.path.dirname(os.path.realpath(__file__)) + '/csv/US_electric_power_generation.csv'
 args = bio.curdoc().session_context.request.arguments
 wdg_arr = args.get('widgets')
 if wdg_arr is not None:
