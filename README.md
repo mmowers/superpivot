@@ -10,8 +10,8 @@ The code was developed starting from Bokeh/examples/app/crossfilter.
 The code is data-agnostic, so any other properly formatted data can
 be used in place of csv/power.csv (see below) and be visualized.
 
-## Setting Up From Scratch
-Get Anaconda for python 2.7 or 3.5 at:
+## Setting Up From Scratch (if you don't already have Bokeh)
+Easiest way is to get Anaconda for python 2.7 or 3.5 at:
 https://www.continuum.io/downloads
 
 You can check if Anaconda automatically installed bokeh by going to
@@ -29,15 +29,11 @@ from the command line:
 ```
 conda install bokeh
 ```
-Finally, git clone this repo onto your computer with:
-```
-git clone https://github.com/mmowers/superpivot.git
-```
 
 ## Running
-From command line, cd into the superpivot repo and type:
+From command line:
 ```
-bokeh serve --show .
+bokeh serve --show /path/to/this/app/
 ```
 This will launch a browser window with the viewer. To see
 a plot, you'll have to select the columns to use for x-axis and y-axis, which are two of the widgets
@@ -80,6 +76,6 @@ The site has good documentation in the User Guide and Reference.
 There is also an active google group for issues:
 https://groups.google.com/a/continuum.io/forum/#!forum/bokeh
 
-And of course, python has pretty good documentation too:
+And of course, python has good documentation too:
 https://docs.python.org/2.7/tutorial/
 https://docs.python.org/3.5/tutorial/
