@@ -92,8 +92,6 @@ def build_widgets(data_source, df_source, cols, init_load=False):
     wdg['download'] = bmw.Button(label='Download csv', button_type='success')
     wdg['export_config'] = bmw.Div(text='Export Config to URL', css_classes=['export-config'])
 
-    wdg['series_legend'].text = build_series_legend(wdg['series'].value)
-
     #use wdg_config (from 'widgets' parameter in URL query string) to configure widgets.
     if init_load:
         for key in wdg_config:
@@ -293,10 +291,10 @@ def add_glyph(wdg, p, xs, ys, c, y_bases=None, series=None):
         p.patch('x', 'y', source=source, alpha=alpha, fill_color=c, line_color=None, line_width=None)
 
 
-def build_series_legend(series_val):
+def build_series_legend(df_plots, series_val):
     series_legend_string = '<div class="legend-header">Series Legend</div><div class="legend-body">'
     if series_val != 'None':
-        active_list = dfs['plots'][series_val].unique().tolist()
+        active_list = df_plots[series_val].unique().tolist()
         for i, txt in reversed(list(enumerate(active_list))):
             series_legend_string += '<div class="legend-entry"><span class="legend-color" style="background-color:' + str(COLORS[i]) + ';"></span>'
             series_legend_string += '<span class="legend-text">' + str(txt) +'</span></div>'
@@ -318,7 +316,7 @@ def update_plots():
         plots.children = []
         return
     dfs['plots'] = set_df_plots(dfs['source'], columns, widgets)
-    widgets['series_legend'].text = build_series_legend(widgets['series'].value)
+    widgets['series_legend'].text = build_series_legend(dfs['plots'], widgets['series'].value)
     plots.children = create_figures(dfs['plots'], widgets, columns)
 
 def download():
