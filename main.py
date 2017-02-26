@@ -159,21 +159,21 @@ def create_figures(df_plots, wdg, cols):
     plot_list = []
     df_plots_cp = df_plots.copy()
     if wdg['explode'].value == 'None':
-        plot_list.append(create_figure(df_plots_cp))
+        plot_list.append(create_figure(df_plots_cp, df_plots, wdg, cols))
     else:
         if wdg['explode_group'].value == 'None':
             for explode_val in df_plots_cp[wdg['explode'].value].unique().tolist():
                 df_exploded = df_plots_cp[df_plots_cp[wdg['explode'].value].isin([explode_val])]
-                plot_list.append(create_figure(df_exploded, explode_val))
+                plot_list.append(create_figure(df_exploded, df_plots, wdg, cols, explode_val))
         else:
             for explode_group in df_plots_cp[wdg['explode_group'].value].unique().tolist():
                 df_exploded_group = df_plots_cp[df_plots_cp[wdg['explode_group'].value].isin([explode_group])]
                 for explode_val in df_exploded_group[wdg['explode'].value].unique().tolist():
                     df_exploded = df_exploded_group[df_exploded_group[wdg['explode'].value].isin([explode_val])]
-                    plot_list.append(create_figure(df_exploded, explode_val, explode_group))
+                    plot_list.append(create_figure(df_exploded, df_plots, wdg, cols, explode_val, explode_group))
     return plot_list
 
-def create_figure(df_exploded, explode_val=None, explode_group=None):
+def create_figure(df_exploded, df_plots, wdg, cols, explode_val=None, explode_group=None):
     # If x_group has a value, create a combined column in the dataframe for x and x_group
     x_col = wdg['x'].value
     if wdg['x_group'].value != 'None':
@@ -246,7 +246,7 @@ def create_figure(df_exploded, explode_val=None, explode_group=None):
             ys = df_exploded[wdg['y'].value].values.tolist()
         add_glyph(p, xs, ys, c)
     else:
-        full_series = dfs['plots'][wdg['series'].value].unique().tolist() #for colors only
+        full_series = df_plots[wdg['series'].value].unique().tolist() #for colors only
         if wdg['series_stack'].value == 'Stacked':
             xs_full = sorted(df_exploded[x_col].unique().tolist())
             y_bases_pos = [0]*len(xs_full)
