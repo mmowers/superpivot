@@ -41,10 +41,8 @@ def get_data(data_source):
     df[cols['continuous']] = df[cols['continuous']].fillna(0)
     return (df, cols)
 
-def build_widgets():
-    data_source = wdg['data'].value
-    wdg.clear()
-
+def build_widgets(data_source, df_source, cols):
+    wdg = collections.OrderedDict()
     wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source, css_classes=['wdgkey-data'])
     wdg['x_dropdown'] = bmw.Div(text='X-Axis (required)', css_classes=['x-dropdown'])
     wdg['x'] = bmw.Select(title='X-Axis (required)', value='None', options=['None'] + cols['all'], css_classes=['wdgkey-x', 'x-drop'])
@@ -63,7 +61,7 @@ def build_widgets():
         css_classes=['wdgkey-explode_group', 'explode-drop'])
     wdg['filters'] = bmw.Div(text='Filters', css_classes=['filters-dropdown'])
     for j, col in enumerate(cols['filterable']):
-        val_list = [str(i) for i in sorted(dfs['source'][col].unique().tolist())]
+        val_list = [str(i) for i in sorted(df_source[col].unique().tolist())]
         wdg['heading_filter_'+str(j)] = bmw.Div(text=col, css_classes=['filter-head'])
         wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=list(range(len(val_list))), css_classes=['wdgkey-filter_'+str(j), 'filter'])
     wdg['update'] = bmw.Button(label='Update Filters', button_type='success', css_classes=['filters-update'])
@@ -94,7 +92,7 @@ def build_widgets():
     wdg['download'] = bmw.Button(label='Download csv', button_type='success')
     wdg['export_config'] = bmw.Div(text='Export Config to URL', css_classes=['export-config'])
 
-    wdg['series_legend'].text = build_series_legend()
+    wdg['series_legend'].text = build_series_legend(wdg['series'].value)
 
     #use wdg_config (from 'widgets' parameter in URL query string) to configure widgets.
     if init['init_load']:
@@ -117,7 +115,7 @@ def build_widgets():
     for name in wdg_names:
         wdg[name].on_change('value', update_sel)
 
-    controls.children = list(wdg.values())
+    return wdg
 
 def set_df_plots():
     dfs['plots'] = dfs['source'].copy()
@@ -294,20 +292,21 @@ def add_glyph(p, xs, ys, c, y_bases=None, series=None):
         p.patch('x', 'y', source=source, alpha=alpha, fill_color=c, line_color=None, line_width=None)
 
 
-def build_series_legend():
+def build_series_legend(series_val):
     series_legend_string = '<div class="legend-header">Series Legend</div><div class="legend-body">'
-    if wdg['series'].value != 'None':
-        active_list = dfs['plots'][wdg['series'].value].unique().tolist()
+    if series_val != 'None':
+        active_list = dfs['plots'][series_val].unique().tolist()
         for i, txt in reversed(list(enumerate(active_list))):
             series_legend_string += '<div class="legend-entry"><span class="legend-color" style="background-color:' + str(COLORS[i]) + ';"></span>'
             series_legend_string += '<span class="legend-text">' + str(txt) +'</span></div>'
     series_legend_string += '</div>'
-    wdg['series_legend'].text =  series_legend_string
+    return series_legend_string
 
 
 def update_data(attr, old, new):
     dfs['source'], cols = get_data(wdg['data'].value)
-    build_widgets()
+    wdg = build_widgets(wdg['data'].value, dfs['source'], cols)
+    controls.children = list(wdg.values())
     update_plots()
 
 def update_sel(attr, old, new):
@@ -318,7 +317,7 @@ def update_plots():
         plots.children = []
         return
     set_df_plots()
-    build_series_legend()
+    wdg['series_legend'].text = build_series_legend(wdg['series'].value)
     create_figures()
 
 def download():
@@ -344,11 +343,10 @@ dfs = {'source': None, 'plots': None}
 cols = {}
 
 #build widgets and plots
-wdg = collections.OrderedDict()
-wdg['data'] = bmw.TextInput(title='Data Source', value=data_file)
-dfs['source'], cols = get_data(wdg['data'].value)
-controls = bl.widgetbox([], id='widgets_section')
-build_widgets()
+dfs['source'], cols = get_data(data_file)
+wdg = build_widgets(data_file, dfs['source'], cols)
+controls = bl.widgetbox(list(wdg.values()), id='widgets_section')
+
 plots = bl.column([], id='plots_section')
 update_plots()
 layout = bl.row(controls, plots, id='layout')
