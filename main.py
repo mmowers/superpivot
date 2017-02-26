@@ -31,14 +31,14 @@ AGGREGATIONS = ['None', 'Sum']
 
 def get_data():
     data_source = wdg['data'].value
-    dfs['df'] = pd.read_csv(data_source)
-    cols['all'] = sorted(dfs['df'].columns)
-    cols['discrete'] = [x for x in cols['all'] if dfs['df'][x].dtype == object]
+    dfs['source'] = pd.read_csv(data_source)
+    cols['all'] = sorted(dfs['source'].columns)
+    cols['discrete'] = [x for x in cols['all'] if dfs['source'][x].dtype == object]
     cols['continuous'] = [x for x in cols['all'] if x not in cols['discrete']]
-    cols['filterable'] = cols['discrete']+[x for x in cols['continuous'] if len(dfs['df'][x].unique()) < 500]
-    cols['seriesable'] = cols['discrete']+[x for x in cols['continuous'] if len(dfs['df'][x].unique()) < 60]
-    dfs['df'][cols['discrete']] = dfs['df'][cols['discrete']].fillna('{BLANK}')
-    dfs['df'][cols['continuous']] = dfs['df'][cols['continuous']].fillna(0)
+    cols['filterable'] = cols['discrete']+[x for x in cols['continuous'] if len(dfs['source'][x].unique()) < 500]
+    cols['seriesable'] = cols['discrete']+[x for x in cols['continuous'] if len(dfs['source'][x].unique()) < 60]
+    dfs['source'][cols['discrete']] = dfs['source'][cols['discrete']].fillna('{BLANK}')
+    dfs['source'][cols['continuous']] = dfs['source'][cols['continuous']].fillna(0)
 
 def build_widgets():
     data_source = wdg['data'].value
@@ -62,7 +62,7 @@ def build_widgets():
         css_classes=['wdgkey-explode_group', 'explode-drop'])
     wdg['filters'] = bmw.Div(text='Filters', css_classes=['filters-dropdown'])
     for j, col in enumerate(cols['filterable']):
-        val_list = [str(i) for i in sorted(dfs['df'][col].unique().tolist())]
+        val_list = [str(i) for i in sorted(dfs['source'][col].unique().tolist())]
         wdg['heading_filter_'+str(j)] = bmw.Div(text=col, css_classes=['filter-head'])
         wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=list(range(len(val_list))), css_classes=['wdgkey-filter_'+str(j), 'filter'])
     wdg['update'] = bmw.Button(label='Update Filters', button_type='success', css_classes=['filters-update'])
@@ -119,20 +119,20 @@ def build_widgets():
     controls.children = list(wdg.values())
 
 def set_df_plots():
-    dfs['df_plots'] = dfs['df'].copy()
+    dfs['plots'] = dfs['source'].copy()
 
     #Apply filters
     for j, col in enumerate(cols['filterable']):
         active = [wdg['filter_'+str(j)].labels[i] for i in wdg['filter_'+str(j)].active]
         if col in cols['continuous']:
             active = [float(i) for i in active]
-        dfs['df_plots'] = dfs['df_plots'][dfs['df_plots'][col].isin(active)]
+        dfs['plots'] = dfs['plots'][dfs['plots'][col].isin(active)]
 
     #Scale Axes
     if wdg['x_scale'].value != '' and wdg['x'].value in cols['continuous']:
-        dfs['df_plots'][wdg['x'].value] = dfs['df_plots'][wdg['x'].value] * float(wdg['x_scale'].value)
+        dfs['plots'][wdg['x'].value] = dfs['plots'][wdg['x'].value] * float(wdg['x_scale'].value)
     if wdg['y_scale'].value != '' and wdg['y'].value in cols['continuous']:
-        dfs['df_plots'][wdg['y'].value] = dfs['df_plots'][wdg['y'].value] * float(wdg['y_scale'].value)
+        dfs['plots'][wdg['y'].value] = dfs['plots'][wdg['y'].value] * float(wdg['y_scale'].value)
 
     #Apply Aggregation
     if wdg['y_agg'].value == 'Sum' and wdg['y'].value in cols['continuous']:
@@ -141,7 +141,7 @@ def set_df_plots():
         if wdg['series'].value != 'None': groupby_cols = [wdg['series'].value] + groupby_cols
         if wdg['explode'].value != 'None': groupby_cols = [wdg['explode'].value] + groupby_cols
         if wdg['explode_group'].value != 'None': groupby_cols = [wdg['explode_group'].value] + groupby_cols
-        dfs['df_plots'] = dfs['df_plots'].groupby(groupby_cols, as_index=False, sort=False)[wdg['y'].value].sum()
+        dfs['plots'] = dfs['plots'].groupby(groupby_cols, as_index=False, sort=False)[wdg['y'].value].sum()
 
     #Sort Dataframe
     sortby_cols = [wdg['x'].value]
@@ -149,15 +149,15 @@ def set_df_plots():
     if wdg['series'].value != 'None': sortby_cols = [wdg['series'].value] + sortby_cols
     if wdg['explode'].value != 'None': sortby_cols = [wdg['explode'].value] + sortby_cols
     if wdg['explode_group'].value != 'None': sortby_cols = [wdg['explode_group'].value] + sortby_cols
-    dfs['df_plots'] = dfs['df_plots'].sort_values(sortby_cols).reset_index(drop=True)
+    dfs['plots'] = dfs['plots'].sort_values(sortby_cols).reset_index(drop=True)
 
     #Rearrange column order for csv download
-    unsorted_columns = [col for col in dfs['df_plots'].columns if col not in sortby_cols + [wdg['y'].value]]
-    dfs['df_plots'] = dfs['df_plots'][sortby_cols + unsorted_columns + [wdg['y'].value]]
+    unsorted_columns = [col for col in dfs['plots'].columns if col not in sortby_cols + [wdg['y'].value]]
+    dfs['plots'] = dfs['plots'][sortby_cols + unsorted_columns + [wdg['y'].value]]
 
 def create_figures():
     plot_list = []
-    df_plots_cp = dfs['df_plots'].copy()
+    df_plots_cp = dfs['plots'].copy()
     if wdg['explode'].value == 'None':
         plot_list.append(create_figure(df_plots_cp))
     else:
@@ -246,7 +246,7 @@ def create_figure(df_exploded, explode_val=None, explode_group=None):
             ys = df_exploded[wdg['y'].value].values.tolist()
         add_glyph(p, xs, ys, c)
     else:
-        full_series = dfs['df_plots'][wdg['series'].value].unique().tolist() #for colors only
+        full_series = dfs['plots'][wdg['series'].value].unique().tolist() #for colors only
         if wdg['series_stack'].value == 'Stacked':
             xs_full = sorted(df_exploded[x_col].unique().tolist())
             y_bases_pos = [0]*len(xs_full)
@@ -296,7 +296,7 @@ def add_glyph(p, xs, ys, c, y_bases=None, series=None):
 def build_series_legend():
     series_legend_string = '<div class="legend-header">Series Legend</div><div class="legend-body">'
     if wdg['series'].value != 'None':
-        active_list = dfs['df_plots'][wdg['series'].value].unique().tolist()
+        active_list = dfs['plots'][wdg['series'].value].unique().tolist()
         for i, txt in reversed(list(enumerate(active_list))):
             series_legend_string += '<div class="legend-entry"><span class="legend-color" style="background-color:' + str(COLORS[i]) + ';"></span>'
             series_legend_string += '<span class="legend-text">' + str(txt) +'</span></div>'
@@ -321,7 +321,7 @@ def update_plots():
     create_figures()
 
 def download():
-    dfs['df_plots'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
+    dfs['plots'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
         datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
 
 
@@ -339,7 +339,7 @@ if wdg_arr is not None:
 
 
 #initialize dict to hold the global dataframes and lists of column headers
-dfs = {'df': None, 'df_plots': None}
+dfs = {'source': None, 'plots': None}
 cols = {'all': None, 'discrete': None, 'continuous':None, 'filterable':None, 'seriesable':None}
 
 #build widgets and plots
