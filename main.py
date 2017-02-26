@@ -244,7 +244,7 @@ def create_figure(df_exploded, df_plots, wdg, cols, explode_val=None, explode_gr
         if wdg['y_agg'].value != 'None' and wdg['y'].value in cols['continuous']:
             xs = df_exploded[x_col].values.tolist()
             ys = df_exploded[wdg['y'].value].values.tolist()
-        add_glyph(p, xs, ys, c)
+        add_glyph(wdg, p, xs, ys, c)
     else:
         full_series = df_plots[wdg['series'].value].unique().tolist() #for colors only
         if wdg['series_stack'].value == 'Stacked':
@@ -257,19 +257,19 @@ def create_figure(df_exploded, df_plots, wdg, cols, explode_val=None, explode_gr
             xs_ser = df_series[x_col].values.tolist()
             ys_ser = df_series[wdg['y'].value].values.tolist()
             if wdg['series_stack'].value == 'Unstacked':
-                add_glyph(p, xs_ser, ys_ser, c, series=ser)
+                add_glyph(wdg, p, xs_ser, ys_ser, c, series=ser)
             else:
                 ys_pos = [ys_ser[xs_ser.index(x)] if x in xs_ser and ys_ser[xs_ser.index(x)] > 0 else 0 for i, x in enumerate(xs_full)]
                 ys_neg = [ys_ser[xs_ser.index(x)] if x in xs_ser and ys_ser[xs_ser.index(x)] < 0 else 0 for i, x in enumerate(xs_full)]
                 ys_stacked_pos = [ys_pos[i] + y_bases_pos[i] for i in range(len(xs_full))]
                 ys_stacked_neg = [ys_neg[i] + y_bases_neg[i] for i in range(len(xs_full))]
-                add_glyph(p, xs_full, ys_stacked_pos, c, y_bases=y_bases_pos, series=ser)
-                add_glyph(p, xs_full, ys_stacked_neg, c, y_bases=y_bases_neg, series=ser)
+                add_glyph(wdg, p, xs_full, ys_stacked_pos, c, y_bases=y_bases_pos, series=ser)
+                add_glyph(wdg, p, xs_full, ys_stacked_neg, c, y_bases=y_bases_neg, series=ser)
                 y_bases_pos = ys_stacked_pos
                 y_bases_neg = ys_stacked_neg
     return p
 
-def add_glyph(p, xs, ys, c, y_bases=None, series=None):
+def add_glyph(wdg, p, xs, ys, c, y_bases=None, series=None):
     alpha = float(wdg['opacity'].value)
     y_unstacked = list(ys) if y_bases is None else [ys[i] - y_bases[i] for i in range(len(ys))]
     ser = ['None']*len(xs) if series is None else [series]*len(xs)
