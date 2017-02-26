@@ -41,7 +41,7 @@ def get_data(data_source):
     df[cols['continuous']] = df[cols['continuous']].fillna(0)
     return (df, cols)
 
-def build_widgets(data_source, df_source, cols):
+def build_widgets(data_source, df_source, cols, init_load=False):
     wdg = collections.OrderedDict()
     wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source, css_classes=['wdgkey-data'])
     wdg['x_dropdown'] = bmw.Div(text='X-Axis (required)', css_classes=['x-dropdown'])
@@ -95,14 +95,13 @@ def build_widgets(data_source, df_source, cols):
     wdg['series_legend'].text = build_series_legend(wdg['series'].value)
 
     #use wdg_config (from 'widgets' parameter in URL query string) to configure widgets.
-    if init['init_load']:
+    if init_load:
         for key in wdg_config:
             if key in wdg:
                 if hasattr(wdg[key], 'value'):
                     wdg[key].value = str(wdg_config[key])
                 elif hasattr(wdg[key], 'active'):
                     wdg[key].active = wdg_config[key]
-        init['init_load'] = False
 
     wdg['data'].on_change('value', update_data)
     wdg['update'].on_click(update_plots)
@@ -327,7 +326,6 @@ def download():
 
 #On initial load, read 'widgets' parameter from URL query string and use to set data source (data_file)
 #and widget configuration object (wdg_config)
-init = {'init_load':True}
 wdg_config = {}
 data_file = os.path.dirname(os.path.realpath(__file__)) + '/csv/US_electric_power_generation.csv'
 args = bio.curdoc().session_context.request.arguments
@@ -344,7 +342,7 @@ cols = {}
 
 #build widgets and plots
 dfs['source'], cols = get_data(data_file)
-wdg = build_widgets(data_file, dfs['source'], cols)
+wdg = build_widgets(data_file, dfs['source'], cols, init_load=True)
 controls = bl.widgetbox(list(wdg.values()), id='widgets_section')
 
 plots = bl.column([], id='plots_section')
