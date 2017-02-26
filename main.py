@@ -41,7 +41,7 @@ def get_data(data_source):
     df_source[cols['continuous']] = df_source[cols['continuous']].fillna(0)
     return (df_source, cols)
 
-def build_widgets(data_source, df_source, cols, init_load=False):
+def build_widgets(data_source, df_source, cols, init_load=False, init_config={}):
     wdg = collections.OrderedDict()
     wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source, css_classes=['wdgkey-data'])
     wdg['x_dropdown'] = bmw.Div(text='X-Axis (required)', css_classes=['x-dropdown'])
@@ -92,14 +92,14 @@ def build_widgets(data_source, df_source, cols, init_load=False):
     wdg['download'] = bmw.Button(label='Download csv', button_type='success')
     wdg['export_config'] = bmw.Div(text='Export Config to URL', css_classes=['export-config'])
 
-    #use wdg_config (from 'widgets' parameter in URL query string) to configure widgets.
+    #use init_config (from 'widgets' parameter in URL query string) to configure widgets.
     if init_load:
-        for key in wdg_config:
+        for key in init_config:
             if key in wdg:
                 if hasattr(wdg[key], 'value'):
-                    wdg[key].value = str(wdg_config[key])
+                    wdg[key].value = str(init_config[key])
                 elif hasattr(wdg[key], 'active'):
-                    wdg[key].active = wdg_config[key]
+                    wdg[key].active = init_config[key]
 
     wdg['data'].on_change('value', update_data)
     wdg['update'].on_click(update_plots)
@@ -342,7 +342,7 @@ dfs = {'source': None, 'plots': None}
 
 #build widgets and plots
 dfs['source'], columns = get_data(data_file)
-widgets = build_widgets(data_file, dfs['source'], columns, init_load=True)
+widgets = build_widgets(data_file, dfs['source'], columns, init_load=True, init_config=wdg_config)
 controls = bl.widgetbox(list(widgets.values()), id='widgets_section')
 
 plots = bl.column([], id='plots_section')
