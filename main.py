@@ -29,16 +29,17 @@ C_NORM = "#31AADE"
 CHARTTYPES = ['Dot', 'Line', 'Bar', 'Area']
 AGGREGATIONS = ['None', 'Sum']
 
-def get_data():
-    data_source = wdg['data'].value
-    dfs['source'] = pd.read_csv(data_source)
-    cols['all'] = sorted(dfs['source'].columns)
-    cols['discrete'] = [x for x in cols['all'] if dfs['source'][x].dtype == object]
+def get_data(data_source):
+    df = pd.read_csv(data_source)
+    cols = {}
+    cols['all'] = sorted(df.columns)
+    cols['discrete'] = [x for x in cols['all'] if df[x].dtype == object]
     cols['continuous'] = [x for x in cols['all'] if x not in cols['discrete']]
-    cols['filterable'] = cols['discrete']+[x for x in cols['continuous'] if len(dfs['source'][x].unique()) < 500]
-    cols['seriesable'] = cols['discrete']+[x for x in cols['continuous'] if len(dfs['source'][x].unique()) < 60]
-    dfs['source'][cols['discrete']] = dfs['source'][cols['discrete']].fillna('{BLANK}')
-    dfs['source'][cols['continuous']] = dfs['source'][cols['continuous']].fillna(0)
+    cols['filterable'] = cols['discrete']+[x for x in cols['continuous'] if len(df[x].unique()) < 500]
+    cols['seriesable'] = cols['discrete']+[x for x in cols['continuous'] if len(df[x].unique()) < 60]
+    df[cols['discrete']] = df[cols['discrete']].fillna('{BLANK}')
+    df[cols['continuous']] = df[cols['continuous']].fillna(0)
+    return (df, cols)
 
 def build_widgets():
     data_source = wdg['data'].value
@@ -305,7 +306,7 @@ def build_series_legend():
 
 
 def update_data(attr, old, new):
-    get_data()
+    dfs['source'], cols = get_data(wdg['data'].value)
     build_widgets()
     update_plots()
 
@@ -340,12 +341,12 @@ if wdg_arr is not None:
 
 #initialize dict to hold the global dataframes and lists of column headers
 dfs = {'source': None, 'plots': None}
-cols = {'all': None, 'discrete': None, 'continuous':None, 'filterable':None, 'seriesable':None}
+cols = {}
 
 #build widgets and plots
 wdg = collections.OrderedDict()
 wdg['data'] = bmw.TextInput(title='Data Source', value=data_file)
-get_data()
+dfs['source'], cols = get_data(wdg['data'].value)
 controls = bl.widgetbox([], id='widgets_section')
 build_widgets()
 plots = bl.column([], id='plots_section')
