@@ -303,25 +303,24 @@ def build_series_legend(df_plots, series_val):
 
 
 def update_data(attr, old, new):
-    global widgets, columns
-    dfs['source'], columns = get_data(widgets['data'].value)
-    widgets = build_widgets(widgets['data'].value, dfs['source'], columns)
-    controls.children = list(widgets.values())
-    plots.children = []
+    gl['df_source'], gl['columns'] = get_data(gl['widgets']['data'].value)
+    gl['widgets'] = build_widgets(gl['widgets']['data'].value, gl['df_source'], gl['columns'])
+    gl['controls'].children = list(gl['widgets'].values())
+    gl['plots'].children = []
 
 def update_sel(attr, old, new):
     update_plots()
 
 def update_plots():
-    if widgets['x'].value == 'None' or widgets['y'].value == 'None':
-        plots.children = []
+    if gl['widgets']['x'].value == 'None' or gl['widgets']['y'].value == 'None':
+        gl['plots'].children = []
         return
-    dfs['plots'] = set_df_plots(dfs['source'], columns, widgets)
-    widgets['series_legend'].text = build_series_legend(dfs['plots'], widgets['series'].value)
-    plots.children = create_figures(dfs['plots'], widgets, columns)
+    gl['df_plots'] = set_df_plots(gl['df_source'], gl['columns'], gl['widgets'])
+    gl['widgets']['series_legend'].text = build_series_legend(gl['df_plots'], gl['widgets']['series'].value)
+    gl['plots'].children = create_figures(gl['df_plots'], gl['widgets'], gl['columns'])
 
 def download():
-    dfs['plots'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
+    gl['df_plots'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
         datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
 
 
@@ -336,18 +335,16 @@ if wdg_arr is not None:
     if 'data' in wdg_config:
         data_file = str(wdg_config['data'])
 
-
-#initialize dict to hold the global dataframes and lists of column headers
-dfs = {'source': None, 'plots': None}
+#initialize globals dict
+gl = {'df_source':None, 'df_plots':None, 'columns':None, 'widgets':None, 'controls': None, 'plots':None}
 
 #build widgets and plots
-dfs['source'], columns = get_data(data_file)
-widgets = build_widgets(data_file, dfs['source'], columns, init_load=True, init_config=wdg_config)
-controls = bl.widgetbox(list(widgets.values()), id='widgets_section')
-
-plots = bl.column([], id='plots_section')
+gl['df_source'], gl['columns'] = get_data(data_file)
+gl['widgets'] = build_widgets(data_file, gl['df_source'], gl['columns'], init_load=True, init_config=wdg_config)
+gl['controls'] = bl.widgetbox(list(gl['widgets'].values()), id='widgets_section')
+gl['plots'] = bl.column([], id='plots_section')
 update_plots()
-layout = bl.row(controls, plots, id='layout')
+layout = bl.row(gl['controls'], gl['plots'], id='layout')
 
 bio.curdoc().add_root(layout)
 bio.curdoc().title = "Exploding Pivot Chart Maker"
