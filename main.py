@@ -155,9 +155,9 @@ def set_df_plots(df_source, cols, wdg):
 
     return df_plots
 
-def create_figures():
+def create_figures(df_plots, wdg, cols):
     plot_list = []
-    df_plots_cp = dfs['plots'].copy()
+    df_plots_cp = df_plots.copy()
     if wdg['explode'].value == 'None':
         plot_list.append(create_figure(df_plots_cp))
     else:
@@ -171,7 +171,7 @@ def create_figures():
                 for explode_val in df_exploded_group[wdg['explode'].value].unique().tolist():
                     df_exploded = df_exploded_group[df_exploded_group[wdg['explode'].value].isin([explode_val])]
                     plot_list.append(create_figure(df_exploded, explode_val, explode_group))
-    plots.children = plot_list
+    return plot_list
 
 def create_figure(df_exploded, explode_val=None, explode_group=None):
     # If x_group has a value, create a combined column in the dataframe for x and x_group
@@ -319,7 +319,7 @@ def update_plots():
         return
     dfs['plots'] = set_df_plots(dfs['source'], cols, wdg)
     wdg['series_legend'].text = build_series_legend(wdg['series'].value)
-    create_figures()
+    plots.children = create_figures(dfs['plots'], wdg, cols)
 
 def download():
     dfs['plots'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
