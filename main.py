@@ -303,10 +303,11 @@ def build_series_legend(df_plots, series_val):
 
 
 def update_data(attr, old, new):
+    global widgets, columns
     dfs['source'], columns = get_data(widgets['data'].value)
     widgets = build_widgets(widgets['data'].value, dfs['source'], columns)
     controls.children = list(widgets.values())
-    update_plots()
+    plots.children = []
 
 def update_sel(attr, old, new):
     update_plots()
