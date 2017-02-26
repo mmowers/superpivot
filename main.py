@@ -30,16 +30,16 @@ CHARTTYPES = ['Dot', 'Line', 'Bar', 'Area']
 AGGREGATIONS = ['None', 'Sum']
 
 def get_data(data_source):
-    df = pd.read_csv(data_source)
+    df_source = pd.read_csv(data_source)
     cols = {}
-    cols['all'] = sorted(df.columns)
-    cols['discrete'] = [x for x in cols['all'] if df[x].dtype == object]
+    cols['all'] = sorted(df_source.columns)
+    cols['discrete'] = [x for x in cols['all'] if df_source[x].dtype == object]
     cols['continuous'] = [x for x in cols['all'] if x not in cols['discrete']]
-    cols['filterable'] = cols['discrete']+[x for x in cols['continuous'] if len(df[x].unique()) < 500]
-    cols['seriesable'] = cols['discrete']+[x for x in cols['continuous'] if len(df[x].unique()) < 60]
-    df[cols['discrete']] = df[cols['discrete']].fillna('{BLANK}')
-    df[cols['continuous']] = df[cols['continuous']].fillna(0)
-    return (df, cols)
+    cols['filterable'] = cols['discrete']+[x for x in cols['continuous'] if len(df_source[x].unique()) < 500]
+    cols['seriesable'] = cols['discrete']+[x for x in cols['continuous'] if len(df_source[x].unique()) < 60]
+    df_source[cols['discrete']] = df_source[cols['discrete']].fillna('{BLANK}')
+    df_source[cols['continuous']] = df_source[cols['continuous']].fillna(0)
+    return (df_source, cols)
 
 def build_widgets(data_source, df_source, cols, init_load=False):
     wdg = collections.OrderedDict()
