@@ -305,21 +305,21 @@ def build_series_legend(series_val):
 
 
 def update_data(attr, old, new):
-    dfs['source'], cols = get_data(wdg['data'].value)
-    wdg = build_widgets(wdg['data'].value, dfs['source'], cols)
-    controls.children = list(wdg.values())
+    dfs['source'], columns = get_data(widgets['data'].value)
+    widgets = build_widgets(widgets['data'].value, dfs['source'], columns)
+    controls.children = list(widgets.values())
     update_plots()
 
 def update_sel(attr, old, new):
     update_plots()
 
 def update_plots():
-    if wdg['x'].value == 'None' or wdg['y'].value == 'None':
+    if widgets['x'].value == 'None' or widgets['y'].value == 'None':
         plots.children = []
         return
-    dfs['plots'] = set_df_plots(dfs['source'], cols, wdg)
-    wdg['series_legend'].text = build_series_legend(wdg['series'].value)
-    plots.children = create_figures(dfs['plots'], wdg, cols)
+    dfs['plots'] = set_df_plots(dfs['source'], columns, widgets)
+    widgets['series_legend'].text = build_series_legend(widgets['series'].value)
+    plots.children = create_figures(dfs['plots'], widgets, columns)
 
 def download():
     dfs['plots'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
@@ -340,12 +340,11 @@ if wdg_arr is not None:
 
 #initialize dict to hold the global dataframes and lists of column headers
 dfs = {'source': None, 'plots': None}
-cols = {}
 
 #build widgets and plots
-dfs['source'], cols = get_data(data_file)
-wdg = build_widgets(data_file, dfs['source'], cols, init_load=True)
-controls = bl.widgetbox(list(wdg.values()), id='widgets_section')
+dfs['source'], columns = get_data(data_file)
+widgets = build_widgets(data_file, dfs['source'], columns, init_load=True)
+controls = bl.widgetbox(list(widgets.values()), id='widgets_section')
 
 plots = bl.column([], id='plots_section')
 update_plots()
