@@ -116,21 +116,21 @@ def build_widgets(data_source, df_source, cols, init_load=False):
 
     return wdg
 
-def set_df_plots():
-    dfs['plots'] = dfs['source'].copy()
+def set_df_plots(df_source, cols, wdg):
+    df_plots = df_source.copy()
 
     #Apply filters
     for j, col in enumerate(cols['filterable']):
         active = [wdg['filter_'+str(j)].labels[i] for i in wdg['filter_'+str(j)].active]
         if col in cols['continuous']:
             active = [float(i) for i in active]
-        dfs['plots'] = dfs['plots'][dfs['plots'][col].isin(active)]
+        df_plots = df_plots[df_plots[col].isin(active)]
 
     #Scale Axes
     if wdg['x_scale'].value != '' and wdg['x'].value in cols['continuous']:
-        dfs['plots'][wdg['x'].value] = dfs['plots'][wdg['x'].value] * float(wdg['x_scale'].value)
+        df_plots[wdg['x'].value] = df_plots[wdg['x'].value] * float(wdg['x_scale'].value)
     if wdg['y_scale'].value != '' and wdg['y'].value in cols['continuous']:
-        dfs['plots'][wdg['y'].value] = dfs['plots'][wdg['y'].value] * float(wdg['y_scale'].value)
+        df_plots[wdg['y'].value] = df_plots[wdg['y'].value] * float(wdg['y_scale'].value)
 
     #Apply Aggregation
     if wdg['y_agg'].value == 'Sum' and wdg['y'].value in cols['continuous']:
@@ -139,7 +139,7 @@ def set_df_plots():
         if wdg['series'].value != 'None': groupby_cols = [wdg['series'].value] + groupby_cols
         if wdg['explode'].value != 'None': groupby_cols = [wdg['explode'].value] + groupby_cols
         if wdg['explode_group'].value != 'None': groupby_cols = [wdg['explode_group'].value] + groupby_cols
-        dfs['plots'] = dfs['plots'].groupby(groupby_cols, as_index=False, sort=False)[wdg['y'].value].sum()
+        df_plots = df_plots.groupby(groupby_cols, as_index=False, sort=False)[wdg['y'].value].sum()
 
     #Sort Dataframe
     sortby_cols = [wdg['x'].value]
@@ -147,11 +147,13 @@ def set_df_plots():
     if wdg['series'].value != 'None': sortby_cols = [wdg['series'].value] + sortby_cols
     if wdg['explode'].value != 'None': sortby_cols = [wdg['explode'].value] + sortby_cols
     if wdg['explode_group'].value != 'None': sortby_cols = [wdg['explode_group'].value] + sortby_cols
-    dfs['plots'] = dfs['plots'].sort_values(sortby_cols).reset_index(drop=True)
+    df_plots = df_plots.sort_values(sortby_cols).reset_index(drop=True)
 
     #Rearrange column order for csv download
-    unsorted_columns = [col for col in dfs['plots'].columns if col not in sortby_cols + [wdg['y'].value]]
-    dfs['plots'] = dfs['plots'][sortby_cols + unsorted_columns + [wdg['y'].value]]
+    unsorted_columns = [col for col in df_plots.columns if col not in sortby_cols + [wdg['y'].value]]
+    df_plots = df_plots[sortby_cols + unsorted_columns + [wdg['y'].value]]
+
+    return df_plots
 
 def create_figures():
     plot_list = []
@@ -315,7 +317,7 @@ def update_plots():
     if wdg['x'].value == 'None' or wdg['y'].value == 'None':
         plots.children = []
         return
-    set_df_plots()
+    dfs['plots'] = set_df_plots(dfs['source'], cols, wdg)
     wdg['series_legend'].text = build_series_legend(wdg['series'].value)
     create_figures()
 
