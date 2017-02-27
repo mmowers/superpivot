@@ -1,3 +1,8 @@
+''' Provide a pivot chart maker example app. Similar to Excel pivot charts,
+but with additonal ability to explode into multiple charts.
+See README.md for more information.
+
+'''
 from __future__ import division
 import os
 import math
@@ -30,6 +35,19 @@ CHARTTYPES = ['Dot', 'Line', 'Bar', 'Area']
 AGGREGATIONS = ['None', 'Sum']
 
 def get_data(data_source):
+    ''' Read a csv into a pandas dataframe, and determine which columns of the dataframe
+    are discrete (strings), continuous (numbers), able to be filtered (aka filterable),
+    and able to be used as a series (aka seriesable). NA values are filled based on the type of column,
+    and the dataframe and columns are returned.
+
+    Args:
+        data_source (string): Path to csv file.
+
+    Returns:
+        df_source (pandas dataframe): A dataframe of the csv source, with filled NA values.
+        cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
+
+    '''
     df_source = pd.read_csv(data_source)
     cols = {}
     cols['all'] = sorted(df_source.columns)
@@ -42,6 +60,20 @@ def get_data(data_source):
     return (df_source, cols)
 
 def build_widgets(data_source, df_source, cols, init_load=False, init_config={}):
+    ''' Use a dataframe and its columns to set widget options. Widget values may
+    be set by URL parameters via init_config.
+
+    Args:
+        data_source (string): Path to csv file.
+        df_source (pandas dataframe): Dataframe of the csv source.
+        cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
+        init_load (boolean, optional): If this is the initial page load, then this will be True, else False.
+        init_config (dict): Initial widget configuration passed via URL.
+
+    Returns:
+        wdg (ordered dict): Dictionary of bokeh.model.widgets.
+
+    '''
     wdg = collections.OrderedDict()
     wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source, css_classes=['wdgkey-data'])
     wdg['x_dropdown'] = bmw.Div(text='X-Axis (required)', css_classes=['x-dropdown'])
@@ -115,6 +147,17 @@ def build_widgets(data_source, df_source, cols, init_load=False, init_config={})
     return wdg
 
 def set_df_plots(df_source, cols, wdg):
+    ''' Apply filters, scaling, aggregation, and sorting to source dataframe, and return the result.
+
+    Args:
+        df_source (pandas dataframe): Dataframe of the csv source.
+        cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
+        wdg (ordered dict): Dictionary of bokeh model widgets.
+
+    Returns:
+        df_plots (pandas dataframe): df_source after having been filtered, scaled, aggregated, and sorted.
+
+    '''
     df_plots = df_source.copy()
 
     #Apply filters
@@ -154,6 +197,18 @@ def set_df_plots(df_source, cols, wdg):
     return df_plots
 
 def create_figures(df_plots, wdg, cols):
+    ''' Create figures based on the data in a dataframe and widget configuration, and return figures in a list.
+    The explode widget determines if there will be multiple figures.
+
+    Args:
+        df_plots (pandas dataframe): Dataframe of csv source after being filtered, scaled, aggregated, and sorted.
+        wdg (ordered dict): Dictionary of bokeh model widgets.
+        cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
+
+    Returns:
+        plot_list (list): List of bokeh.model.figures.
+
+    '''
     plot_list = []
     df_plots_cp = df_plots.copy()
     if wdg['explode'].value == 'None':
@@ -172,6 +227,20 @@ def create_figures(df_plots, wdg, cols):
     return plot_list
 
 def create_figure(df_exploded, df_plots, wdg, cols, explode_val=None, explode_group=None):
+    ''' Create and return a figure based on the data in a dataframe and widget configuration.
+
+    Args:
+        df_exploded (pandas dataframe): Dataframe of just the data that will be plotted in this figure.
+        df_plots (pandas dataframe): Dataframe of all plots data, used only for maintaining consistent series colors.
+        wdg (ordered dict): Dictionary of bokeh model widgets.
+        cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
+        explode_val (string, optional): The value in the column designated by wdg['explode'] that applies to this figure.
+        explode_group (string, optional): The value in the wdg['explode_group'] column that applies to this figure.
+
+    Returns:
+        p (bokeh.model.figure): A figure, with all glyphs added by the add_glyph() function.
+
+    '''
     # If x_group has a value, create a combined column in the dataframe for x and x_group
     x_col = wdg['x'].value
     if wdg['x_group'].value != 'None':
@@ -268,6 +337,21 @@ def create_figure(df_exploded, df_plots, wdg, cols, explode_val=None, explode_gr
     return p
 
 def add_glyph(wdg, p, xs, ys, c, y_bases=None, series=None):
+    ''' Add a glyph to a Bokeh figure, depending on the chosen chart type.
+
+    Args:
+        wdg (ordered dict): Dictionary of bokeh model widgets.
+        p (bokeh.model.figure): Bokeh figure.
+        xs (list): List of x-values. These could be numeric or strings.
+        ys (list): List of y-values. These could be numeric or strings. If series data is stacked, these values include stacking.
+        c (string): Color to use for this series.
+        y_bases (list, optional): Only used when stacking series. This is the previous cumulative stacking level.
+        series (string): Name of current series for this glyph.
+
+    Returns:
+        Nothing.
+
+    '''
     alpha = float(wdg['opacity'].value)
     y_unstacked = list(ys) if y_bases is None else [ys[i] - y_bases[i] for i in range(len(ys))]
     ser = ['None']*len(xs) if series is None else [series]*len(xs)
@@ -292,6 +376,16 @@ def add_glyph(wdg, p, xs, ys, c, y_bases=None, series=None):
 
 
 def build_series_legend(df_plots, series_val):
+    ''' Return html for series legend, based on values of column that was chosen for series, and global COLORS.
+
+    Args:
+        df_plots (pandas dataframe): Dataframe of all plots data.
+        series_val (string): Header for column chosen as series.
+
+    Returns:
+        series_legend_string (string): html to be used as legend.
+
+    '''
     series_legend_string = '<div class="legend-header">Series Legend</div><div class="legend-body">'
     if series_val != 'None':
         active_list = df_plots[series_val].unique().tolist()
