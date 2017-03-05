@@ -33,6 +33,7 @@ LINE_WIDTH = 2
 COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142']*1000
 C_NORM = "#31AADE"
 CHARTTYPES = ['Dot', 'Line', 'Bar', 'Area']
+STACKEDTYPES = ['Bar', 'Area']
 AGGREGATIONS = ['None', 'Sum']
 
 def get_data(data_source):
@@ -87,8 +88,6 @@ def build_widgets(data_source, df_source, cols, init_load=False, init_config={})
     wdg['series_dropdown'] = bmw.Div(text='Series', css_classes=['series-dropdown'])
     wdg['series_legend'] = bmw.Div(text='', css_classes=['series-drop'])
     wdg['series'] = bmw.Select(title='Separate Series By', value='None', options=['None'] + cols['seriesable'], css_classes=['wdgkey-series', 'series-drop'])
-    wdg['series_stack'] = bmw.Select(title='Series Stacking', value='Unstacked', options=['Unstacked', 'Stacked'],
-        css_classes=['wdgkey-series_stack', 'series-drop'])
     wdg['explode_dropdown'] = bmw.Div(text='Explode', css_classes=['explode-dropdown'])
     wdg['explode'] = bmw.Select(title='Explode By', value='None', options=['None'] + cols['seriesable'], css_classes=['wdgkey-explode', 'explode-drop'])
     wdg['explode_group'] = bmw.Select(title='Group Exploded Charts By', value='None', options=['None'] + cols['seriesable'],
@@ -314,7 +313,7 @@ def create_figure(df_exploded, df_plots, wdg, cols, explode_val=None, explode_gr
         add_glyph(wdg, p, xs, ys, c)
     else:
         full_series = df_plots[wdg['series'].value].unique().tolist() #for colors only
-        if wdg['series_stack'].value == 'Stacked':
+        if wdg['chart_type'].value in STACKEDTYPES: #We are stacking the series
             xs_full = sorted(df_exploded[x_col].unique().tolist())
             y_bases_pos = [0]*len(xs_full)
             y_bases_neg = [0]*len(xs_full)
@@ -323,9 +322,9 @@ def create_figure(df_exploded, df_plots, wdg, cols, explode_val=None, explode_gr
             df_series = df_exploded[df_exploded[wdg['series'].value].isin([ser])]
             xs_ser = df_series[x_col].values.tolist()
             ys_ser = df_series[wdg['y'].value].values.tolist()
-            if wdg['series_stack'].value == 'Unstacked':
+            if wdg['chart_type'].value not in STACKEDTYPES: #The series will not be stacked
                 add_glyph(wdg, p, xs_ser, ys_ser, c, series=ser)
-            else:
+            else: #We are stacking the series
                 ys_pos = [ys_ser[xs_ser.index(x)] if x in xs_ser and ys_ser[xs_ser.index(x)] > 0 else 0 for i, x in enumerate(xs_full)]
                 ys_neg = [ys_ser[xs_ser.index(x)] if x in xs_ser and ys_ser[xs_ser.index(x)] < 0 else 0 for i, x in enumerate(xs_full)]
                 ys_stacked_pos = [ys_pos[i] + y_bases_pos[i] for i in range(len(xs_full))]
@@ -468,7 +467,7 @@ wdg_col_ser = ['x_group', 'series', 'explode', 'explode_group'] #seriesable colu
 wdg_col = wdg_col_all + wdg_col_ser
 
 #List of widgets that don't use columns as selector and share general widget update function
-wdg_non_col = ['chart_type', 'y_agg', 'series_stack', 'plot_title', 'plot_title_size',
+wdg_non_col = ['chart_type', 'y_agg', 'plot_title', 'plot_title_size',
     'plot_width', 'plot_height', 'opacity', 'x_min', 'x_max', 'x_scale', 'x_title',
     'x_title_size', 'x_major_label_size', 'x_major_label_orientation',
     'y_min', 'y_max', 'y_scale', 'y_title', 'y_title_size', 'y_major_label_size',
