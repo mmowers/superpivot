@@ -61,15 +61,15 @@ def get_data(data_source):
     df_source[cols['continuous']] = df_source[cols['continuous']].fillna(0)
     return (df_source, cols)
 
-def build_widgets(data_source, df_source, cols, init_load=False, init_config={}):
+def build_widgets(df_source, cols, defaults, init_load=False, init_config={}):
     '''
     Use a dataframe and its columns to set widget options. Widget values may
     be set by URL parameters via init_config.
 
     Args:
-        data_source (string): Path to csv file.
         df_source (pandas dataframe): Dataframe of the csv source.
         cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
+        defaults (dict): Keys correspond to widgets, and values (str) are the default values of those widgets.
         init_load (boolean, optional): If this is the initial page load, then this will be True, else False.
         init_config (dict): Initial widget configuration passed via URL.
 
@@ -78,19 +78,19 @@ def build_widgets(data_source, df_source, cols, init_load=False, init_config={})
     '''
     #Add widgets
     wdg = collections.OrderedDict()
-    wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source, css_classes=['wdgkey-data'])
+    wdg['data'] = bmw.TextInput(title='Data Source (required)', value=defaults['data_source'], css_classes=['wdgkey-data'])
     wdg['x_dropdown'] = bmw.Div(text='X-Axis (required)', css_classes=['x-dropdown'])
-    wdg['x'] = bmw.Select(title='X-Axis (required)', value='None', options=['None'] + cols['all'], css_classes=['wdgkey-x', 'x-drop'])
-    wdg['x_group'] = bmw.Select(title='Group X-Axis By', value='None', options=['None'] + cols['seriesable'], css_classes=['wdgkey-x_group', 'x-drop'])
+    wdg['x'] = bmw.Select(title='X-Axis (required)', value=defaults['x'], options=['None'] + cols['all'], css_classes=['wdgkey-x', 'x-drop'])
+    wdg['x_group'] = bmw.Select(title='Group X-Axis By', value=defaults['x_group'], options=['None'] + cols['seriesable'], css_classes=['wdgkey-x_group', 'x-drop'])
     wdg['y_dropdown'] = bmw.Div(text='Y-Axis (required)', css_classes=['y-dropdown'])
-    wdg['y'] = bmw.Select(title='Y-Axis (required)', value='None', options=['None'] + cols['all'], css_classes=['wdgkey-y', 'y-drop'])
+    wdg['y'] = bmw.Select(title='Y-Axis (required)', value=defaults['y'], options=['None'] + cols['all'], css_classes=['wdgkey-y', 'y-drop'])
     wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='Sum', options=AGGREGATIONS, css_classes=['wdgkey-y_agg', 'y-drop'])
     wdg['series_dropdown'] = bmw.Div(text='Series', css_classes=['series-dropdown'])
     wdg['series_legend'] = bmw.Div(text='', css_classes=['series-drop'])
-    wdg['series'] = bmw.Select(title='Separate Series By', value='None', options=['None'] + cols['seriesable'], css_classes=['wdgkey-series', 'series-drop'])
+    wdg['series'] = bmw.Select(title='Separate Series By', value=defaults['series'], options=['None'] + cols['seriesable'], css_classes=['wdgkey-series', 'series-drop'])
     wdg['explode_dropdown'] = bmw.Div(text='Explode', css_classes=['explode-dropdown'])
-    wdg['explode'] = bmw.Select(title='Explode By', value='None', options=['None'] + cols['seriesable'], css_classes=['wdgkey-explode', 'explode-drop'])
-    wdg['explode_group'] = bmw.Select(title='Group Exploded Charts By', value='None', options=['None'] + cols['seriesable'],
+    wdg['explode'] = bmw.Select(title='Explode By', value=defaults['explode'], options=['None'] + cols['seriesable'], css_classes=['wdgkey-explode', 'explode-drop'])
+    wdg['explode_group'] = bmw.Select(title='Group Exploded Charts By', value=defaults['explode_group'], options=['None'] + cols['seriesable'],
         css_classes=['wdgkey-explode_group', 'explode-drop'])
     wdg['filters'] = bmw.Div(text='Filters', css_classes=['filters-dropdown'])
     for j, col in enumerate(cols['filterable']):
@@ -99,7 +99,7 @@ def build_widgets(data_source, df_source, cols, init_load=False, init_config={})
         wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=list(range(len(val_list))), css_classes=['wdgkey-filter_'+str(j), 'filter'])
     wdg['update'] = bmw.Button(label='Update Filters', button_type='success', css_classes=['filters-update'])
     wdg['adjustments'] = bmw.Div(text='Plot Adjustments', css_classes=['adjust-dropdown'])
-    wdg['chart_type'] = bmw.Select(title='Chart Type', value=CHARTTYPES[0], options=CHARTTYPES, css_classes=['wdgkey-chart_type', 'adjust-drop'])
+    wdg['chart_type'] = bmw.Select(title='Chart Type', value=defaults['chart_type'], options=CHARTTYPES, css_classes=['wdgkey-chart_type', 'adjust-drop'])
     wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value=str(PLOT_WIDTH), css_classes=['wdgkey-plot_width', 'adjust-drop'])
     wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value=str(PLOT_HEIGHT), css_classes=['wdgkey-plot_height', 'adjust-drop'])
     wdg['plot_title'] = bmw.TextInput(title='Plot Title', value='', css_classes=['wdgkey-plot_title', 'adjust-drop'])
@@ -399,8 +399,12 @@ def update_data(attr, old, new):
     '''
     When data source is updated, rebuild widgets and plots.
     '''
-    gl['df_source'], gl['columns'] = get_data(gl['widgets']['data'].value)
-    gl['widgets'] = build_widgets(gl['widgets']['data'].value, gl['df_source'], gl['columns'])
+    defaults['data_source'] = gl['widgets']['data'].value
+    for w in wdg_col:
+        defaults[w] = 'None'
+    defaults['chart_type'] = 'Dot'
+    gl['df_source'], gl['columns'] = get_data(defaults['data_source'])
+    gl['widgets'] = build_widgets(gl['df_source'], gl['columns'], defaults)
     gl['controls'].children = list(gl['widgets'].values())
     gl['plots'].children = []
 
@@ -412,8 +416,16 @@ def update_wdg(attr, old, new):
 
 def update_wdg_col(attr, old, new):
     '''
-    When widgets in wdg_col are updated, limit available selections for these new widgets,
+    When widgets in wdg_col are updated, set the options of all wdg_col widgets,
     and update plots.
+    '''
+    set_wdg_col_options()
+    update_plots()
+
+def set_wdg_col_options():
+    '''
+    Limit available options for wdg_col widgets based on their selected values, so that users
+    cannot select the same value for two different wdg_col widgets.
     '''
     cols = gl['columns']
     wdg = gl['widgets']
@@ -426,7 +438,6 @@ def update_wdg_col(attr, old, new):
         none_append = [] if val == 'None' else ['None']
         opt_reduced = all_reduced if w in wdg_col_all else ser_reduced
         wdg[w].options = [val] + opt_reduced + none_append
-    update_plots()
 
 def update_plots():
     '''
@@ -447,17 +458,6 @@ def download():
     gl['df_plots'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
         datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
 
-#On initial load, read 'widgets' parameter from URL query string and use to set data source (data_file)
-#and widget configuration object (wdg_config)
-wdg_config = {}
-data_file = os.path.dirname(os.path.realpath(__file__)) + '/csv/US_electric_power_generation.csv'
-args = bio.curdoc().session_context.request.arguments
-wdg_arr = args.get('widgets')
-if wdg_arr is not None:
-    wdg_config = json.loads(urlp.unquote(wdg_arr[0].decode('utf-8')))
-    if 'data' in wdg_config:
-        data_file = str(wdg_config['data'])
-
 #initialize globals dict
 gl = {'df_source':None, 'df_plots':None, 'columns':None, 'widgets':None, 'controls': None, 'plots':None}
 
@@ -473,9 +473,33 @@ wdg_non_col = ['chart_type', 'y_agg', 'plot_title', 'plot_title_size',
     'y_min', 'y_max', 'y_scale', 'y_title', 'y_title_size', 'y_major_label_size',
     'circle_size', 'bar_width', 'line_width']
 
+#Specify default widget values
+defaults = {}
+defaults['data_source'] = os.path.dirname(os.path.realpath(__file__)) + '/csv/US_electric_power_generation.csv'
+for w in wdg_col:
+    defaults[w] = 'None'
+defaults['x'] = 'Year'
+defaults['y'] = 'Generation (TWh)'
+defaults['series'] = 'Technology'
+defaults['explode'] = 'Scenario'
+defaults['chart_type'] = 'Area'
+
+#On initial load, read 'widgets' parameter from URL query string and use to set data source (data_source)
+#and widget configuration object (wdg_config)
+wdg_config = {}
+args = bio.curdoc().session_context.request.arguments
+wdg_arr = args.get('widgets')
+if wdg_arr is not None:
+    wdg_config = json.loads(urlp.unquote(wdg_arr[0].decode('utf-8')))
+    if 'data' in wdg_config:
+        defaults['data_source'] = str(wdg_config['data'])
+        for w in wdg_col:
+            defaults[w] = 'None'
+
 #build widgets and plots
-gl['df_source'], gl['columns'] = get_data(data_file)
-gl['widgets'] = build_widgets(data_file, gl['df_source'], gl['columns'], init_load=True, init_config=wdg_config)
+gl['df_source'], gl['columns'] = get_data(defaults['data_source'])
+gl['widgets'] = build_widgets(gl['df_source'], gl['columns'], defaults, init_load=True, init_config=wdg_config)
+set_wdg_col_options()
 gl['controls'] = bl.widgetbox(list(gl['widgets'].values()), id='widgets_section')
 gl['plots'] = bl.column([], id='plots_section')
 update_plots()
