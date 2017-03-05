@@ -24,14 +24,9 @@ body {
     width: auto !important;
     height: auto !important;
 }
-
 .bk-plot-layout{
     display: inline-block;
 }
-.x-drop,
-.y-drop,
-.series-drop,
-.explode-drop,
 .filter,
 .filters-update,
 .adjust-drop{
