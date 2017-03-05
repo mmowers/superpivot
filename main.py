@@ -18,6 +18,7 @@ import bokeh.plotting as bp
 import datetime
 import six.moves.urllib.parse as urlp
 
+#Defaults to configure:
 PLOT_WIDTH = 300
 PLOT_HEIGHT = 300
 PLOT_FONT_SIZE = 10
@@ -35,7 +36,8 @@ CHARTTYPES = ['Dot', 'Line', 'Bar', 'Area']
 AGGREGATIONS = ['None', 'Sum']
 
 def get_data(data_source):
-    ''' Read a csv into a pandas dataframe, and determine which columns of the dataframe
+    '''
+    Read a csv into a pandas dataframe, and determine which columns of the dataframe
     are discrete (strings), continuous (numbers), able to be filtered (aka filterable),
     and able to be used as a series (aka seriesable). NA values are filled based on the type of column,
     and the dataframe and columns are returned.
@@ -46,7 +48,6 @@ def get_data(data_source):
     Returns:
         df_source (pandas dataframe): A dataframe of the csv source, with filled NA values.
         cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
-
     '''
     df_source = pd.read_csv(data_source)
     cols = {}
@@ -60,7 +61,8 @@ def get_data(data_source):
     return (df_source, cols)
 
 def build_widgets(data_source, df_source, cols, init_load=False, init_config={}):
-    ''' Use a dataframe and its columns to set widget options. Widget values may
+    '''
+    Use a dataframe and its columns to set widget options. Widget values may
     be set by URL parameters via init_config.
 
     Args:
@@ -72,7 +74,6 @@ def build_widgets(data_source, df_source, cols, init_load=False, init_config={})
 
     Returns:
         wdg (ordered dict): Dictionary of bokeh.model.widgets.
-
     '''
     #Add widgets
     wdg = collections.OrderedDict()
@@ -146,7 +147,8 @@ def build_widgets(data_source, df_source, cols, init_load=False, init_config={})
     return wdg
 
 def set_df_plots(df_source, cols, wdg):
-    ''' Apply filters, scaling, aggregation, and sorting to source dataframe, and return the result.
+    '''
+    Apply filters, scaling, aggregation, and sorting to source dataframe, and return the result.
 
     Args:
         df_source (pandas dataframe): Dataframe of the csv source.
@@ -155,7 +157,6 @@ def set_df_plots(df_source, cols, wdg):
 
     Returns:
         df_plots (pandas dataframe): df_source after having been filtered, scaled, aggregated, and sorted.
-
     '''
     df_plots = df_source.copy()
 
@@ -196,7 +197,8 @@ def set_df_plots(df_source, cols, wdg):
     return df_plots
 
 def create_figures(df_plots, wdg, cols):
-    ''' Create figures based on the data in a dataframe and widget configuration, and return figures in a list.
+    '''
+    Create figures based on the data in a dataframe and widget configuration, and return figures in a list.
     The explode widget determines if there will be multiple figures.
 
     Args:
@@ -206,7 +208,6 @@ def create_figures(df_plots, wdg, cols):
 
     Returns:
         plot_list (list): List of bokeh.model.figures.
-
     '''
     plot_list = []
     df_plots_cp = df_plots.copy()
@@ -226,7 +227,8 @@ def create_figures(df_plots, wdg, cols):
     return plot_list
 
 def create_figure(df_exploded, df_plots, wdg, cols, explode_val=None, explode_group=None):
-    ''' Create and return a figure based on the data in a dataframe and widget configuration.
+    '''
+    Create and return a figure based on the data in a dataframe and widget configuration.
 
     Args:
         df_exploded (pandas dataframe): Dataframe of just the data that will be plotted in this figure.
@@ -238,7 +240,6 @@ def create_figure(df_exploded, df_plots, wdg, cols, explode_val=None, explode_gr
 
     Returns:
         p (bokeh.model.figure): A figure, with all glyphs added by the add_glyph() function.
-
     '''
     # If x_group has a value, create a combined column in the dataframe for x and x_group
     x_col = wdg['x'].value
@@ -336,7 +337,8 @@ def create_figure(df_exploded, df_plots, wdg, cols, explode_val=None, explode_gr
     return p
 
 def add_glyph(wdg, p, xs, ys, c, y_bases=None, series=None):
-    ''' Add a glyph to a Bokeh figure, depending on the chosen chart type.
+    '''
+    Add a glyph to a Bokeh figure, depending on the chosen chart type.
 
     Args:
         wdg (ordered dict): Dictionary of bokeh model widgets.
@@ -349,7 +351,6 @@ def add_glyph(wdg, p, xs, ys, c, y_bases=None, series=None):
 
     Returns:
         Nothing.
-
     '''
     alpha = float(wdg['opacity'].value)
     y_unstacked = list(ys) if y_bases is None else [ys[i] - y_bases[i] for i in range(len(ys))]
@@ -375,7 +376,8 @@ def add_glyph(wdg, p, xs, ys, c, y_bases=None, series=None):
 
 
 def build_series_legend(df_plots, series_val):
-    ''' Return html for series legend, based on values of column that was chosen for series, and global COLORS.
+    '''
+    Return html for series legend, based on values of column that was chosen for series, and global COLORS.
 
     Args:
         df_plots (pandas dataframe): Dataframe of all plots data.
@@ -383,7 +385,6 @@ def build_series_legend(df_plots, series_val):
 
     Returns:
         series_legend_string (string): html to be used as legend.
-
     '''
     series_legend_string = '<div class="legend-header">Series Legend</div><div class="legend-body">'
     if series_val != 'None':
@@ -396,18 +397,24 @@ def build_series_legend(df_plots, series_val):
 
 
 def update_data(attr, old, new):
+    '''
+    When data source is updated, rebuild widgets and plots.
+    '''
     gl['df_source'], gl['columns'] = get_data(gl['widgets']['data'].value)
     gl['widgets'] = build_widgets(gl['widgets']['data'].value, gl['df_source'], gl['columns'])
     gl['controls'].children = list(gl['widgets'].values())
     gl['plots'].children = []
 
 def update_wdg(attr, old, new):
+    '''
+    When general widgets are updated (not in wdg_col), update plots only.
+    '''
     update_plots()
 
 def update_wdg_col(attr, old, new):
     '''
-    Limit available selections for the widgets in wdg_col when any of them are updated
-
+    When widgets in wdg_col are updated, limit available selections for these new widgets,
+    and update plots.
     '''
     cols = gl['columns']
     wdg = gl['widgets']
@@ -423,6 +430,9 @@ def update_wdg_col(attr, old, new):
     update_plots()
 
 def update_plots():
+    '''
+    Make sure x axis and y axis are set. If so, set the dataframe for the plots and build them.
+    '''
     if gl['widgets']['x'].value == 'None' or gl['widgets']['y'].value == 'None':
         gl['plots'].children = []
         return
@@ -431,6 +441,10 @@ def update_plots():
     gl['plots'].children = create_figures(gl['df_plots'], gl['widgets'], gl['columns'])
 
 def download():
+    '''
+    Download a csv file of the currently viewed data to the downloads/ directory,
+    with the current timestamp.
+    '''
     gl['df_plots'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
         datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
 
