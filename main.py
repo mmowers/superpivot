@@ -50,7 +50,7 @@ def get_data(data_source):
     '''
     df_source = pd.read_csv(data_source)
     cols = {}
-    cols['all'] = sorted(df_source.columns)
+    cols['all'] = df_source.columns.values.tolist()
     cols['discrete'] = [x for x in cols['all'] if df_source[x].dtype == object]
     cols['continuous'] = [x for x in cols['all'] if x not in cols['discrete']]
     cols['filterable'] = cols['discrete']+[x for x in cols['continuous'] if len(df_source[x].unique()) < 500]
@@ -74,6 +74,7 @@ def build_widgets(data_source, df_source, cols, init_load=False, init_config={})
         wdg (ordered dict): Dictionary of bokeh.model.widgets.
 
     '''
+    #Add widgets
     wdg = collections.OrderedDict()
     wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source, css_classes=['wdgkey-data'])
     wdg['x_dropdown'] = bmw.Div(text='X-Axis (required)', css_classes=['x-dropdown'])
@@ -133,16 +134,14 @@ def build_widgets(data_source, df_source, cols, init_load=False, init_config={})
                 elif hasattr(wdg[key], 'active'):
                     wdg[key].active = init_config[key]
 
+    #Add update functions for widgets
     wdg['data'].on_change('value', update_data)
     wdg['update'].on_click(update_plots)
     wdg['download'].on_click(download)
-
-    wdg_names = ['chart_type', 'x', 'x_group', 'y', 'y_agg', 'series', 'series_stack', 'explode', 'explode_group', 'plot_title', 'plot_title_size',
-    'plot_width', 'plot_height', 'opacity', 'x_min', 'x_max', 'x_scale', 'x_title', 'x_title_size', 'x_major_label_size', 'x_major_label_orientation',
-    'y_min', 'y_max', 'y_scale', 'y_title', 'y_title_size', 'y_major_label_size', 'circle_size', 'bar_width', 'line_width']
-
-    for name in wdg_names:
-        wdg[name].on_change('value', update_sel)
+    for name in wdg_col:
+        wdg[name].on_change('value', update_wdg_col)
+    for name in wdg_non_col:
+        wdg[name].on_change('value', update_wdg)
 
     return wdg
 
@@ -402,7 +401,25 @@ def update_data(attr, old, new):
     gl['controls'].children = list(gl['widgets'].values())
     gl['plots'].children = []
 
-def update_sel(attr, old, new):
+def update_wdg(attr, old, new):
+    update_plots()
+
+def update_wdg_col(attr, old, new):
+    '''
+    Limit available selections for the widgets in wdg_col when any of them are updated
+
+    '''
+    cols = gl['columns']
+    wdg = gl['widgets']
+    #get list of selected values and use to reduce selection options.
+    sels = [str(wdg[w].value) for w in wdg_col if str(wdg[w].value) !='None']
+    all_reduced = [x for x in cols['all'] if x not in sels]
+    ser_reduced = [x for x in cols['seriesable'] if x not in sels]
+    for w in wdg_col:
+        val = str(wdg[w].value)
+        none_append = [] if val == 'None' else ['None']
+        opt_reduced = all_reduced if w in wdg_col_all else ser_reduced
+        wdg[w].options = [val] + opt_reduced + none_append
     update_plots()
 
 def update_plots():
@@ -417,7 +434,6 @@ def download():
     gl['df_plots'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
         datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
 
-
 #On initial load, read 'widgets' parameter from URL query string and use to set data source (data_file)
 #and widget configuration object (wdg_config)
 wdg_config = {}
@@ -431,6 +447,18 @@ if wdg_arr is not None:
 
 #initialize globals dict
 gl = {'df_source':None, 'df_plots':None, 'columns':None, 'widgets':None, 'controls': None, 'plots':None}
+
+#List of widgets that use columns as their selectors
+wdg_col_all = ['x', 'y'] #all columns available for these widgets
+wdg_col_ser = ['x_group', 'series', 'explode', 'explode_group'] #seriesable columns available for these widgets
+wdg_col = wdg_col_all + wdg_col_ser
+
+#List of widgets that don't use columns as selector and share general widget update function
+wdg_non_col = ['chart_type', 'y_agg', 'series_stack', 'plot_title', 'plot_title_size',
+    'plot_width', 'plot_height', 'opacity', 'x_min', 'x_max', 'x_scale', 'x_title',
+    'x_title_size', 'x_major_label_size', 'x_major_label_orientation',
+    'y_min', 'y_max', 'y_scale', 'y_title', 'y_title_size', 'y_major_label_size',
+    'circle_size', 'bar_width', 'line_width']
 
 #build widgets and plots
 gl['df_source'], gl['columns'] = get_data(data_file)
