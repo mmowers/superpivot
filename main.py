@@ -123,7 +123,7 @@ def build_widgets(df_source, cols, defaults, init_load=False, init_config={}):
     wdg['bar_width'] = bmw.TextInput(title='Bar Width (Bar Only)', value=str(BAR_WIDTH), css_classes=['wdgkey-bar_width', 'adjust-drop'])
     wdg['line_width'] = bmw.TextInput(title='Line Width (Line Only)', value=str(LINE_WIDTH), css_classes=['wdgkey-line_width', 'adjust-drop'])
     wdg['download'] = bmw.Button(label='Download csv', button_type='success')
-    wdg['export_config'] = bmw.Div(text='Export Config to URL', css_classes=['export-config'])
+    wdg['export_config'] = bmw.Div(text='Export Config to URL', css_classes=['export-config', 'bk-bs-btn', 'bk-bs-btn-success'])
 
     #use init_config (from 'widgets' parameter in URL query string) to configure widgets.
     if init_load:
