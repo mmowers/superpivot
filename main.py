@@ -24,7 +24,7 @@ PLOT_HEIGHT = 300
 PLOT_FONT_SIZE = 10
 PLOT_AXIS_LABEL_SIZE = 8
 PLOT_LABEL_ORIENTATION = 45
-OPACITY = 0.6
+OPACITY = 0.8
 X_SCALE = 1
 Y_SCALE = 1
 CIRCLE_SIZE = 9
@@ -55,7 +55,7 @@ def get_data(data_source):
     cols['all'] = df_source.columns.values.tolist()
     cols['discrete'] = [x for x in cols['all'] if df_source[x].dtype == object]
     cols['continuous'] = [x for x in cols['all'] if x not in cols['discrete']]
-    cols['filterable'] = cols['discrete']+[x for x in cols['continuous'] if len(df_source[x].unique()) < 500]
+    cols['filterable'] = cols['discrete']+[x for x in cols['continuous'] if len(df_source[x].unique()) < 100]
     cols['seriesable'] = cols['discrete']+[x for x in cols['continuous'] if len(df_source[x].unique()) < 60]
     df_source[cols['discrete']] = df_source[cols['discrete']].fillna('{BLANK}')
     df_source[cols['continuous']] = df_source[cols['continuous']].fillna(0)
@@ -86,8 +86,8 @@ def build_widgets(df_source, cols, defaults, init_load=False, init_config={}):
     wdg['y'] = bmw.Select(title='Y-Axis (required)', value=defaults['y'], options=['None'] + cols['all'], css_classes=['wdgkey-y', 'y-drop'])
     wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='Sum', options=AGGREGATIONS, css_classes=['wdgkey-y_agg', 'y-drop'])
     wdg['series_dropdown'] = bmw.Div(text='Series', css_classes=['series-dropdown'])
-    wdg['series_legend'] = bmw.Div(text='', css_classes=['series-drop'])
     wdg['series'] = bmw.Select(title='Separate Series By', value=defaults['series'], options=['None'] + cols['seriesable'], css_classes=['wdgkey-series', 'series-drop'])
+    wdg['series_legend'] = bmw.Div(text='', css_classes=['series-drop'])
     wdg['explode_dropdown'] = bmw.Div(text='Explode', css_classes=['explode-dropdown'])
     wdg['explode'] = bmw.Select(title='Explode By', value=defaults['explode'], options=['None'] + cols['seriesable'], css_classes=['wdgkey-explode', 'explode-drop'])
     wdg['explode_group'] = bmw.Select(title='Group Exploded Charts By', value=defaults['explode_group'], options=['None'] + cols['seriesable'],
@@ -479,9 +479,9 @@ defaults['data_source'] = os.path.dirname(os.path.realpath(__file__)) + '/csv/US
 for w in wdg_col:
     defaults[w] = 'None'
 defaults['x'] = 'Year'
-defaults['y'] = 'Generation (TWh)'
+defaults['y'] = 'Electricity Generation (TWh)'
 defaults['series'] = 'Technology'
-defaults['explode'] = 'Scenario'
+defaults['explode'] = 'Case'
 defaults['chart_type'] = 'Area'
 
 #On initial load, read 'widgets' parameter from URL query string and use to set data source (data_source)
