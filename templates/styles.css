@@ -19,6 +19,9 @@ body {
     height: auto !important;
     overflow-y: scroll;
 }
+#header{
+    margin-left: 260px;
+}
 #modelid_plots_section{
     margin-left: 250px;
     width: auto !important;
@@ -62,7 +65,6 @@ body {
     cursor: pointer;
 }
 .legend-body{
-    display: none;
     border: 1px solid lightgrey;
     padding: 10px;
 }
