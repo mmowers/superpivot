@@ -17,6 +17,7 @@ import bokeh.models.tools as bmt
 import bokeh.plotting as bp
 import datetime
 import six.moves.urllib.parse as urlp
+import gdxl
 
 #Defaults to configure:
 PLOT_WIDTH = 300
@@ -50,7 +51,12 @@ def get_data(data_source):
         df_source (pandas dataframe): A dataframe of the csv source, with filled NA values.
         cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
     '''
-    df_source = pd.read_csv(data_source)
+    path_parts = data_source.split('>')
+    if path_parts[0].lower().endswith('.gdx'):
+        df_source = gdxl.get_df(str(path_parts[0]), str(path_parts[1]))
+        df_source.columns = df_source.columns.astype(str)
+    else:
+        df_source = pd.read_csv(data_source)
     cols = {}
     cols['all'] = df_source.columns.values.tolist()
     cols['discrete'] = [x for x in cols['all'] if df_source[x].dtype == object]
