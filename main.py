@@ -35,7 +35,7 @@ COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#fee08b', '#fd
 C_NORM = "#31AADE"
 CHARTTYPES = ['Dot', 'Line', 'Bar', 'Area']
 STACKEDTYPES = ['Bar', 'Area']
-AGGREGATIONS = ['None', 'Sum']
+AGGREGATIONS = ['None', 'Sum', 'Ave', 'Weighted Ave']
 
 def get_data(data_source):
     '''
@@ -91,6 +91,7 @@ def build_widgets(df_source, cols, defaults, init_load=False, init_config={}):
     wdg['y_dropdown'] = bmw.Div(text='Y-Axis (required)', css_classes=['y-dropdown'])
     wdg['y'] = bmw.Select(title='Y-Axis (required)', value=defaults['y'], options=['None'] + cols['all'], css_classes=['wdgkey-y', 'y-drop'])
     wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='Sum', options=AGGREGATIONS, css_classes=['wdgkey-y_agg', 'y-drop'])
+    wdg['y_weight'] = bmw.Select(title='Weighting Factor', value='None', options=['None'] + cols['all'], css_classes=['wdgkey-y_weight', 'y-drop'])
     wdg['series_dropdown'] = bmw.Div(text='Series', css_classes=['series-dropdown'])
     wdg['series'] = bmw.Select(title='Separate Series By', value=defaults['series'], options=['None'] + cols['seriesable'],
         css_classes=['wdgkey-series', 'series-drop'])
@@ -180,13 +181,20 @@ def set_df_plots(df_source, cols, wdg):
         df_plots[wdg['y'].value] = df_plots[wdg['y'].value] * float(wdg['y_scale'].value)
 
     #Apply Aggregation
-    if wdg['y_agg'].value == 'Sum' and wdg['y'].value in cols['continuous']:
+    if wdg['y'].value in cols['continuous'] and wdg['y_agg'].value != 'None':
         groupby_cols = [wdg['x'].value]
         if wdg['x_group'].value != 'None': groupby_cols = [wdg['x_group'].value] + groupby_cols
         if wdg['series'].value != 'None': groupby_cols = [wdg['series'].value] + groupby_cols
         if wdg['explode'].value != 'None': groupby_cols = [wdg['explode'].value] + groupby_cols
         if wdg['explode_group'].value != 'None': groupby_cols = [wdg['explode_group'].value] + groupby_cols
-        df_plots = df_plots.groupby(groupby_cols, as_index=False, sort=False)[wdg['y'].value].sum()
+        df_grouped = df_plots.groupby(groupby_cols, sort=False)
+        if wdg['y_agg'].value == 'Sum':
+            df_plots = df_grouped[wdg['y'].value].sum().reset_index()
+        elif wdg['y_agg'].value == 'Ave':
+            df_plots = df_grouped[wdg['y'].value].mean().reset_index()
+        elif wdg['y_agg'].value == 'Weighted Ave' and wdg['y_weight'].value in cols['continuous']:
+            df_plots = df_grouped.apply(wavg, wdg['y'].value, wdg['y_weight'].value).reset_index()
+            df_plots.rename(columns={0: wdg['y'].value}, inplace=True)
 
     #Sort Dataframe
     sortby_cols = [wdg['x'].value]
@@ -402,6 +410,17 @@ def build_series_legend(df_plots, series_val):
     return series_legend_string
 
 
+def wavg(group, avg_name, weight_name):
+    """ http://pbpython.com/weighted-average.html
+    """
+    d = group[avg_name]
+    w = group[weight_name]
+    try:
+        return (d * w).sum() / w.sum()
+    except ZeroDivisionError:
+        return 0
+
+
 def update_data(attr, old, new):
     '''
     When data source is updated, rebuild widgets and plots.
@@ -474,7 +493,7 @@ wdg_col_ser = ['x_group', 'series', 'explode', 'explode_group'] #seriesable colu
 wdg_col = wdg_col_all + wdg_col_ser
 
 #List of widgets that don't use columns as selector and share general widget update function
-wdg_non_col = ['chart_type', 'y_agg', 'plot_title', 'plot_title_size',
+wdg_non_col = ['chart_type', 'y_agg', 'y_weight', 'plot_title', 'plot_title_size',
     'plot_width', 'plot_height', 'opacity', 'x_min', 'x_max', 'x_scale', 'x_title',
     'x_title_size', 'x_major_label_size', 'x_major_label_orientation',
     'y_min', 'y_max', 'y_scale', 'y_title', 'y_title_size', 'y_major_label_size',
