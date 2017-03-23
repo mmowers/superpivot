@@ -36,6 +36,7 @@ C_NORM = "#31AADE"
 CHARTTYPES = ['Dot', 'Line', 'Bar', 'Area']
 STACKEDTYPES = ['Bar', 'Area']
 AGGREGATIONS = ['None', 'Sum', 'Ave', 'Weighted Ave']
+ADV_BASES = ['Consecutive', 'Total']
 
 def get_data(data_source):
     '''
@@ -100,6 +101,10 @@ def build_widgets(df_source, cols, defaults, init_load=False, init_config={}):
     wdg['explode'] = bmw.Select(title='Explode By', value=defaults['explode'], options=['None'] + cols['seriesable'], css_classes=['wdgkey-explode', 'explode-drop'])
     wdg['explode_group'] = bmw.Select(title='Group Exploded Charts By', value=defaults['explode_group'], options=['None'] + cols['seriesable'],
         css_classes=['wdgkey-explode_group', 'explode-drop'])
+    wdg['adv_dropdown'] = bmw.Div(text='Comparisons', css_classes=['adv-dropdown'])
+    wdg['adv_op'] = bmw.Select(title='Operation', value='None', options=['None', 'Difference', 'Ratio'], css_classes=['wdgkey-adv_op', 'adv-drop'])
+    wdg['adv_col'] = bmw.Select(title='Operate Across', value='None', options=['None'] + cols['all'], css_classes=['wdgkey-adv_col', 'adv-drop'])
+    wdg['adv_col_base'] = bmw.Select(title='Base', value='None', options=['None'], css_classes=['wdgkey-adv_col_base', 'adv-drop'])
     wdg['filters'] = bmw.Div(text='Filters', css_classes=['filters-dropdown'])
     for j, col in enumerate(cols['filterable']):
         val_list = [str(i) for i in sorted(df_source[col].unique().tolist())]
@@ -146,6 +151,7 @@ def build_widgets(df_source, cols, defaults, init_load=False, init_config={}):
     wdg['data'].on_change('value', update_data)
     wdg['update'].on_click(update_plots)
     wdg['download'].on_click(download)
+    wdg['adv_col'].on_change('value', update_adv_col)
     for name in wdg_col:
         wdg[name].on_change('value', update_wdg_col)
     for name in wdg_non_col:
@@ -195,6 +201,52 @@ def set_df_plots(df_source, cols, wdg):
         elif wdg['y_agg'].value == 'Weighted Ave' and wdg['y_weight'].value in cols['continuous']:
             df_plots = df_grouped.apply(wavg, wdg['y'].value, wdg['y_weight'].value).reset_index()
             df_plots.rename(columns={0: wdg['y'].value}, inplace=True)
+
+    #Do Advanced Operations
+    op = wdg['adv_op'].value
+    col = wdg['adv_col'].value
+    col_base = wdg['adv_col_base'].value
+    y_val = wdg['y'].value
+    y_agg = wdg['y_agg'].value
+    if op != 'None' and col != 'None' and col in df_plots and col_base != 'None' and y_agg != 'None' and y_val in cols['continuous']:
+        #sort df_plots so that col_base is at the front, so that we can use transform('first') later
+        if col in cols['continuous'] and col_base not in ADV_BASES:
+            col_base = float(col_base)
+        col_list = df_plots[col].unique().tolist()
+        if col_base not in ADV_BASES:
+            col_list.remove(col_base)
+            col_list = [col_base] + col_list
+        df_plots['tempsort'] = df_plots[col].map(lambda x: col_list.index(x))
+        df_plots = df_plots.sort_values('tempsort').reset_index(drop=True)
+        df_plots.drop(['tempsort'], axis='columns', inplace=True)
+        #groupby all columns that are not the operating column and y axis column so we can do operations on y-axis across the operating column
+        groupcols = [i for i in df_plots.columns.values.tolist() if i not in [col, y_val]]
+        if groupcols != []:
+            df_grouped = df_plots.groupby(groupcols, sort=False)[y_val]
+        else:
+            #if we don't have other columns to group, make one, to prevent error
+            df_plots['tempgroup'] = 1
+            df_grouped = df_plots.groupby('tempgroup', sort=False)[y_val]
+        #Now do operations with the groups:
+        if op == 'Difference':
+            if col_base == 'Consecutive':
+                df_plots[y_val] = df_grouped.diff()
+            elif col_base == 'Total':
+                df_plots[y_val] = df_plots[y_val] - df_grouped.transform('sum')
+            else:
+                df_plots[y_val] = df_plots[y_val] - df_grouped.transform('first')
+        elif op == 'Ratio':
+            if col_base == 'Consecutive':
+                df_plots[y_val] = df_grouped.diff()
+            elif col_base == 'Total':
+                df_plots[y_val] = df_plots[y_val] / df_grouped.transform('sum')
+            else:
+                df_plots[y_val] = df_plots[y_val] / df_grouped.transform('first')
+        #Finally, clean up df_plots, dropping unnecessary columns, rows with the base value, and any rows with NAs for y_vals
+        if 'tempgroup' in df_plots:
+            df_plots.drop(['tempgroup'], axis='columns', inplace=True)
+        df_plots = df_plots[~df_plots[col].isin([col_base])]
+        df_plots = df_plots[pd.notnull(df_plots[y_val])]
 
     #Sort Dataframe
     sortby_cols = [wdg['x'].value]
@@ -448,6 +500,15 @@ def update_wdg_col(attr, old, new):
     set_wdg_col_options()
     update_plots()
 
+def update_adv_col(attr, old, new):
+    '''
+    When adv_col is set, find unique values of adv_col in dataframe, and set adv_col_base with those values.
+    '''
+    wdg = gl['widgets']
+    df = gl['df_source']
+    if wdg['adv_col'].value != 'None':
+        wdg['adv_col_base'].options = ['None'] + ADV_BASES + [str(i) for i in sorted(df[wdg['adv_col'].value].unique().tolist())]
+
 def set_wdg_col_options():
     '''
     Limit available options for wdg_col widgets based on their selected values, so that users
@@ -493,7 +554,7 @@ wdg_col_ser = ['x_group', 'series', 'explode', 'explode_group'] #seriesable colu
 wdg_col = wdg_col_all + wdg_col_ser
 
 #List of widgets that don't use columns as selector and share general widget update function
-wdg_non_col = ['chart_type', 'y_agg', 'y_weight', 'plot_title', 'plot_title_size',
+wdg_non_col = ['chart_type', 'y_agg', 'y_weight', 'adv_op', 'adv_col_base', 'plot_title', 'plot_title_size',
     'plot_width', 'plot_height', 'opacity', 'x_min', 'x_max', 'x_scale', 'x_title',
     'x_title_size', 'x_major_label_size', 'x_major_label_orientation',
     'y_min', 'y_max', 'y_scale', 'y_title', 'y_title_size', 'y_major_label_size',

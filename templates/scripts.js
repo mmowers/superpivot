@@ -12,6 +12,9 @@ $(document).ready(function(){
     $('body').on('click', '.explode-dropdown', function(){
         $('.explode-drop').toggle();
     });
+    $('body').on('click', '.adv-dropdown', function(){
+        $('.adv-drop').toggle();
+    });
     $('body').on('click', '.filters-dropdown', function(){
         $('.filter-head').toggle();
         $('.filters-update').toggle();

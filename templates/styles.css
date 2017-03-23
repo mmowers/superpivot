@@ -32,6 +32,11 @@ body {
 .bk-plot-layout{
     display: inline-block;
 }
+.x-drop,
+.y-drop,
+.series-drop,
+.explode-drop,
+.adv-drop,
 .filter,
 .filters-update,
 .adjust-drop{
@@ -47,8 +52,10 @@ body {
 .y-dropdown,
 .series-dropdown,
 .explode-dropdown,
+.adv-dropdown,
 .filters-dropdown,
-.adjust-dropdown{
+.adjust-dropdown
+{
     font-weight: bold;
     color: blue;
     cursor: pointer;
