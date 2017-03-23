@@ -63,3 +63,19 @@ $(document).ready(function(){
         window.history.pushState({}, "", pathname+"?widgets=" + widgets_string);
     });
 });
+//pressing Alt key will collapse menus.
+document.onkeydown = function(e) {
+  if(e.which == 18) {
+    $('.x-drop').hide();
+    $('.y-drop').hide();
+    $('.legend-body').hide();
+    $('.series-drop').hide();
+    $('.explode-drop').hide();
+    $('.adv-drop').hide();
+    $('.filter-head').hide();
+    $('.filters-update').hide();
+    $('.select-all-none').hide();
+    $('.filter').hide();
+    $('.adjust-drop').hide();
+  }
+};
