@@ -26,7 +26,10 @@ def get_df(file_name, param_name):
     for i in range(nrRecs):
         ret = gdxcc.gdxDataReadRaw(gdxHandle)
         sets = [uelMap[x] for x in ret[1]]
-        ls.append(sets+[ret[2][gdxcc.GMS_VAL_LEVEL]])
+        val = ret[2][gdxcc.GMS_VAL_LEVEL]
+        if val == 5e300:
+            val = 0
+        ls.append(sets+[val])
 
     assert not gdxcc.gdxClose(gdxHandle)
     assert gdxcc.gdxFree(gdxHandle)
