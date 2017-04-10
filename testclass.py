@@ -25,8 +25,7 @@ class BokehPivot:
         self.COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142']*1000
         self.DEF_COLOR = "#31AADE"
         self.NON_COL_BASES = ['Consecutive', 'Total']
-        #initialize globals dict
-        self.gl = {'df_source':None, 'df_plots':None, 'columns':None, 'widgets':None, 'controls': None, 'plots':None}
+        self.df_plots = None
 
         #List of widgets that use columns as their selectors
         self.wdg_col_all = ['x', 'y'] #all columns available for these widgets
@@ -64,13 +63,13 @@ class BokehPivot:
                     self.defaults[w] = 'None'
 
         #build widgets and plots
-        self.gl['df_source'], self.gl['columns'] = self.get_data(self.defaults['data_source'])
-        self.gl['widgets'] = self.build_widgets(self.gl['df_source'], self.gl['columns'], self.wdg_col, self.wdg_non_col, self.defaults, init_load=True, init_config=self.wdg_config)
+        self.df_source, self.columns = self.get_data(self.defaults['data_source'])
+        self.widgets = self.build_widgets(self.df_source, self.columns, self.wdg_col, self.wdg_non_col, self.defaults, init_load=True, init_config=self.wdg_config)
         self.set_wdg_col_options()
-        self.gl['controls'] = bl.widgetbox(list(self.gl['widgets'].values()), id='widgets_section')
-        self.gl['plots'] = bl.column([], id='plots_section')
+        self.controls = bl.widgetbox(list(self.widgets.values()), id='widgets_section')
+        self.plots = bl.column([], id='plots_section')
         self.update_plots()
-        self.layout = bl.row(self.gl['controls'], self.gl['plots'], id='layout')
+        self.layout = bl.row(self.controls, self.plots, id='layout')
 
         bio.curdoc().add_root(self.layout)
         bio.curdoc().title = "Exploding Pivot Chart Maker"
@@ -533,14 +532,14 @@ class BokehPivot:
         '''
         When data source is updated, rebuild widgets and plots.
         '''
-        self.defaults['data_source'] = self.gl['widgets']['data'].value
+        self.defaults['data_source'] = self.widgets['data'].value
         for w in self.wdg_col:
             self.defaults[w] = 'None'
         self.defaults['chart_type'] = 'Dot'
-        self.gl['df_source'], self.gl['columns'] = self.get_data(self.defaults['data_source'])
-        self.gl['widgets'] = self.build_widgets(self.gl['df_source'], self.gl['columns'], self.wdg_col, self.wdg_non_col, self.defaults)
-        self.gl['controls'].children = list(self.gl['widgets'].values())
-        self.gl['plots'].children = []
+        self.df_source, self.columns = self.get_data(self.defaults['data_source'])
+        self.widgets = self.build_widgets(self.df_source, self.columns, self.wdg_col, self.wdg_non_col, self.defaults)
+        self.controls.children = list(self.widgets.values())
+        self.plots.children = []
 
     def update_wdg(self, attr, old, new):
         '''
@@ -560,8 +559,8 @@ class BokehPivot:
         '''
         When adv_col is set, find unique values of adv_col in dataframe, and set adv_col_base with those values.
         '''
-        wdg = self.gl['widgets']
-        df = self.gl['df_source']
+        wdg = self.widgets
+        df = self.df_source
         if wdg['adv_col'].value != 'None':
             wdg['adv_col_base'].options = ['None'] + self.NON_COL_BASES + [str(i) for i in sorted(df[wdg['adv_col'].value].unique().tolist())]
 
@@ -570,8 +569,8 @@ class BokehPivot:
         Limit available options for wdg_col widgets based on their selected values, so that users
         cannot select the same value for two different wdg_col widgets.
         '''
-        cols = self.gl['columns']
-        wdg = self.gl['widgets']
+        cols = self.columns
+        wdg = self.widgets
         #get list of selected values and use to reduce selection options.
         sels = [str(wdg[w].value) for w in self.wdg_col if str(wdg[w].value) !='None']
         all_reduced = [x for x in cols['all'] if x not in sels]
@@ -586,17 +585,17 @@ class BokehPivot:
         '''
         Make sure x axis and y axis are set. If so, set the dataframe for the plots and build them.
         '''
-        if self.gl['widgets']['x'].value == 'None' or self.gl['widgets']['y'].value == 'None':
-            self.gl['plots'].children = []
+        if self.widgets['x'].value == 'None' or self.widgets['y'].value == 'None':
+            self.plots.children = []
             return
-        self.gl['df_plots'] = self.set_df_plots(self.gl['df_source'], self.gl['columns'], self.gl['widgets'], self.NON_COL_BASES)
-        self.gl['widgets']['series_legend'].text = self.build_series_legend(self.gl['df_plots'], self.gl['widgets']['series'].value, self.COLORS)
-        self.gl['plots'].children = self.create_figures(self.gl['df_plots'], self.gl['widgets'], self.gl['columns'], self.COLORS, self.DEF_COLOR)
+        self.df_plots = self.set_df_plots(self.df_source, self.columns, self.widgets, self.NON_COL_BASES)
+        self.widgets['series_legend'].text = self.build_series_legend(self.df_plots, self.widgets['series'].value, self.COLORS)
+        self.plots.children = self.create_figures(self.df_plots, self.widgets, self.columns, self.COLORS, self.DEF_COLOR)
 
     def download(self):
         '''
         Download a csv file of the currently viewed data to the downloads/ directory,
         with the current timestamp.
         '''
-        self.gl['df_plots'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
+        self.df_plots.to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
             datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
