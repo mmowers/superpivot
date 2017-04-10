@@ -23,8 +23,8 @@ class BokehPivot:
     """A base class for producing bokeh pivot charts"""
     def __init__(self):
         self.COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142']*1000
-        self.C_NORM = "#31AADE"
-        self.ADV_BASES = ['Consecutive', 'Total']
+        self.DEF_COLOR = "#31AADE"
+        self.NON_COL_BASES = ['Consecutive', 'Total']
         #initialize globals dict
         self.gl = {'df_source':None, 'df_plots':None, 'columns':None, 'widgets':None, 'controls': None, 'plots':None}
 
@@ -65,7 +65,7 @@ class BokehPivot:
 
         #build widgets and plots
         self.gl['df_source'], self.gl['columns'] = self.get_data(self.defaults['data_source'])
-        self.gl['widgets'] = self.build_widgets(self.gl['df_source'], self.gl['columns'], self.defaults, init_load=True, init_config=self.wdg_config)
+        self.gl['widgets'] = self.build_widgets(self.gl['df_source'], self.gl['columns'], self.wdg_col, self.wdg_non_col, self.defaults, init_load=True, init_config=self.wdg_config)
         self.set_wdg_col_options()
         self.gl['controls'] = bl.widgetbox(list(self.gl['widgets'].values()), id='widgets_section')
         self.gl['plots'] = bl.column([], id='plots_section')
@@ -101,13 +101,15 @@ class BokehPivot:
         df_source[cols['continuous']] = df_source[cols['continuous']].fillna(0)
         return (df_source, cols)
 
-    def build_widgets(self, df_source, cols, defaults, init_load=False, init_config={}):
+    def build_widgets(self, df_source, cols, wdg_col, wdg_non_col, defaults, init_load=False, init_config={}):
         '''
         Use a dataframe and its columns to set widget options. Widget values may
         be set by URL parameters via init_config.
 
         Args:
             df_source (pandas dataframe): Dataframe of the csv source.
+            wdg_col (list of strings): List of widgets that use columns as their selectors
+            non_wdg_col (list of strings): List of widgets that don't use columns as selector and share general widget update function
             cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
             defaults (dict): Keys correspond to widgets, and values (str) are the default values of those widgets.
             init_load (boolean, optional): If this is the initial page load, then this will be True, else False.
@@ -199,14 +201,14 @@ class BokehPivot:
         wdg['update'].on_click(self.update_plots)
         wdg['download'].on_click(self.download)
         wdg['adv_col'].on_change('value', self.update_adv_col)
-        for name in self.wdg_col:
+        for name in wdg_col:
             wdg[name].on_change('value', self.update_wdg_col)
-        for name in self.wdg_non_col:
+        for name in wdg_non_col:
             wdg[name].on_change('value', self.update_wdg)
 
         return wdg
 
-    def set_df_plots(self, df_source, cols, wdg):
+    def set_df_plots(self, df_source, cols, wdg, non_col_bases):
         '''
         Apply filters, scaling, aggregation, and sorting to source dataframe, and return the result.
 
@@ -214,6 +216,7 @@ class BokehPivot:
             df_source (pandas dataframe): Dataframe of the csv source.
             cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
             wdg (ordered dict): Dictionary of bokeh model widgets.
+            non_col_bases (List of strings): List of bases for comparison operations that are not column values.
 
         Returns:
             df_plots (pandas dataframe): df_source after having been filtered, scaled, aggregated, and sorted.
@@ -257,10 +260,10 @@ class BokehPivot:
         y_agg = wdg['y_agg'].value
         if op != 'None' and col != 'None' and col in df_plots and col_base != 'None' and y_agg != 'None' and y_val in cols['continuous']:
             #sort df_plots so that col_base is at the front, so that we can use transform('first') later
-            if col in cols['continuous'] and col_base not in self.ADV_BASES:
+            if col in cols['continuous'] and col_base not in non_col_bases:
                 col_base = float(col_base)
             col_list = df_plots[col].unique().tolist()
-            if col_base not in self.ADV_BASES:
+            if col_base not in non_col_bases:
                 col_list.remove(col_base)
                 col_list = [col_base] + col_list
             df_plots['tempsort'] = df_plots[col].map(lambda x: col_list.index(x))
@@ -309,7 +312,7 @@ class BokehPivot:
 
         return df_plots
 
-    def create_figures(self, df_plots, wdg, cols):
+    def create_figures(self, df_plots, wdg, cols, colors, def_color):
         '''
         Create figures based on the data in a dataframe and widget configuration, and return figures in a list.
         The explode widget determines if there will be multiple figures.
@@ -318,6 +321,8 @@ class BokehPivot:
             df_plots (pandas dataframe): Dataframe of csv source after being filtered, scaled, aggregated, and sorted.
             wdg (ordered dict): Dictionary of bokeh model widgets.
             cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
+            colors (list of strings): Colors of the different series.
+            def_color (string): Default color
 
         Returns:
             plot_list (list): List of bokeh.model.figures.
@@ -325,21 +330,21 @@ class BokehPivot:
         plot_list = []
         df_plots_cp = df_plots.copy()
         if wdg['explode'].value == 'None':
-            plot_list.append(self.create_figure(df_plots_cp, df_plots, wdg, cols))
+            plot_list.append(self.create_figure(df_plots_cp, df_plots, wdg, cols, colors, def_color))
         else:
             if wdg['explode_group'].value == 'None':
                 for explode_val in df_plots_cp[wdg['explode'].value].unique().tolist():
                     df_exploded = df_plots_cp[df_plots_cp[wdg['explode'].value].isin([explode_val])]
-                    plot_list.append(self.create_figure(df_exploded, df_plots, wdg, cols, explode_val))
+                    plot_list.append(self.create_figure(df_exploded, df_plots, wdg, cols, colors, def_color, explode_val))
             else:
                 for explode_group in df_plots_cp[wdg['explode_group'].value].unique().tolist():
                     df_exploded_group = df_plots_cp[df_plots_cp[wdg['explode_group'].value].isin([explode_group])]
                     for explode_val in df_exploded_group[wdg['explode'].value].unique().tolist():
                         df_exploded = df_exploded_group[df_exploded_group[wdg['explode'].value].isin([explode_val])]
-                        plot_list.append(self.create_figure(df_exploded, df_plots, wdg, cols, explode_val, explode_group))
+                        plot_list.append(self.create_figure(df_exploded, df_plots, wdg, cols, colors, def_color, explode_val, explode_group))
         return plot_list
 
-    def create_figure(self, df_exploded, df_plots, wdg, cols, explode_val=None, explode_group=None):
+    def create_figure(self, df_exploded, df_plots, wdg, cols, colors, def_color, explode_val=None, explode_group=None):
         '''
         Create and return a figure based on the data in a dataframe and widget configuration.
 
@@ -348,6 +353,8 @@ class BokehPivot:
             df_plots (pandas dataframe): Dataframe of all plots data, used only for maintaining consistent series colors.
             wdg (ordered dict): Dictionary of bokeh model widgets.
             cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
+            colors (list of strings): Colors of the different series.
+            def_color (string): Default color
             explode_val (string, optional): The value in the column designated by wdg['explode'] that applies to this figure.
             explode_group (string, optional): The value in the wdg['explode_group'] column that applies to this figure.
 
@@ -419,7 +426,7 @@ class BokehPivot:
             if wdg['y_max'].value != '': p.y_range.end = float(wdg['y_max'].value)
 
         #Add glyphs to figure
-        c = self.C_NORM
+        c = def_color
         STACKEDTYPES = ['Bar', 'Area']
         if wdg['series'].value == 'None':
             if wdg['y_agg'].value != 'None' and wdg['y'].value in cols['continuous']:
@@ -433,7 +440,7 @@ class BokehPivot:
                 y_bases_pos = [0]*len(xs_full)
                 y_bases_neg = [0]*len(xs_full)
             for i, ser in enumerate(df_exploded[wdg['series'].value].unique().tolist()):
-                c = self.COLORS[full_series.index(ser)]
+                c = colors[full_series.index(ser)]
                 df_series = df_exploded[df_exploded[wdg['series'].value].isin([ser])]
                 xs_ser = df_series[x_col].values.tolist()
                 ys_ser = df_series[wdg['y'].value].values.tolist()
@@ -489,13 +496,14 @@ class BokehPivot:
             p.patch('x', 'y', source=source, alpha=alpha, fill_color=c, line_color=None, line_width=None)
 
 
-    def build_series_legend(self, df_plots, series_val):
+    def build_series_legend(self, df_plots, series_val, colors):
         '''
         Return html for series legend, based on values of column that was chosen for series, and global COLORS.
 
         Args:
             df_plots (pandas dataframe): Dataframe of all plots data.
             series_val (string): Header for column chosen as series.
+            colors (list of strings): Colors of the different series.
 
         Returns:
             series_legend_string (string): html to be used as legend.
@@ -504,7 +512,7 @@ class BokehPivot:
         if series_val != 'None':
             active_list = df_plots[series_val].unique().tolist()
             for i, txt in reversed(list(enumerate(active_list))):
-                series_legend_string += '<div class="legend-entry"><span class="legend-color" style="background-color:' + str(self.COLORS[i]) + ';"></span>'
+                series_legend_string += '<div class="legend-entry"><span class="legend-color" style="background-color:' + str(colors[i]) + ';"></span>'
                 series_legend_string += '<span class="legend-text">' + str(txt) +'</span></div>'
         series_legend_string += '</div>'
         return series_legend_string
@@ -530,7 +538,7 @@ class BokehPivot:
             self.defaults[w] = 'None'
         self.defaults['chart_type'] = 'Dot'
         self.gl['df_source'], self.gl['columns'] = self.get_data(self.defaults['data_source'])
-        self.gl['widgets'] = self.build_widgets(self.gl['df_source'], self.gl['columns'], self.defaults)
+        self.gl['widgets'] = self.build_widgets(self.gl['df_source'], self.gl['columns'], self.wdg_col, self.wdg_non_col, self.defaults)
         self.gl['controls'].children = list(self.gl['widgets'].values())
         self.gl['plots'].children = []
 
@@ -555,7 +563,7 @@ class BokehPivot:
         wdg = self.gl['widgets']
         df = self.gl['df_source']
         if wdg['adv_col'].value != 'None':
-            wdg['adv_col_base'].options = ['None'] + self.ADV_BASES + [str(i) for i in sorted(df[wdg['adv_col'].value].unique().tolist())]
+            wdg['adv_col_base'].options = ['None'] + self.NON_COL_BASES + [str(i) for i in sorted(df[wdg['adv_col'].value].unique().tolist())]
 
     def set_wdg_col_options(self):
         '''
@@ -581,9 +589,9 @@ class BokehPivot:
         if self.gl['widgets']['x'].value == 'None' or self.gl['widgets']['y'].value == 'None':
             self.gl['plots'].children = []
             return
-        self.gl['df_plots'] = self.set_df_plots(self.gl['df_source'], self.gl['columns'], self.gl['widgets'])
-        self.gl['widgets']['series_legend'].text = self.build_series_legend(self.gl['df_plots'], self.gl['widgets']['series'].value)
-        self.gl['plots'].children = self.create_figures(self.gl['df_plots'], self.gl['widgets'], self.gl['columns'])
+        self.gl['df_plots'] = self.set_df_plots(self.gl['df_source'], self.gl['columns'], self.gl['widgets'], self.NON_COL_BASES)
+        self.gl['widgets']['series_legend'].text = self.build_series_legend(self.gl['df_plots'], self.gl['widgets']['series'].value, self.COLORS)
+        self.gl['plots'].children = self.create_figures(self.gl['df_plots'], self.gl['widgets'], self.gl['columns'], self.COLORS, self.DEF_COLOR)
 
     def download(self):
         '''
