@@ -427,7 +427,7 @@ def add_glyph(wdg, p, xs, ys, c, y_bases=None, series=None):
     elif wdg['chart_type'].value == 'Line':
         source = bms.ColumnDataSource({'x': xs, 'y': ys, 'x_legend': xs, 'y_legend': y_unstacked, 'ser_legend': ser})
         p.line('x', 'y', source=source, color=c, alpha=alpha, line_width=float(wdg['line_width'].value))
-    elif wdg['chart_type'].value == 'Bar':
+    elif wdg['chart_type'].value == 'Bar' and y_unstacked != [0]*len(y_unstacked):
         if y_bases is None: y_bases = [0]*len(ys)
         centers = [(ys[i] + y_bases[i])/2 for i in range(len(ys))]
         heights = [abs(ys[i] - y_bases[i]) for i in range(len(ys))]
@@ -441,10 +441,9 @@ def add_glyph(wdg, p, xs, ys, c, y_bases=None, series=None):
                 del heights[i]
                 del y_unstacked[i]
                 del ser[i]
-        if len(xs) > 0:
-            source = bms.ColumnDataSource({'x': xs_cp, 'y': centers, 'x_legend': xs_cp, 'y_legend': y_unstacked, 'h': heights, 'ser_legend': ser})
-            p.rect('x', 'y', source=source, height='h', color=c, fill_alpha=alpha, width=float(wdg['bar_width'].value), line_color=None, line_width=None)
-    elif wdg['chart_type'].value == 'Area':
+        source = bms.ColumnDataSource({'x': xs_cp, 'y': centers, 'x_legend': xs_cp, 'y_legend': y_unstacked, 'h': heights, 'ser_legend': ser})
+        p.rect('x', 'y', source=source, height='h', color=c, fill_alpha=alpha, width=float(wdg['bar_width'].value), line_color=None, line_width=None)
+    elif wdg['chart_type'].value == 'Area' and y_unstacked != [0]*len(y_unstacked):
         if y_bases is None: y_bases = [0]*len(ys)
         #only add glyph if something will be shown.
         if ys != y_bases:
