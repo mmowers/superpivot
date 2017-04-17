@@ -431,8 +431,19 @@ def add_glyph(wdg, p, xs, ys, c, y_bases=None, series=None):
         if y_bases is None: y_bases = [0]*len(ys)
         centers = [(ys[i] + y_bases[i])/2 for i in range(len(ys))]
         heights = [abs(ys[i] - y_bases[i]) for i in range(len(ys))]
-        source = bms.ColumnDataSource({'x': xs, 'y': centers, 'x_legend': xs, 'y_legend': y_unstacked, 'h': heights, 'ser_legend': ser})
-        p.rect('x', 'y', source=source, height='h', color=c, fill_alpha=alpha, width=float(wdg['bar_width'].value), line_color=None, line_width=None)
+        #bars have issues when height is 0, so remove elements whose height is 0 
+        heights_orig = list(heights) #we make a copy so we aren't modifying the list we are iterating on.
+        xs_cp = list(xs) #we don't want to modify xs that are passed into function
+        for i, h in reversed(list(enumerate(heights_orig))):
+            if h == 0:
+                del xs_cp[i]
+                del centers[i]
+                del heights[i]
+                del y_unstacked[i]
+                del ser[i]
+        if len(xs) > 0:
+            source = bms.ColumnDataSource({'x': xs_cp, 'y': centers, 'x_legend': xs_cp, 'y_legend': y_unstacked, 'h': heights, 'ser_legend': ser})
+            p.rect('x', 'y', source=source, height='h', color=c, fill_alpha=alpha, width=float(wdg['bar_width'].value), line_color=None, line_width=None)
     elif wdg['chart_type'].value == 'Area':
         if y_bases is None: y_bases = [0]*len(ys)
         xs_around = xs + xs[::-1]
