@@ -446,10 +446,12 @@ def add_glyph(wdg, p, xs, ys, c, y_bases=None, series=None):
             p.rect('x', 'y', source=source, height='h', color=c, fill_alpha=alpha, width=float(wdg['bar_width'].value), line_color=None, line_width=None)
     elif wdg['chart_type'].value == 'Area':
         if y_bases is None: y_bases = [0]*len(ys)
-        xs_around = xs + xs[::-1]
-        ys_around = y_bases + ys[::-1]
-        source = bms.ColumnDataSource({'x': xs_around, 'y': ys_around})
-        p.patch('x', 'y', source=source, alpha=alpha, fill_color=c, line_color=None, line_width=None)
+        #only add glyph if something will be shown.
+        if ys != y_bases:
+            xs_around = xs + xs[::-1]
+            ys_around = y_bases + ys[::-1]
+            source = bms.ColumnDataSource({'x': xs_around, 'y': ys_around})
+            p.patch('x', 'y', source=source, alpha=alpha, fill_color=c, line_color=None, line_width=None)
 
 
 def build_series_legend(df_plots, series_val):
