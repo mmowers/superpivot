@@ -481,19 +481,28 @@ class BokehPivot:
         elif wdg['chart_type'].value == 'Line':
             source = bms.ColumnDataSource({'x': xs, 'y': ys, 'x_legend': xs, 'y_legend': y_unstacked, 'ser_legend': ser})
             p.line('x', 'y', source=source, color=c, alpha=alpha, line_width=float(wdg['line_width'].value))
-        elif wdg['chart_type'].value == 'Bar':
+        elif wdg['chart_type'].value == 'Bar' and y_unstacked != [0]*len(y_unstacked):
             if y_bases is None: y_bases = [0]*len(ys)
             centers = [(ys[i] + y_bases[i])/2 for i in range(len(ys))]
             heights = [abs(ys[i] - y_bases[i]) for i in range(len(ys))]
-            source = bms.ColumnDataSource({'x': xs, 'y': centers, 'x_legend': xs, 'y_legend': y_unstacked, 'h': heights, 'ser_legend': ser})
+            #bars have issues when height is 0, so remove elements whose height is 0 
+            heights_orig = list(heights) #we make a copy so we aren't modifying the list we are iterating on.
+            xs_cp = list(xs) #we don't want to modify xs that are passed into function
+            for i, h in reversed(list(enumerate(heights_orig))):
+                if h == 0:
+                    del xs_cp[i]
+                    del centers[i]
+                    del heights[i]
+                    del y_unstacked[i]
+                    del ser[i]
+            source = bms.ColumnDataSource({'x': xs_cp, 'y': centers, 'x_legend': xs_cp, 'y_legend': y_unstacked, 'h': heights, 'ser_legend': ser})
             p.rect('x', 'y', source=source, height='h', color=c, fill_alpha=alpha, width=float(wdg['bar_width'].value), line_color=None, line_width=None)
-        elif wdg['chart_type'].value == 'Area':
+        elif wdg['chart_type'].value == 'Area' and y_unstacked != [0]*len(y_unstacked):
             if y_bases is None: y_bases = [0]*len(ys)
             xs_around = xs + xs[::-1]
             ys_around = y_bases + ys[::-1]
             source = bms.ColumnDataSource({'x': xs_around, 'y': ys_around})
             p.patch('x', 'y', source=source, alpha=alpha, fill_color=c, line_color=None, line_width=None)
-
 
     def build_series_legend(self, df_plots, series_val, colors):
         '''
