@@ -3,6 +3,6 @@ but with additonal ability to explode into multiple charts.
 See README.md for more information.
 
 '''
-import testclass
+import bokehpivot as bp
 
-testclass.BokehPivot()
+bp.BokehPivot()
