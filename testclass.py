@@ -39,40 +39,37 @@ class BokehPivot:
             'y_min', 'y_max', 'y_scale', 'y_title', 'y_title_size', 'y_major_label_size',
             'circle_size', 'bar_width', 'line_width']
 
-        #Specify default widget values
-        self.defaults = {}
-        self.defaults['data_source'] = os.path.dirname(os.path.realpath(__file__)) + '/csv/US_electric_power_generation.csv'
-        for w in self.wdg_col:
-            self.defaults[w] = 'None'
-        self.defaults['x'] = 'Year'
-        self.defaults['y'] = 'Electricity Generation (TWh)'
-        self.defaults['series'] = 'Technology'
-        self.defaults['explode'] = 'Case'
-        self.defaults['chart_type'] = 'Area'
-
         #On initial load, read 'widgets' parameter from URL query string and use to set data source (data_source)
         #and widget configuration object (wdg_config)
         self.wdg_config = {}
         self.args = bio.curdoc().session_context.request.arguments
         self.wdg_arr = self.args.get('widgets')
+        self.data_source = ''
         if self.wdg_arr is not None:
             self.wdg_config = json.loads(urlp.unquote(self.wdg_arr[0].decode('utf-8')))
             if 'data' in self.wdg_config:
-                self.defaults['data_source'] = str(self.wdg_config['data'])
-                for w in self.wdg_col:
-                    self.defaults[w] = 'None'
+                self.data_source = str(self.wdg_config['data'])
 
         #build widgets and plots
-        self.df_source, self.columns = self.get_data(self.defaults['data_source'])
-        self.widgets = self.build_widgets(self.df_source, self.columns, self.wdg_col, self.wdg_non_col, self.defaults, init_load=True, init_config=self.wdg_config)
-        self.set_wdg_col_options()
-        self.controls = bl.widgetbox(list(self.widgets.values()), id='widgets_section')
+        self.top_wdg = self.build_top_wdg(self.data_source)
+        self.widgets = self.top_wdg.copy()
         self.plots = bl.column([], id='plots_section')
-        self.update_plots()
+        if self.data_source != '':
+            self.df_source, self.columns = self.get_data(self.data_source)
+            self.widgets.update(self.build_widgets(self.df_source, self.columns, self.wdg_col, self.wdg_non_col, init_load=True, init_config=self.wdg_config))
+            self.set_wdg_col_options()
+            self.update_plots()
+        self.controls = bl.widgetbox(list(self.widgets.values()), id='widgets_section')
         self.layout = bl.row(self.controls, self.plots, id='layout')
 
         bio.curdoc().add_root(self.layout)
         bio.curdoc().title = "Exploding Pivot Chart Maker"
+
+    def build_top_wdg(self, data_source):
+        wdg = collections.OrderedDict()
+        wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source, css_classes=['wdgkey-data'])
+        wdg['data'].on_change('value', self.update_data)
+        return wdg
 
     def get_data(self, data_source):
         '''
@@ -100,7 +97,7 @@ class BokehPivot:
         df_source[cols['continuous']] = df_source[cols['continuous']].fillna(0)
         return (df_source, cols)
 
-    def build_widgets(self, df_source, cols, wdg_col, wdg_non_col, defaults, init_load=False, init_config={}):
+    def build_widgets(self, df_source, cols, wdg_col, wdg_non_col, init_load=False, init_config={}):
         '''
         Use a dataframe and its columns to set widget options. Widget values may
         be set by URL parameters via init_config.
@@ -110,7 +107,6 @@ class BokehPivot:
             wdg_col (list of strings): List of widgets that use columns as their selectors
             non_wdg_col (list of strings): List of widgets that don't use columns as selector and share general widget update function
             cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
-            defaults (dict): Keys correspond to widgets, and values (str) are the default values of those widgets.
             init_load (boolean, optional): If this is the initial page load, then this will be True, else False.
             init_config (dict): Initial widget configuration passed via URL.
 
@@ -133,21 +129,20 @@ class BokehPivot:
 
         #Add widgets
         wdg = collections.OrderedDict()
-        wdg['data'] = bmw.TextInput(title='Data Source (required)', value=defaults['data_source'], css_classes=['wdgkey-data'])
         wdg['x_dropdown'] = bmw.Div(text='X-Axis (required)', css_classes=['x-dropdown'])
-        wdg['x'] = bmw.Select(title='X-Axis (required)', value=defaults['x'], options=['None'] + cols['all'], css_classes=['wdgkey-x', 'x-drop'])
-        wdg['x_group'] = bmw.Select(title='Group X-Axis By', value=defaults['x_group'], options=['None'] + cols['seriesable'], css_classes=['wdgkey-x_group', 'x-drop'])
+        wdg['x'] = bmw.Select(title='X-Axis (required)', value='None', options=['None'] + cols['all'], css_classes=['wdgkey-x', 'x-drop'])
+        wdg['x_group'] = bmw.Select(title='Group X-Axis By', value='None', options=['None'] + cols['seriesable'], css_classes=['wdgkey-x_group', 'x-drop'])
         wdg['y_dropdown'] = bmw.Div(text='Y-Axis (required)', css_classes=['y-dropdown'])
-        wdg['y'] = bmw.Select(title='Y-Axis (required)', value=defaults['y'], options=['None'] + cols['all'], css_classes=['wdgkey-y', 'y-drop'])
+        wdg['y'] = bmw.Select(title='Y-Axis (required)', value='None', options=['None'] + cols['all'], css_classes=['wdgkey-y', 'y-drop'])
         wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='Sum', options=AGGREGATIONS, css_classes=['wdgkey-y_agg', 'y-drop'])
         wdg['y_weight'] = bmw.Select(title='Weighting Factor', value='None', options=['None'] + cols['all'], css_classes=['wdgkey-y_weight', 'y-drop'])
         wdg['series_dropdown'] = bmw.Div(text='Series', css_classes=['series-dropdown'])
-        wdg['series'] = bmw.Select(title='Separate Series By', value=defaults['series'], options=['None'] + cols['seriesable'],
+        wdg['series'] = bmw.Select(title='Separate Series By', value='None', options=['None'] + cols['seriesable'],
             css_classes=['wdgkey-series', 'series-drop'])
         wdg['series_legend'] = bmw.Div(text='', css_classes=['series-drop'])
         wdg['explode_dropdown'] = bmw.Div(text='Explode', css_classes=['explode-dropdown'])
-        wdg['explode'] = bmw.Select(title='Explode By', value=defaults['explode'], options=['None'] + cols['seriesable'], css_classes=['wdgkey-explode', 'explode-drop'])
-        wdg['explode_group'] = bmw.Select(title='Group Exploded Charts By', value=defaults['explode_group'], options=['None'] + cols['seriesable'],
+        wdg['explode'] = bmw.Select(title='Explode By', value='None', options=['None'] + cols['seriesable'], css_classes=['wdgkey-explode', 'explode-drop'])
+        wdg['explode_group'] = bmw.Select(title='Group Exploded Charts By', value='None', options=['None'] + cols['seriesable'],
             css_classes=['wdgkey-explode_group', 'explode-drop'])
         wdg['adv_dropdown'] = bmw.Div(text='Comparisons', css_classes=['adv-dropdown'])
         wdg['adv_op'] = bmw.Select(title='Operation', value='None', options=['None', 'Difference', 'Ratio'], css_classes=['wdgkey-adv_op', 'adv-drop'])
@@ -160,7 +155,7 @@ class BokehPivot:
             wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=list(range(len(val_list))), css_classes=['wdgkey-filter_'+str(j), 'filter'])
         wdg['update'] = bmw.Button(label='Update Filters', button_type='success', css_classes=['filters-update'])
         wdg['adjustments'] = bmw.Div(text='Plot Adjustments', css_classes=['adjust-dropdown'])
-        wdg['chart_type'] = bmw.Select(title='Chart Type', value=defaults['chart_type'], options=CHARTTYPES, css_classes=['wdgkey-chart_type', 'adjust-drop'])
+        wdg['chart_type'] = bmw.Select(title='Chart Type', value='Dot', options=CHARTTYPES, css_classes=['wdgkey-chart_type', 'adjust-drop'])
         wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value=str(PLOT_WIDTH), css_classes=['wdgkey-plot_width', 'adjust-drop'])
         wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value=str(PLOT_HEIGHT), css_classes=['wdgkey-plot_height', 'adjust-drop'])
         wdg['plot_title'] = bmw.TextInput(title='Plot Title', value='', css_classes=['wdgkey-plot_title', 'adjust-drop'])
@@ -196,7 +191,6 @@ class BokehPivot:
                         wdg[key].active = init_config[key]
 
         #Add update functions for widgets
-        wdg['data'].on_change('value', self.update_data)
         wdg['update'].on_click(self.update_plots)
         wdg['download'].on_click(self.download)
         wdg['adv_col'].on_change('value', self.update_adv_col)
@@ -541,12 +535,10 @@ class BokehPivot:
         '''
         When data source is updated, rebuild widgets and plots.
         '''
-        self.defaults['data_source'] = self.widgets['data'].value
-        for w in self.wdg_col:
-            self.defaults[w] = 'None'
-        self.defaults['chart_type'] = 'Dot'
-        self.df_source, self.columns = self.get_data(self.defaults['data_source'])
-        self.widgets = self.build_widgets(self.df_source, self.columns, self.wdg_col, self.wdg_non_col, self.defaults)
+        self.widgets = self.top_wdg.copy()
+        if self.widgets['data'].value != '':
+            self.df_source, self.columns = self.get_data(self.widgets['data'].value)
+            self.widgets.update(self.build_widgets(self.df_source, self.columns, self.wdg_col, self.wdg_non_col))
         self.controls.children = list(self.widgets.values())
         self.plots.children = []
 
