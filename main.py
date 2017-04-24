@@ -4,5 +4,7 @@ See README.md for more information.
 
 '''
 import bokehpivot as bp
+import os
 
-bp.BokehPivot()
+dirpath = os.path.dirname(os.path.realpath(__file__))
+bp.BokehPivot(dirpath)

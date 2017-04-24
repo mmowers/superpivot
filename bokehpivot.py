@@ -21,7 +21,8 @@ import six.moves.urllib.parse as urlp
 class BokehPivot:
 
     """A base class for producing bokeh pivot charts"""
-    def __init__(self):
+    def __init__(self, dirpath=None):
+        self.dirpath = dirpath
         self.COLORS = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142']*1000
         self.DEF_COLOR = "#31AADE"
         self.NON_COL_BASES = ['Consecutive', 'Total']
@@ -598,5 +599,5 @@ class BokehPivot:
         Download a csv file of the currently viewed data to the downloads/ directory,
         with the current timestamp.
         '''
-        self.df_plots.to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
+        self.df_plots.to_csv(self.dirpath + '/downloads/out '+
             datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
