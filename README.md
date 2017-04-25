@@ -30,10 +30,13 @@ from the command line:
 conda install bokeh
 ```
 
+You will also need to install bokepivot: https://github.com/mmowers/bokehpivot.
+Follow installation instructions in the README.
+
 ## Running
 From command line:
 ```
-bokeh serve --show /path/to/this/app/
+bokeh serve --show /path/to/this/repo/
 ```
 This will launch a browser window with the viewer. To see
 a plot, you'll have to select the columns to use for x-axis and y-axis, which are two of the widgets
