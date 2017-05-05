@@ -5,7 +5,7 @@ This bokeh app creates pivot charts from data, similar to Excel's pivot
 chart functionality, but with the additional ability to explode into
 multiple pivot charts.
 
-This app has been contributed as an example to the main Bokeh repo:
+A more simplified version of this app has been contributed as an example to the main Bokeh repo:
 https://github.com/bokeh/bokeh/tree/master/examples/app/pivot
 
 The code is data-agnostic, so any other properly formatted data can
