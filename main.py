@@ -53,6 +53,35 @@ WDG_NON_COL = ['chart_type', 'y_agg', 'y_weight', 'adv_op', 'adv_col_base', 'plo
 #initialize globals dict for variables that are modified within update functions.
 GL = {'df_source':None, 'df_plots':None, 'columns':None, 'top_wdg':None, 'widgets':None, 'controls': None, 'plots':None}
 
+def initialize():
+    '''
+    On initial load, read 'widgets' parameter from URL query string and use to set data source (data_source)
+    and widget configuration object (wdg_config)
+    '''
+    wdg_config = {}
+    args = bio.curdoc().session_context.request.arguments
+    wdg_arr = args.get('widgets')
+    data_source = ''
+    if wdg_arr is not None:
+        wdg_config = json.loads(urlp.unquote(wdg_arr[0].decode('utf-8')))
+        if 'data' in wdg_config:
+            data_source = str(wdg_config['data'])
+
+    #build widgets and plots
+    GL['top_wdg'] = build_top_wdg(data_source)
+    GL['widgets'] = GL['top_wdg'].copy()
+    GL['plots'] = bl.column([], id='plots_section')
+    if data_source != '':
+        GL['df_source'], GL['columns'] = get_data(data_source)
+        GL['widgets'].update(build_widgets(GL['df_source'], GL['columns'], init_load=True, init_config=wdg_config))
+        set_wdg_col_options()
+        update_plots()
+    GL['controls'] = bl.widgetbox(list(GL['widgets'].values()), id='widgets_section')
+    layout = bl.row(GL['controls'], GL['plots'], id='layout')
+
+    bio.curdoc().add_root(layout)
+    bio.curdoc().title = "Exploding Pivot Chart Maker"
+
 def build_top_wdg(data_source):
     wdg = collections.OrderedDict()
     wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source, css_classes=['wdgkey-data'])
@@ -572,29 +601,4 @@ def download():
     GL['df_plots'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
         datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
 
-
-#On initial load, read 'widgets' parameter from URL query string and use to set data source (data_source)
-#and widget configuration object (wdg_config)
-wdg_config = {}
-args = bio.curdoc().session_context.request.arguments
-wdg_arr = args.get('widgets')
-data_source = ''
-if wdg_arr is not None:
-    wdg_config = json.loads(urlp.unquote(wdg_arr[0].decode('utf-8')))
-    if 'data' in wdg_config:
-        data_source = str(wdg_config['data'])
-
-#build widgets and plots
-GL['top_wdg'] = build_top_wdg(data_source)
-GL['widgets'] = GL['top_wdg'].copy()
-GL['plots'] = bl.column([], id='plots_section')
-if data_source != '':
-    GL['df_source'], GL['columns'] = get_data(data_source)
-    GL['widgets'].update(build_widgets(GL['df_source'], GL['columns'], init_load=True, init_config=wdg_config))
-    set_wdg_col_options()
-    update_plots()
-GL['controls'] = bl.widgetbox(list(GL['widgets'].values()), id='widgets_section')
-layout = bl.row(GL['controls'], GL['plots'], id='layout')
-
-bio.curdoc().add_root(layout)
-bio.curdoc().title = "Exploding Pivot Chart Maker"
+initialize()
