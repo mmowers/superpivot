@@ -38,6 +38,12 @@ STACKEDTYPES = ['Bar', 'Area']
 AGGREGATIONS = ['None', 'Sum', 'Ave', 'Weighted Ave']
 ADV_BASES = ['Consecutive', 'Total']
 
+def build_top_wdg(data_source):
+    wdg = collections.OrderedDict()
+    wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source, css_classes=['wdgkey-data'])
+    wdg['data'].on_change('value', update_data)
+    return wdg
+
 def get_data(data_source):
     '''
     Read a csv into a pandas dataframe, and determine which columns of the dataframe
@@ -68,7 +74,7 @@ def get_data(data_source):
     df_source[cols['continuous']] = df_source[cols['continuous']].fillna(0)
     return (df_source, cols)
 
-def build_widgets(df_source, cols, defaults, init_load=False, init_config={}):
+def build_widgets(df_source, cols, init_load=False, init_config={}):
     '''
     Use a dataframe and its columns to set widget options. Widget values may
     be set by URL parameters via init_config.
@@ -76,7 +82,6 @@ def build_widgets(df_source, cols, defaults, init_load=False, init_config={}):
     Args:
         df_source (pandas dataframe): Dataframe of the csv source.
         cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
-        defaults (dict): Keys correspond to widgets, and values (str) are the default values of those widgets.
         init_load (boolean, optional): If this is the initial page load, then this will be True, else False.
         init_config (dict): Initial widget configuration passed via URL.
 
@@ -85,21 +90,20 @@ def build_widgets(df_source, cols, defaults, init_load=False, init_config={}):
     '''
     #Add widgets
     wdg = collections.OrderedDict()
-    wdg['data'] = bmw.TextInput(title='Data Source (required)', value=defaults['data_source'], css_classes=['wdgkey-data'])
     wdg['x_dropdown'] = bmw.Div(text='X-Axis (required)', css_classes=['x-dropdown'])
-    wdg['x'] = bmw.Select(title='X-Axis (required)', value=defaults['x'], options=['None'] + cols['all'], css_classes=['wdgkey-x', 'x-drop'])
-    wdg['x_group'] = bmw.Select(title='Group X-Axis By', value=defaults['x_group'], options=['None'] + cols['seriesable'], css_classes=['wdgkey-x_group', 'x-drop'])
+    wdg['x'] = bmw.Select(title='X-Axis (required)', value='None', options=['None'] + cols['all'], css_classes=['wdgkey-x', 'x-drop'])
+    wdg['x_group'] = bmw.Select(title='Group X-Axis By', value='None', options=['None'] + cols['seriesable'], css_classes=['wdgkey-x_group', 'x-drop'])
     wdg['y_dropdown'] = bmw.Div(text='Y-Axis (required)', css_classes=['y-dropdown'])
-    wdg['y'] = bmw.Select(title='Y-Axis (required)', value=defaults['y'], options=['None'] + cols['all'], css_classes=['wdgkey-y', 'y-drop'])
+    wdg['y'] = bmw.Select(title='Y-Axis (required)', value='None', options=['None'] + cols['all'], css_classes=['wdgkey-y', 'y-drop'])
     wdg['y_agg'] = bmw.Select(title='Y-Axis Aggregation', value='Sum', options=AGGREGATIONS, css_classes=['wdgkey-y_agg', 'y-drop'])
     wdg['y_weight'] = bmw.Select(title='Weighting Factor', value='None', options=['None'] + cols['all'], css_classes=['wdgkey-y_weight', 'y-drop'])
     wdg['series_dropdown'] = bmw.Div(text='Series', css_classes=['series-dropdown'])
-    wdg['series'] = bmw.Select(title='Separate Series By', value=defaults['series'], options=['None'] + cols['seriesable'],
+    wdg['series'] = bmw.Select(title='Separate Series By', value='None', options=['None'] + cols['seriesable'],
         css_classes=['wdgkey-series', 'series-drop'])
     wdg['series_legend'] = bmw.Div(text='', css_classes=['series-drop'])
     wdg['explode_dropdown'] = bmw.Div(text='Explode', css_classes=['explode-dropdown'])
-    wdg['explode'] = bmw.Select(title='Explode By', value=defaults['explode'], options=['None'] + cols['seriesable'], css_classes=['wdgkey-explode', 'explode-drop'])
-    wdg['explode_group'] = bmw.Select(title='Group Exploded Charts By', value=defaults['explode_group'], options=['None'] + cols['seriesable'],
+    wdg['explode'] = bmw.Select(title='Explode By', value='None', options=['None'] + cols['seriesable'], css_classes=['wdgkey-explode', 'explode-drop'])
+    wdg['explode_group'] = bmw.Select(title='Group Exploded Charts By', value='None', options=['None'] + cols['seriesable'],
         css_classes=['wdgkey-explode_group', 'explode-drop'])
     wdg['adv_dropdown'] = bmw.Div(text='Comparisons', css_classes=['adv-dropdown'])
     wdg['adv_op'] = bmw.Select(title='Operation', value='None', options=['None', 'Difference', 'Ratio'], css_classes=['wdgkey-adv_op', 'adv-drop'])
@@ -112,7 +116,7 @@ def build_widgets(df_source, cols, defaults, init_load=False, init_config={}):
         wdg['filter_'+str(j)] = bmw.CheckboxGroup(labels=val_list, active=list(range(len(val_list))), css_classes=['wdgkey-filter_'+str(j), 'filter'])
     wdg['update'] = bmw.Button(label='Update Filters', button_type='success', css_classes=['filters-update'])
     wdg['adjustments'] = bmw.Div(text='Plot Adjustments', css_classes=['adjust-dropdown'])
-    wdg['chart_type'] = bmw.Select(title='Chart Type', value=defaults['chart_type'], options=CHARTTYPES, css_classes=['wdgkey-chart_type', 'adjust-drop'])
+    wdg['chart_type'] = bmw.Select(title='Chart Type', value='Dot', options=CHARTTYPES, css_classes=['wdgkey-chart_type', 'adjust-drop'])
     wdg['plot_width'] = bmw.TextInput(title='Plot Width (px)', value=str(PLOT_WIDTH), css_classes=['wdgkey-plot_width', 'adjust-drop'])
     wdg['plot_height'] = bmw.TextInput(title='Plot Height (px)', value=str(PLOT_HEIGHT), css_classes=['wdgkey-plot_height', 'adjust-drop'])
     wdg['plot_title'] = bmw.TextInput(title='Plot Title', value='', css_classes=['wdgkey-plot_title', 'adjust-drop'])
@@ -148,7 +152,6 @@ def build_widgets(df_source, cols, defaults, init_load=False, init_config={}):
                     wdg[key].active = init_config[key]
 
     #Add update functions for widgets
-    wdg['data'].on_change('value', update_data)
     wdg['update'].on_click(update_plots)
     wdg['download'].on_click(download)
     wdg['adv_col'].on_change('value', update_adv_col)
@@ -487,12 +490,10 @@ def update_data(attr, old, new):
     '''
     When data source is updated, rebuild widgets and plots.
     '''
-    defaults['data_source'] = gl['widgets']['data'].value
-    for w in wdg_col:
-        defaults[w] = 'None'
-    defaults['chart_type'] = 'Dot'
-    gl['df_source'], gl['columns'] = get_data(defaults['data_source'])
-    gl['widgets'] = build_widgets(gl['df_source'], gl['columns'], defaults)
+    gl['widgets'] = gl['top_wdg'].copy()
+    if gl['widgets']['data'].value != '':
+        gl['df_source'], gl['columns'] = get_data(gl['widgets']['data'].value)
+        gl['widgets'].update(build_widgets(gl['df_source'], gl['columns']))
     gl['controls'].children = list(gl['widgets'].values())
     gl['plots'].children = []
 
@@ -556,7 +557,7 @@ def download():
         datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
 
 #initialize globals dict
-gl = {'df_source':None, 'df_plots':None, 'columns':None, 'widgets':None, 'controls': None, 'plots':None}
+gl = {'df_source':None, 'df_plots':None, 'columns':None, 'top_wdg':None, 'widgets':None, 'controls': None, 'plots':None}
 
 #List of widgets that use columns as their selectors
 wdg_col_all = ['x', 'y'] #all columns available for these widgets
@@ -570,36 +571,27 @@ wdg_non_col = ['chart_type', 'y_agg', 'y_weight', 'adv_op', 'adv_col_base', 'plo
     'y_min', 'y_max', 'y_scale', 'y_title', 'y_title_size', 'y_major_label_size',
     'circle_size', 'bar_width', 'line_width']
 
-#Specify default widget values
-defaults = {}
-defaults['data_source'] = os.path.dirname(os.path.realpath(__file__)) + '/csv/US_electric_power_generation.csv'
-for w in wdg_col:
-    defaults[w] = 'None'
-defaults['x'] = 'Year'
-defaults['y'] = 'Electricity Generation (TWh)'
-defaults['series'] = 'Technology'
-defaults['explode'] = 'Case'
-defaults['chart_type'] = 'Area'
-
 #On initial load, read 'widgets' parameter from URL query string and use to set data source (data_source)
 #and widget configuration object (wdg_config)
 wdg_config = {}
 args = bio.curdoc().session_context.request.arguments
 wdg_arr = args.get('widgets')
+data_source = ''
 if wdg_arr is not None:
     wdg_config = json.loads(urlp.unquote(wdg_arr[0].decode('utf-8')))
     if 'data' in wdg_config:
-        defaults['data_source'] = str(wdg_config['data'])
-        for w in wdg_col:
-            defaults[w] = 'None'
+        data_source = str(wdg_config['data'])
 
 #build widgets and plots
-gl['df_source'], gl['columns'] = get_data(defaults['data_source'])
-gl['widgets'] = build_widgets(gl['df_source'], gl['columns'], defaults, init_load=True, init_config=wdg_config)
-set_wdg_col_options()
-gl['controls'] = bl.widgetbox(list(gl['widgets'].values()), id='widgets_section')
+gl['top_wdg'] = build_top_wdg(data_source)
+gl['widgets'] = gl['top_wdg'].copy()
 gl['plots'] = bl.column([], id='plots_section')
-update_plots()
+if data_source != '':
+    gl['df_source'], gl['columns'] = get_data(data_source)
+    gl['widgets'].update(build_widgets(gl['df_source'], gl['columns'], init_load=True, init_config=wdg_config))
+    set_wdg_col_options()
+    update_plots()
+gl['controls'] = bl.widgetbox(list(gl['widgets'].values()), id='widgets_section')
 layout = bl.row(gl['controls'], gl['plots'], id='layout')
 
 bio.curdoc().add_root(layout)
