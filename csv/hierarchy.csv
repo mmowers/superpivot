@@ -1,0 +1,455 @@
+i,n,r,rnew,rto,censusregions,st,in,country,custreg
+1,p2,nr11,nr1new,rto1,PA,WA,WSCC,USA,Pacific
+2,p1,nr11,nr1new,rto1,PA,WA,WSCC,USA,Pacific
+3,p1,nr11,nr1new,rto1,PA,WA,WSCC,USA,Pacific
+4,p1,nr11,nr1new,rto1,PA,WA,WSCC,USA,Pacific
+5,p2,nr11,nr1new,rto1,PA,WA,WSCC,USA,Pacific
+6,p3,nr11,nr1new,rto1,PA,WA,WSCC,USA,Pacific
+7,p4,nr11,nr1new,rto1,PA,WA,WSCC,USA,Pacific
+8,p3,nr11,nr1new,rto1,PA,WA,WSCC,USA,Pacific
+9,p2,nr11,nr1new,rto1,PA,WA,WSCC,USA,Pacific
+10,p5,nr11,nr1new,rto1,PA,OR,WSCC,USA,Pacific
+11,p5,nr11,nr1new,rto1,PA,OR,WSCC,USA,Pacific
+12,p5,nr11,nr1new,rto1,PA,OR,WSCC,USA,Pacific
+14,p6,nr11,nr1new,rto1,PA,OR,WSCC,USA,Pacific
+15,p6,nr11,nr1new,rto1,PA,OR,WSCC,USA,Pacific
+16,p5,nr11,nr1new,rto1,PA,OR,WSCC,USA,Pacific
+17,p5,nr11,nr1new,rto1,PA,OR,WSCC,USA,Pacific
+18,p7,nr11,nr1new,rto1,PA,OR,WSCC,USA,Pacific
+19,p7,nr11,nr1new,rto1,PA,OR,WSCC,USA,Pacific
+20,p9,nr13,nr4new,rto4,PA,CA,WSCC,USA,Pacific
+21,p8,nr13,nr1new,rto2,PA,CA,WSCC,USA,Pacific
+22,p9,nr13,nr4new,rto4,PA,CA,WSCC,USA,Pacific
+23,p9,nr13,nr4new,rto4,PA,CA,WSCC,USA,Pacific
+24,p9,nr13,nr4new,rto4,PA,CA,WSCC,USA,Pacific
+25,p9,nr13,nr4new,rto4,PA,CA,WSCC,USA,Pacific
+26,p9,nr13,nr4new,rto4,PA,CA,WSCC,USA,Pacific
+27,p9,nr13,nr4new,rto4,PA,CA,WSCC,USA,Pacific
+28,p10,nr13,nr5new,rto4,PA,CA,WSCC,USA,Pacific
+29,p9,nr13,nr4new,rto4,PA,CA,WSCC,USA,Pacific
+30,p10,nr13,nr5new,rto4,PA,CA,WSCC,USA,Pacific
+31,p10,nr13,nr5new,rto4,PA,CA,WSCC,USA,Pacific
+32,p11,nr13,nr5new,rto4,PA,CA,WSCC,USA,Pacific
+33,p10,nr13,nr5new,rto4,PA,CA,WSCC,USA,Pacific
+34,p12,nr11,nr2new,rto2,MTN,NV,WSCC,USA,Mountain
+35,p12,nr11,nr2new,rto2,MTN,NV,WSCC,USA,Mountain
+36,p12,nr11,nr2new,rto2,MTN,NV,WSCC,USA,Mountain
+37,p12,nr11,nr2new,rto2,MTN,NV,WSCC,USA,Mountain
+38,p12,nr11,nr2new,rto2,MTN,NV,WSCC,USA,Mountain
+39,p12,nr11,nr2new,rto2,MTN,NV,WSCC,USA,Mountain
+40,p13,nr12,nr7new,rto3,MTN,NV,WSCC,USA,Mountain
+41,p14,nr11,nr1new,rto1,MTN,ID,WSCC,USA,Mountain
+42,p15,nr11,nr2new,rto1,MTN,ID,WSCC,USA,Mountain
+43,p15,nr11,nr2new,rto1,MTN,ID,WSCC,USA,Mountain
+44,p15,nr11,nr2new,rto1,MTN,ID,WSCC,USA,Mountain
+45,p15,nr11,nr2new,rto1,MTN,ID,WSCC,USA,Mountain
+46,p16,nr11,nr2new,rto1,MTN,ID,WSCC,USA,Mountain
+47,p16,nr11,nr2new,rto1,MTN,ID,WSCC,USA,Mountain
+48,p25,nr11,nr2new,rto2,MTN,UT,WSCC,USA,Mountain
+49,p25,nr11,nr2new,rto2,MTN,UT,WSCC,USA,Mountain
+50,p26,nr11,nr2new,rto2,MTN,UT,WSCC,USA,Mountain
+51,p25,nr11,nr2new,rto2,MTN,UT,WSCC,USA,Mountain
+52,p25,nr11,nr2new,rto2,MTN,UT,WSCC,USA,Mountain
+53,p27,nr12,nr7new,rto3,MTN,AZ,WSCC,USA,Mountain
+54,p28,nr12,nr7new,rto3,MTN,AZ,WSCC,USA,Mountain
+55,p29,nr12,nr7new,rto3,MTN,AZ,WSCC,USA,Mountain
+56,p28,nr12,nr7new,rto3,MTN,AZ,WSCC,USA,Mountain
+57,p28,nr12,nr7new,rto3,MTN,AZ,WSCC,USA,Mountain
+58,p30,nr12,nr7new,rto3,MTN,AZ,WSCC,USA,Mountain
+59,p28,nr12,nr7new,rto3,MTN,AZ,WSCC,USA,Mountain
+60,p17,nr11,nr1new,rto1,MTN,MT,WSCC,USA,Mountain
+61,p17,nr11,nr1new,rto1,MTN,MT,WSCC,USA,Mountain
+62,p17,nr11,nr1new,rto1,MTN,MT,WSCC,USA,Mountain
+63,p17,nr11,nr1new,rto1,MTN,MT,WSCC,USA,Mountain
+64,p18,nr11,nr1new,rto2,MTN,MT,WSCC,USA,Mountain
+65,p18,nr11,nr1new,rto2,MTN,MT,WSCC,USA,Mountain
+66,p20,nr11,nr1new,rto2,MTN,MT,WSCC,USA,Mountain
+67,p18,nr11,nr1new,rto2,MTN,MT,WSCC,USA,Mountain
+68,p19,nr11,nr9new,rto2,MTN,MT,WSCC,USA,Mountain
+69,p20,nr11,nr1new,rto2,MTN,MT,WSCC,USA,Mountain
+70,p21,nr11,nr2new,rto2,MTN,WY,WSCC,USA,Mountain
+71,p21,nr11,nr2new,rto2,MTN,WY,WSCC,USA,Mountain
+72,p22,nr11,nr3new,rto2,MTN,WY,WSCC,USA,Mountain
+73,p23,nr11,nr3new,rto5,MTN,WY,WSCC,USA,Mountain
+74,p24,nr11,nr3new,rto5,MTN,WY,WSCC,USA,Mountain
+75,p33,nr12,nr3new,rto5,MTN,CO,WSCC,USA,Mountain
+76,p33,nr12,nr3new,rto5,MTN,CO,WSCC,USA,Mountain
+77,p34,nr12,nr3new,rto5,MTN,CO,WSCC,USA,Mountain
+78,p34,nr12,nr3new,rto5,MTN,CO,WSCC,USA,Mountain
+79,p33,nr12,nr3new,rto5,MTN,CO,WSCC,USA,Mountain
+80,p33,nr12,nr3new,rto5,MTN,CO,WSCC,USA,Mountain
+81,p33,nr12,nr3new,rto5,MTN,CO,WSCC,USA,Mountain
+82,p33,nr12,nr3new,rto5,MTN,CO,WSCC,USA,Mountain
+83,p34,nr12,nr3new,rto5,MTN,CO,WSCC,USA,Mountain
+84,p34,nr12,nr3new,rto5,MTN,CO,WSCC,USA,Mountain
+85,p33,nr12,nr3new,rto5,MTN,CO,WSCC,USA,Mountain
+86,p34,nr12,nr3new,rto5,MTN,CO,WSCC,USA,Mountain
+87,p34,nr12,nr3new,rto5,MTN,CO,WSCC,USA,Mountain
+88,p31,nr12,nr7new,rto3,MTN,NM,WSCC,USA,Mountain
+89,p31,nr12,nr7new,rto3,MTN,NM,WSCC,USA,Mountain
+90,p31,nr12,nr7new,rto3,MTN,NM,WSCC,USA,Mountain
+91,p31,nr12,nr7new,rto3,MTN,NM,WSCC,USA,Mountain
+92,p31,nr12,nr7new,rto3,MTN,NM,WSCC,USA,Mountain
+93,p31,nr12,nr7new,rto3,MTN,NM,WSCC,USA,Mountain
+94,p59,nr12,nr7new,rto3,MTN,TX,WSCC,USA,Mountain
+95,p32,nr11,nr3new,rto5,MTN,SD,WSCC,USA,Mountain
+96,p35,nr5,nr9new,rto11,WNC,MT,eastern,USA,West North Central
+97,p36,nr5,nr9new,rto11,WNC,ND,eastern,USA,West North Central
+98,p36,nr5,nr9new,rto11,WNC,ND,eastern,USA,West North Central
+99,p37,nr5,nr9new,rto11,WNC,ND,eastern,USA,West North Central
+100,p36,nr5,nr9new,rto11,WNC,ND,eastern,USA,West North Central
+101,p36,nr5,nr9new,rto11,WNC,ND,eastern,USA,West North Central
+102,p37,nr5,nr9new,rto11,WNC,ND,eastern,USA,West North Central
+103,p37,nr5,nr9new,rto11,WNC,ND,eastern,USA,West North Central
+104,p38,nr5,nr9new,rto11,WNC,SD,eastern,USA,West North Central
+105,p38,nr5,nr9new,rto11,WNC,SD,eastern,USA,West North Central
+106,p38,nr5,nr9new,rto11,WNC,SD,eastern,USA,West North Central
+107,p38,nr5,nr9new,rto11,WNC,SD,eastern,USA,West North Central
+108,p38,nr5,nr9new,rto11,WNC,SD,eastern,USA,West North Central
+109,p38,nr5,nr9new,rto11,WNC,SD,eastern,USA,West North Central
+110,p38,nr5,nr9new,rto11,WNC,SD,eastern,USA,West North Central
+111,p38,nr5,nr9new,rto11,WNC,SD,eastern,USA,West North Central
+112,p38,nr5,nr9new,rto11,WNC,SD,eastern,USA,West North Central
+113,p38,nr5,nr9new,rto11,WNC,SD,eastern,USA,West North Central
+114,p39,nr5,nr10new,rto8,WNC,NE,eastern,USA,West North Central
+115,p39,nr5,nr10new,rto8,WNC,NE,eastern,USA,West North Central
+116,p40,nr5,nr10new,rto8,WNC,NE,eastern,USA,West North Central
+117,p40,nr5,nr10new,rto8,WNC,NE,eastern,USA,West North Central
+118,p40,nr5,nr10new,rto8,WNC,NE,eastern,USA,West North Central
+119,p41,nr5,nr10new,rto8,WNC,NE,eastern,USA,West North Central
+120,p42,nr5,nr9new,rto11,WNC,MN,eastern,USA,West North Central
+121,p43,nr5,nr11new,rto11,WNC,MN,eastern,USA,West North Central
+122,p44,nr5,nr11new,rto11,WNC,MN,eastern,USA,West North Central
+123,p44,nr5,nr11new,rto11,WNC,MN,eastern,USA,West North Central
+124,p43,nr5,nr11new,rto11,WNC,MN,eastern,USA,West North Central
+125,p43,nr5,nr11new,rto11,WNC,MN,eastern,USA,West North Central
+126,p43,nr5,nr11new,rto11,WNC,MN,eastern,USA,West North Central
+127,p43,nr5,nr11new,rto11,WNC,MN,eastern,USA,West North Central
+128,p43,nr5,nr11new,rto11,WNC,MN,eastern,USA,West North Central
+129,p46,nr5,nr11new,rto11,ENC,WI,eastern,USA,Great Lakes
+130,p46,nr5,nr11new,rto11,ENC,WI,eastern,USA,Great Lakes
+131,p46,nr5,nr11new,rto11,ENC,WI,eastern,USA,Great Lakes
+132,p45,nr5,nr11new,rto6,WNC,IA,eastern,USA,West North Central
+133,p69,nr5,nr11new,rto6,WNC,IA,eastern,USA,West North Central
+134,p45,nr5,nr11new,rto6,WNC,IA,eastern,USA,West North Central
+13,p5,nr11,nr1new,rto1,PA,OR,WSCC,USA,Pacific
+135,p52,nr10,nr10new,rto8,WNC,KS,eastern,USA,West North Central
+136,p53,nr10,nr10new,rto8,WNC,KS,eastern,USA,West North Central
+137,p53,nr10,nr10new,rto8,WNC,KS,eastern,USA,West North Central
+138,p53,nr10,nr10new,rto8,WNC,KS,eastern,USA,West North Central
+139,p53,nr10,nr10new,rto8,WNC,KS,eastern,USA,West North Central
+140,p53,nr10,nr10new,rto8,WNC,KS,eastern,USA,West North Central
+141,p53,nr10,nr10new,rto8,WNC,KS,eastern,USA,West North Central
+142,p53,nr10,nr10new,rto8,WNC,KS,eastern,USA,West North Central
+143,p53,nr10,nr10new,rto8,WNC,KS,eastern,USA,West North Central
+144,p54,nr10,nr11new,rto8,WNC,MO,eastern,USA,West North Central
+145,p54,nr10,nr11new,rto8,WNC,MO,eastern,USA,West North Central
+146,p55,nr10,nr10new,rto8,WNC,MO,eastern,USA,West North Central
+147,p55,nr10,nr10new,rto8,WNC,MO,eastern,USA,West North Central
+148,p47,nr10,nr10new,rto8,WSC,NM,eastern,USA,West South Central
+149,p48,nr10,nr10new,rto8,WSC,TX,eastern,USA,West South Central
+150,p48,nr10,nr10new,rto8,WSC,TX,eastern,USA,West South Central
+151,p57,nr10,nr10new,rto8,WSC,TX,eastern,USA,West South Central
+152,p49,nr10,nr10new,rto8,WSC,OK,eastern,USA,West South Central
+153,p50,nr10,nr10new,rto8,WSC,OK,eastern,USA,West South Central
+154,p50,nr10,nr10new,rto8,WSC,OK,eastern,USA,West South Central
+155,p50,nr10,nr10new,rto8,WSC,OK,eastern,USA,West South Central
+156,p50,nr10,nr10new,rto8,WSC,OK,eastern,USA,West South Central
+157,p51,nr10,nr10new,rto8,WSC,OK,eastern,USA,West South Central
+158,p50,nr10,nr10new,rto8,WSC,OK,eastern,USA,West South Central
+159,p56,nr10,nr10new,rto8,WSC,AR,eastern,USA,West South Central
+160,p56,nr10,nr10new,rto8,WSC,AR,eastern,USA,West South Central
+161,p58,nr9,nr10new,rto13,WSC,LA,eastern,USA,West South Central
+162,p58,nr9,nr10new,rto13,WSC,LA,eastern,USA,West South Central
+163,p61,nr2,nr8new,rto10,WSC,TX,texas,USA,West South Central
+164,p62,nr2,nr8new,rto10,WSC,TX,texas,USA,West South Central
+165,p60,nr2,nr8new,rto10,WSC,TX,texas,USA,West South Central
+166,p61,nr2,nr8new,rto10,WSC,TX,texas,USA,West South Central
+167,p63,nr2,nr8new,rto10,WSC,TX,texas,USA,West South Central
+168,p63,nr2,nr8new,rto10,WSC,TX,texas,USA,West South Central
+169,p63,nr2,nr8new,rto10,WSC,TX,texas,USA,West South Central
+170,p63,nr2,nr8new,rto10,WSC,TX,texas,USA,West South Central
+171,p64,nr2,nr8new,rto10,WSC,TX,texas,USA,West South Central
+172,p65,nr2,nr8new,rto10,WSC,TX,texas,USA,West South Central
+173,p65,nr2,nr8new,rto10,WSC,TX,texas,USA,West South Central
+174,p65,nr2,nr8new,rto10,WSC,TX,texas,USA,West South Central
+175,p67,nr2,nr8new,rto10,WSC,TX,texas,USA,West South Central
+176,p68,nr5,nr11new,rto11,WNC,MN,eastern,USA,West North Central
+177,p69,nr5,nr11new,rto6,WNC,IA,eastern,USA,West North Central
+178,p70,nr5,nr11new,rto6,WNC,IA,eastern,USA,West North Central
+179,p70,nr5,nr11new,rto6,WNC,IA,eastern,USA,West North Central
+180,p70,nr5,nr11new,rto6,WNC,IA,eastern,USA,West North Central
+181,p70,nr5,nr11new,rto6,WNC,IA,eastern,USA,West North Central
+182,p70,nr5,nr11new,rto6,WNC,IA,eastern,USA,West North Central
+183,p70,nr5,nr11new,rto6,WNC,IA,eastern,USA,West North Central
+184,p71,nr4,nr11new,rto6,WNC,MO,eastern,USA,West North Central
+185,p72,nr4,nr11new,rto6,WNC,MO,eastern,USA,West North Central
+186,p73,nr4,nr11new,rto13,WNC,MO,eastern,USA,West North Central
+187,p84,nr9,nr11new,rto13,WNC,MO,eastern,USA,West North Central
+188,p84,nr9,nr11new,rto13,WNC,MO,eastern,USA,West North Central
+189,p72,nr4,nr11new,rto6,WNC,MO,eastern,USA,West North Central
+190,p72,nr4,nr11new,rto6,WNC,MO,eastern,USA,West North Central
+191,p74,nr4,nr11new,rto6,ENC,MI,eastern,USA,Great Lakes
+192,p75,nr4,nr11new,rto6,ENC,WI,eastern,USA,Great Lakes
+193,p76,nr4,nr11new,rto6,ENC,WI,eastern,USA,Great Lakes
+194,p77,nr4,nr11new,rto11,ENC,WI,eastern,USA,Great Lakes
+195,p78,nr4,nr11new,rto6,ENC,WI,eastern,USA,Great Lakes
+196,p76,nr4,nr11new,rto6,ENC,WI,eastern,USA,Great Lakes
+197,p75,nr4,nr11new,rto6,ENC,WI,eastern,USA,Great Lakes
+198,p79,nr4,nr11new,rto6,ENC,WI,eastern,USA,Great Lakes
+199,p80,nr4,nr17new,rto7,ENC,IL,eastern,USA,Great Lakes
+200,p81,nr4,nr11new,rto6,ENC,IL,eastern,USA,Great Lakes
+201,p81,nr4,nr11new,rto6,ENC,IL,eastern,USA,Great Lakes
+202,p81,nr4,nr11new,rto6,ENC,IL,eastern,USA,Great Lakes
+203,p82,nr4,nr11new,rto6,ENC,IL,eastern,USA,Great Lakes
+204,p81,nr4,nr11new,rto6,ENC,IL,eastern,USA,Great Lakes
+205,p81,nr4,nr11new,rto6,ENC,IL,eastern,USA,Great Lakes
+206,p80,nr4,nr17new,rto7,ENC,IL,eastern,USA,Great Lakes
+207,p80,nr4,nr17new,rto7,ENC,IL,eastern,USA,Great Lakes
+208,p83,nr4,nr11new,rto6,ENC,IL,eastern,USA,Great Lakes
+209,p83,nr4,nr11new,rto6,ENC,IL,eastern,USA,Great Lakes
+210,p83,nr4,nr11new,rto6,ENC,IL,eastern,USA,Great Lakes
+211,p103,nr1,nr11new,rto6,ENC,MI,eastern,USA,Great Lakes
+212,p103,nr1,nr11new,rto6,ENC,MI,eastern,USA,Great Lakes
+213,p104,nr1,nr17new,rto7,ENC,MI,eastern,USA,Great Lakes
+214,p103,nr1,nr11new,rto6,ENC,MI,eastern,USA,Great Lakes
+215,p103,nr1,nr11new,rto6,ENC,MI,eastern,USA,Great Lakes
+216,p103,nr1,nr11new,rto6,ENC,MI,eastern,USA,Great Lakes
+217,p103,nr1,nr11new,rto6,ENC,MI,eastern,USA,Great Lakes
+218,p103,nr1,nr11new,rto6,ENC,MI,eastern,USA,Great Lakes
+219,p105,nr1,nr11new,rto6,ENC,IN,eastern,USA,Great Lakes
+220,p105,nr1,nr11new,rto6,ENC,IN,eastern,USA,Great Lakes
+221,p105,nr1,nr11new,rto6,ENC,IN,eastern,USA,Great Lakes
+222,p105,nr1,nr11new,rto6,ENC,IN,eastern,USA,Great Lakes
+223,p106,nr1,nr11new,rto6,ENC,IN,eastern,USA,Great Lakes
+224,p107,nr1,nr11new,rto6,ENC,IN,eastern,USA,Great Lakes
+225,p105,nr1,nr11new,rto6,ENC,IN,eastern,USA,Great Lakes
+226,p105,nr1,nr11new,rto6,ENC,IN,eastern,USA,Great Lakes
+227,p111,nr1,nr17new,rto7,ENC,OH,eastern,USA,Great Lakes
+228,p112,nr1,nr17new,rto7,ENC,OH,eastern,USA,Great Lakes
+229,p112,nr1,nr17new,rto7,ENC,OH,eastern,USA,Great Lakes
+230,p113,nr1,nr17new,rto7,ENC,OH,eastern,USA,Great Lakes
+231,p114,nr1,nr11new,rto7,ENC,OH,eastern,USA,Great Lakes
+232,p112,nr1,nr17new,rto7,ENC,OH,eastern,USA,Great Lakes
+233,p112,nr1,nr17new,rto7,ENC,OH,eastern,USA,Great Lakes
+234,p111,nr1,nr17new,rto7,ENC,OH,eastern,USA,Great Lakes
+235,p112,nr1,nr17new,rto7,ENC,OH,eastern,USA,Great Lakes
+236,p108,nr1,nr16new,rto6,ESC,KY,eastern,USA,Southeast
+237,p109,nr1,nr16new,rto7,ESC,KY,eastern,USA,Southeast
+238,p109,nr1,nr16new,rto7,ESC,KY,eastern,USA,Southeast
+239,p109,nr1,nr16new,rto7,ESC,KY,eastern,USA,Southeast
+240,p109,nr1,nr16new,rto7,ESC,KY,eastern,USA,Southeast
+241,p109,nr1,nr16new,rto7,ESC,KY,eastern,USA,Southeast
+242,p110,nr1,nr17new,rto7,ESC,KY,eastern,USA,Southeast
+243,p118,nr1,nr17new,rto7,SA,VA,eastern,USA,Southeast
+244,p118,nr1,nr17new,rto7,SA,VA,eastern,USA,Southeast
+245,p118,nr1,nr17new,rto7,SA,VA,eastern,USA,Southeast
+246,p117,nr1,nr17new,rto7,SA,WV,eastern,USA,Southeast
+247,p117,nr1,nr17new,rto7,SA,WV,eastern,USA,Southeast
+248,p117,nr1,nr17new,rto7,SA,WV,eastern,USA,Southeast
+249,p116,nr1,nr17new,rto7,SA,WV,eastern,USA,Southeast
+250,p116,nr1,nr17new,rto7,SA,WV,eastern,USA,Southeast
+251,p115,nr1,nr17new,rto7,MA,PA,eastern,USA,Northeast
+252,p115,nr1,nr17new,rto7,MA,PA,eastern,USA,Northeast
+253,p121,nr1,nr17new,rto7,SA,MD,eastern,USA,Southeast
+254,p120,nr1,nr17new,rto7,MA,PA,eastern,USA,Northeast
+255,p119,nr1,nr17new,rto12,MA,PA,eastern,USA,Northeast
+256,p66,nr9,nr10new,rto13,WSC,TX,eastern,USA,West South Central
+257,p85,nr9,nr12new,rto13,WSC,AR,eastern,USA,West South Central
+258,p85,nr9,nr12new,rto13,WSC,AR,eastern,USA,West South Central
+259,p85,nr9,nr12new,rto13,WSC,AR,eastern,USA,West South Central
+260,p86,nr9,nr12new,rto13,WSC,LA,eastern,USA,West South Central
+261,p58,nr9,nr10new,rto13,WSC,LA,eastern,USA,West South Central
+262,p87,nr9,nr12new,rto13,ESC,MS,eastern,USA,Southeast
+263,p88,nr9,nr12new,rto14,ESC,MS,eastern,USA,Southeast
+264,p87,nr9,nr12new,rto13,ESC,MS,eastern,USA,Southeast
+265,p89,nr9,nr13new,rto14,ESC,AL,eastern,USA,Southeast
+266,p89,nr9,nr13new,rto14,ESC,AL,eastern,USA,Southeast
+267,p90,nr9,nr13new,rto9,ESC,AL,eastern,USA,Southeast
+268,p90,nr9,nr13new,rto9,ESC,AL,eastern,USA,Southeast
+269,p91,nr9,nr13new,rto9,SA,FL,eastern,USA,Southeast
+270,p91,nr9,nr13new,rto9,SA,FL,eastern,USA,Southeast
+271,p91,nr9,nr13new,rto9,SA,FL,eastern,USA,Southeast
+272,p94,nr9,nr13new,rto9,SA,GA,eastern,USA,Southeast
+273,p94,nr9,nr13new,rto9,SA,GA,eastern,USA,Southeast
+274,p94,nr9,nr13new,rto9,SA,GA,eastern,USA,Southeast
+275,p94,nr9,nr13new,rto9,SA,GA,eastern,USA,Southeast
+276,p92,nr9,nr16new,rto14,ESC,TN,eastern,USA,Southeast
+277,p92,nr9,nr16new,rto14,ESC,TN,eastern,USA,Southeast
+278,p92,nr9,nr16new,rto14,ESC,TN,eastern,USA,Southeast
+279,p92,nr9,nr16new,rto14,ESC,TN,eastern,USA,Southeast
+280,p92,nr9,nr16new,rto14,ESC,TN,eastern,USA,Southeast
+281,p92,nr9,nr16new,rto14,ESC,TN,eastern,USA,Southeast
+282,p92,nr9,nr16new,rto14,ESC,TN,eastern,USA,Southeast
+283,p92,nr9,nr16new,rto14,ESC,TN,eastern,USA,Southeast
+284,p92,nr9,nr16new,rto14,ESC,TN,eastern,USA,Southeast
+285,p92,nr9,nr16new,rto14,ESC,TN,eastern,USA,Southeast
+286,p93,nr9,nr16new,rto14,ESC,KY,eastern,USA,Southeast
+287,p93,nr9,nr16new,rto14,ESC,KY,eastern,USA,Southeast
+288,p97,nr9,nr15new,rto15,SA,NC,eastern,USA,Southeast
+289,p97,nr9,nr15new,rto15,SA,NC,eastern,USA,Southeast
+290,p97,nr9,nr15new,rto15,SA,NC,eastern,USA,Southeast
+291,p98,nr9,nr15new,rto15,SA,NC,eastern,USA,Southeast
+292,p98,nr9,nr15new,rto15,SA,NC,eastern,USA,Southeast
+293,p98,nr9,nr15new,rto15,SA,NC,eastern,USA,Southeast
+294,p98,nr9,nr15new,rto15,SA,NC,eastern,USA,Southeast
+295,p95,nr9,nr15new,rto15,SA,SC,eastern,USA,Southeast
+296,p96,nr9,nr15new,rto15,SA,SC,eastern,USA,Southeast
+297,p96,nr9,nr15new,rto15,SA,SC,eastern,USA,Southeast
+298,p96,nr9,nr15new,rto15,SA,SC,eastern,USA,Southeast
+299,p96,nr9,nr15new,rto15,SA,SC,eastern,USA,Southeast
+300,p99,nr9,nr17new,rto7,SA,VA,eastern,USA,Southeast
+301,p100,nr9,nr17new,rto7,SA,VA,eastern,USA,Southeast
+302,p99,nr9,nr17new,rto7,SA,VA,eastern,USA,Southeast
+303,p99,nr9,nr17new,rto7,SA,VA,eastern,USA,Southeast
+304,p99,nr9,nr17new,rto7,SA,VA,eastern,USA,Southeast
+305,p99,nr9,nr17new,rto7,SA,VA,eastern,USA,Southeast
+306,p99,nr9,nr17new,rto7,SA,VA,eastern,USA,Southeast
+307,p99,nr9,nr17new,rto7,SA,VA,eastern,USA,Southeast
+308,p116,nr1,nr17new,rto7,SA,WV,eastern,USA,Southeast
+309,p101,nr8,nr14new,rto16,SA,FL,eastern,USA,Southeast
+310,p101,nr8,nr14new,rto16,SA,FL,eastern,USA,Southeast
+311,p101,nr8,nr14new,rto16,SA,FL,eastern,USA,Southeast
+312,p101,nr8,nr14new,rto16,SA,FL,eastern,USA,Southeast
+313,p102,nr8,nr14new,rto16,SA,FL,eastern,USA,Southeast
+314,p124,nr3,nr17new,rto12,SA,VA,eastern,USA,Southeast
+315,p123,nr3,nr17new,rto12,SA,MD,eastern,USA,Southeast
+316,p123,nr3,nr17new,rto12,SA,MD,eastern,USA,Southeast
+317,p123,nr3,nr17new,rto12,SA,MD,eastern,USA,Southeast
+318,p125,nr3,nr17new,rto12,SA,DE,eastern,USA,Southeast
+319,p125,nr3,nr17new,rto12,SA,DE,eastern,USA,Southeast
+320,p122,nr3,nr17new,rto12,MA,PA,eastern,USA,Northeast
+321,p122,nr3,nr17new,rto12,MA,PA,eastern,USA,Northeast
+322,p122,nr3,nr17new,rto12,MA,PA,eastern,USA,Northeast
+323,p122,nr3,nr17new,rto12,MA,PA,eastern,USA,Northeast
+324,p122,nr3,nr17new,rto12,MA,PA,eastern,USA,Northeast
+325,p122,nr3,nr17new,rto12,MA,PA,eastern,USA,Northeast
+326,p122,nr3,nr17new,rto12,MA,PA,eastern,USA,Northeast
+327,p122,nr3,nr17new,rto12,MA,PA,eastern,USA,Northeast
+328,p126,nr3,nr17new,rto12,MA,NJ,eastern,USA,Northeast
+329,p126,nr3,nr17new,rto12,MA,NJ,eastern,USA,Northeast
+330,p126,nr3,nr17new,rto12,MA,NJ,eastern,USA,Northeast
+331,p126,nr3,nr17new,rto12,MA,NJ,eastern,USA,Northeast
+332,p126,nr3,nr17new,rto12,MA,NJ,eastern,USA,Northeast
+333,p127,nr6,nr18new,rto17,MA,NY,eastern,USA,Northeast
+334,p127,nr6,nr18new,rto17,MA,NY,eastern,USA,Northeast
+335,p127,nr6,nr18new,rto17,MA,NY,eastern,USA,Northeast
+336,p127,nr6,nr18new,rto17,MA,NY,eastern,USA,Northeast
+337,p127,nr6,nr18new,rto17,MA,NY,eastern,USA,Northeast
+338,p127,nr6,nr18new,rto17,MA,NY,eastern,USA,Northeast
+339,p127,nr6,nr18new,rto17,MA,NY,eastern,USA,Northeast
+340,p127,nr6,nr18new,rto17,MA,NY,eastern,USA,Northeast
+341,p127,nr6,nr18new,rto17,MA,NY,eastern,USA,Northeast
+342,p128,nr6,nr18new,rto17,MA,NY,eastern,USA,Northeast
+343,p132,nr7,nr19new,rto18,NE,CT,eastern,USA,Northeast
+344,p132,nr7,nr19new,rto18,NE,CT,eastern,USA,Northeast
+345,p133,nr7,nr19new,rto18,NE,RI,eastern,USA,Northeast
+346,p133,nr7,nr19new,rto18,NE,RI,eastern,USA,Northeast
+347,p131,nr7,nr19new,rto18,NE,MA,eastern,USA,Northeast
+348,p131,nr7,nr19new,rto18,NE,MA,eastern,USA,Northeast
+349,p131,nr7,nr19new,rto18,NE,MA,eastern,USA,Northeast
+350,p129,nr7,nr19new,rto18,NE,VT,eastern,USA,Northeast
+351,p129,nr7,nr19new,rto18,NE,VT,eastern,USA,Northeast
+352,p129,nr7,nr19new,rto18,NE,VT,eastern,USA,Northeast
+353,p130,nr7,nr19new,rto18,NE,NH,eastern,USA,Northeast
+354,p130,nr7,nr19new,rto18,NE,NH,eastern,USA,Northeast
+355,p134,nr7,nr19new,rto18,NE,ME,eastern,USA,Northeast
+356,p134,nr7,nr19new,rto18,NE,ME,eastern,USA,Northeast
+357,p135,nr13,nr5new,rto4,PA,MEX,WSCC,MEX,Pacific
+358,p136,nr13,nr5new,rto4,PA,MEX,WSCC,MEX,Pacific
+359,p137,nr11,nr20new,rto33,PA,BC,WSCC,CAN,Pacific
+360,p137,nr11,nr20new,rto33,PA,BC,WSCC,CAN,Pacific
+361,p137,nr11,nr20new,rto33,PA,BC,WSCC,CAN,Pacific
+362,p138,nr11,nr20new,rto33,PA,BC,WSCC,CAN,Pacific
+363,p139,nr11,nr20new,rto33,PA,BC,WSCC,CAN,Pacific
+364,p139,nr11,nr20new,rto33,PA,BC,WSCC,CAN,Pacific
+365,p139,nr11,nr20new,rto33,PA,BC,WSCC,CAN,Pacific
+366,p139,nr11,nr20new,rto33,PA,BC,WSCC,CAN,Pacific
+367,p140,nr11,nr21new,rto34,MTN,AB,WSCC,CAN,Mountain
+368,p141,nr11,nr21new,rto34,MTN,AB,WSCC,CAN,Mountain
+369,p142,nr5,nr22new,rto35,WNC,SK,eastern,CAN,West North Central
+370,p143,nr5,nr23new,rto36,WNC,MB,eastern,CAN,West North Central
+371,p144,nr6,nr24new,rto37,MA,ON,eastern,CAN,Northeast
+372,p145,nr6,nr24new,rto37,MA,ON,eastern,CAN,Northeast
+373,p146,nr6,nr24new,rto37,MA,ON,eastern,CAN,Northeast
+374,p147,nr6,nr24new,rto37,MA,ON,eastern,CAN,Northeast
+375,p148,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+376,p149,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+377,p150,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+378,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+379,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+380,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+381,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+382,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+383,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+384,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+385,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+386,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+387,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+388,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+389,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+390,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+391,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+392,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+393,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+394,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+395,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+396,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+397,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+398,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+399,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+400,p151,nr14,nr25new,rto38,NE,QC,quebec,CAN,Northeast
+401,p152,nr7,nr26new,rto39,NE,NB,eastern,CAN,Northeast
+402,p153,nr7,nr26new,rto39,NE,NS,eastern,CAN,Northeast
+403,p154,nr14,nr24new,rto38,NE,NL,quebec,CAN,Northeast
+404,p155,nr14,nr24new,rto38,NE,NFI,quebec,CAN,Northeast
+405,p156,nr7,nr26new,rto39,NE,PEI,eastern,CAN,Northeast
+406,p157,nr15,nr27new,rto40,MEX,SIN_SON,mexico,MEX,Mexico
+407,p158,nr15,nr27new,rto40,MEX,SIN_SON,mexico,MEX,Mexico
+408,p159,nr15,nr27new,rto40,MEX,SIN_SON,mexico,MEX,Mexico
+409,p160,nr15,nr27new,rto40,MEX,SIN_SON,mexico,MEX,Mexico
+410,p161,nr15,nr27new,rto40,MEX,SIN_SON,mexico,MEX,Mexico
+411,p162,nr15,nr27new,rto40,MEX,SIN_SON,mexico,MEX,Mexico
+412,p163,nr15,nr27new,rto40,MEX,CHH,mexico,MEX,Mexico
+413,p164,nr15,nr27new,rto40,MEX,CHH,mexico,MEX,Mexico
+414,p165,nr15,nr27new,rto40,MEX,CHH,mexico,MEX,Mexico
+415,p166,nr15,nr27new,rto40,MEX,COA_DGO_NLE,mexico,MEX,Mexico
+416,p167,nr15,nr27new,rto40,MEX,COA_DGO_NLE,mexico,MEX,Mexico
+417,p168,nr15,nr27new,rto40,MEX,COA_DGO_NLE,mexico,MEX,Mexico
+418,p169,nr15,nr27new,rto40,MEX,DIF_HID_MEX_MOR_OAX_PUE_TAM_TLA_VER,mexico,MEX,Mexico
+419,p170,nr15,nr27new,rto40,MEX,DIF_HID_MEX_MOR_OAX_PUE_TAM_TLA_VER,mexico,MEX,Mexico
+420,p171,nr15,nr27new,rto40,MEX,DIF_HID_MEX_MOR_OAX_PUE_TAM_TLA_VER,mexico,MEX,Mexico
+421,p172,nr15,nr27new,rto40,MEX,COA_DGO_NLE,mexico,MEX,Mexico
+422,p173,nr15,nr27new,rto40,MEX,COA_DGO_NLE,mexico,MEX,Mexico
+423,p174,nr15,nr27new,rto40,MEX,SLP,mexico,MEX,Mexico
+424,p175,nr15,nr27new,rto40,MEX,DIF_HID_MEX_MOR_OAX_PUE_TAM_TLA_VER,mexico,MEX,Mexico
+425,p176,nr15,nr27new,rto40,MEX,SLP,mexico,MEX,Mexico
+426,p177,nr15,nr27new,rto40,MEX,DIF_HID_MEX_MOR_OAX_PUE_TAM_TLA_VER,mexico,MEX,Mexico
+427,p178,nr15,nr27new,rto40,MEX,AGU_GUA_JAL_NAY_QUE_ZAC,mexico,MEX,Mexico
+428,p179,nr15,nr27new,rto40,MEX,AGU_GUA_JAL_NAY_QUE_ZAC,mexico,MEX,Mexico
+429,p180,nr15,nr27new,rto40,MEX,AGU_GUA_JAL_NAY_QUE_ZAC,mexico,MEX,Mexico
+430,p181,nr15,nr27new,rto40,MEX,SLP,mexico,MEX,Mexico
+431,p182,nr15,nr27new,rto40,MEX,AGU_GUA_JAL_NAY_QUE_ZAC,mexico,MEX,Mexico
+432,p183,nr15,nr27new,rto40,MEX,COL,mexico,MEX,Mexico
+433,p184,nr15,nr27new,rto40,MEX,GRO_MIC,mexico,MEX,Mexico
+434,p185,nr15,nr27new,rto40,MEX,GRO_MIC,mexico,MEX,Mexico
+435,p186,nr15,nr27new,rto40,MEX,AGU_GUA_JAL_NAY_QUE_ZAC,mexico,MEX,Mexico
+436,p187,nr15,nr27new,rto40,MEX,DIF_HID_MEX_MOR_OAX_PUE_TAM_TLA_VER,mexico,MEX,Mexico
+437,p188,nr15,nr27new,rto40,MEX,DIF_HID_MEX_MOR_OAX_PUE_TAM_TLA_VER,mexico,MEX,Mexico
+438,p189,nr15,nr27new,rto40,MEX,DIF_HID_MEX_MOR_OAX_PUE_TAM_TLA_VER,mexico,MEX,Mexico
+439,p190,nr15,nr27new,rto40,MEX,DIF_HID_MEX_MOR_OAX_PUE_TAM_TLA_VER,mexico,MEX,Mexico
+440,p191,nr15,nr27new,rto40,MEX,GRO_MIC,mexico,MEX,Mexico
+441,p192,nr15,nr27new,rto40,MEX,DIF_HID_MEX_MOR_OAX_PUE_TAM_TLA_VER,mexico,MEX,Mexico
+442,p193,nr15,nr27new,rto40,MEX,DIF_HID_MEX_MOR_OAX_PUE_TAM_TLA_VER,mexico,MEX,Mexico
+443,p194,nr15,nr27new,rto40,MEX,CAM_CHP_TAB,mexico,MEX,Mexico
+444,p195,nr15,nr27new,rto40,MEX,CAM_CHP_TAB,mexico,MEX,Mexico
+445,p196,nr15,nr27new,rto40,MEX,DIF_HID_MEX_MOR_OAX_PUE_TAM_TLA_VER,mexico,MEX,Mexico
+446,p197,nr15,nr27new,rto40,MEX,CAM_CHP_TAB,mexico,MEX,Mexico
+447,p198,nr15,nr27new,rto40,MEX,YUC,mexico,MEX,Mexico
+448,p199,nr15,nr27new,rto40,MEX,ROO,mexico,MEX,Mexico
+449,p200,nr15,nr27new,rto40,MEX,ROO,mexico,MEX,Mexico
+450,p201,nr15,nr27new,rto41,MEX,BCN,mexico,MEX,Mexico
+451,p202,nr15,nr27new,rto41,MEX,BCN,mexico,MEX,Mexico
+452,p203,nr15,nr27new,rto41,MEX,BCN,mexico,MEX,Mexico
+453,p204,nr15,nr27new,rto41,MEX,BCN,mexico,MEX,Mexico
+454,p205,nr15,nr27new,rto41,MEX,BCS,mexico,MEX,Mexico

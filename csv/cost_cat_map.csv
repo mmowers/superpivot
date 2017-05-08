@@ -1,0 +1,14 @@
+raw,display
+capcostconv,Conventional Capital
+OMconv,Conventional O&M
+fuelconv,Conventional Fuel
+capcostRE,Renewable Capital
+OMVRRE,Renewable O&M
+OMDRE,Renewable O&M
+fuelRE,Renewable Fuel
+capcoststore,Storage Capital
+OMstore,Storage O&M
+fuelstore,Storage O&M
+capcosttrans,Transmission
+OMtrans,Transmission
+water,Water

@@ -1,0 +1,14 @@
+cost_cat,type
+capcostconv,Capital
+OMconv,Operation
+fuelconv,Operation
+capcostRE,Capital
+OMVRRE,Operation
+OMDRE,Operation
+fuelRE,Operation
+capcoststore,Capital
+OMstore,Operation
+fuelstore,Operation
+capcosttrans,Capital
+OMtrans,Operation
+water,Capital

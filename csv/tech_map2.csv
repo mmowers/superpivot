@@ -1,0 +1,27 @@
+raw,display
+nuclear,Nuclear
+CoalOldUns,Coal
+CoalOldScr,Coal
+CofireOld,Coal
+CofireNew,Coal
+coal-new,Coal
+coal-IGCC,Coal
+coal-CCS,Coal
+gas-CC,Natural Gas
+gas-CC-CCS,Natural Gas
+gas-CT,Natural Gas
+hydro,Hydropower
+wind-ons,Wind
+wind-ofs,Wind
+wind-ofm,Wind
+wind-ofd,Wind
+CSP,Solar
+CSP-ns,Solar
+CSP-ws,Solar
+UPV,Solar
+DUPV,Solar
+distPV,Solar
+Gas-CC-NSP,Natural Gas
+Gas-CT-NSP,Natural Gas
+Coal-CCS-NSP,Natural Gas
+Nuclear-NSP,Nuclear
