@@ -38,6 +38,21 @@ STACKEDTYPES = ['Bar', 'Area']
 AGGREGATIONS = ['None', 'Sum', 'Ave', 'Weighted Ave']
 ADV_BASES = ['Consecutive', 'Total']
 
+#List of widgets that use columns as their selectors
+WDG_COL_ALL = ['x', 'y'] #all columns available for these widgets
+WDG_COL_SER = ['x_group', 'series', 'explode', 'explode_group'] #seriesable columns available for these widgets
+WDG_COL = WDG_COL_ALL + WDG_COL_SER
+
+#List of widgets that don't use columns as selector and share general widget update function
+WDG_NON_COL = ['chart_type', 'y_agg', 'y_weight', 'adv_op', 'adv_col_base', 'plot_title', 'plot_title_size',
+    'plot_width', 'plot_height', 'opacity', 'x_min', 'x_max', 'x_scale', 'x_title',
+    'x_title_size', 'x_major_label_size', 'x_major_label_orientation',
+    'y_min', 'y_max', 'y_scale', 'y_title', 'y_title_size', 'y_major_label_size',
+    'circle_size', 'bar_width', 'line_width']
+
+#initialize globals dict for variables that are modified within update functions.
+GL = {'df_source':None, 'df_plots':None, 'columns':None, 'top_wdg':None, 'widgets':None, 'controls': None, 'plots':None}
+
 def build_top_wdg(data_source):
     wdg = collections.OrderedDict()
     wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source, css_classes=['wdgkey-data'])
@@ -155,9 +170,9 @@ def build_widgets(df_source, cols, init_load=False, init_config={}):
     wdg['update'].on_click(update_plots)
     wdg['download'].on_click(download)
     wdg['adv_col'].on_change('value', update_adv_col)
-    for name in wdg_col:
+    for name in WDG_COL:
         wdg[name].on_change('value', update_wdg_col)
-    for name in wdg_non_col:
+    for name in WDG_NON_COL:
         wdg[name].on_change('value', update_wdg)
 
     return wdg
@@ -490,22 +505,22 @@ def update_data(attr, old, new):
     '''
     When data source is updated, rebuild widgets and plots.
     '''
-    gl['widgets'] = gl['top_wdg'].copy()
-    if gl['widgets']['data'].value != '':
-        gl['df_source'], gl['columns'] = get_data(gl['widgets']['data'].value)
-        gl['widgets'].update(build_widgets(gl['df_source'], gl['columns']))
-    gl['controls'].children = list(gl['widgets'].values())
-    gl['plots'].children = []
+    GL['widgets'] = GL['top_wdg'].copy()
+    if GL['widgets']['data'].value != '':
+        GL['df_source'], GL['columns'] = get_data(GL['widgets']['data'].value)
+        GL['widgets'].update(build_widgets(GL['df_source'], GL['columns']))
+    GL['controls'].children = list(GL['widgets'].values())
+    GL['plots'].children = []
 
 def update_wdg(attr, old, new):
     '''
-    When general widgets are updated (not in wdg_col), update plots only.
+    When general widgets are updated (not in WDG_COL), update plots only.
     '''
     update_plots()
 
 def update_wdg_col(attr, old, new):
     '''
-    When widgets in wdg_col are updated, set the options of all wdg_col widgets,
+    When widgets in WDG_COL are updated, set the options of all WDG_COL widgets,
     and update plots.
     '''
     set_wdg_col_options()
@@ -515,61 +530,47 @@ def update_adv_col(attr, old, new):
     '''
     When adv_col is set, find unique values of adv_col in dataframe, and set adv_col_base with those values.
     '''
-    wdg = gl['widgets']
-    df = gl['df_source']
+    wdg = GL['widgets']
+    df = GL['df_source']
     if wdg['adv_col'].value != 'None':
         wdg['adv_col_base'].options = ['None'] + ADV_BASES + [str(i) for i in sorted(df[wdg['adv_col'].value].unique().tolist())]
 
 def set_wdg_col_options():
     '''
-    Limit available options for wdg_col widgets based on their selected values, so that users
-    cannot select the same value for two different wdg_col widgets.
+    Limit available options for WDG_COL widgets based on their selected values, so that users
+    cannot select the same value for two different WDG_COL widgets.
     '''
-    cols = gl['columns']
-    wdg = gl['widgets']
+    cols = GL['columns']
+    wdg = GL['widgets']
     #get list of selected values and use to reduce selection options.
-    sels = [str(wdg[w].value) for w in wdg_col if str(wdg[w].value) !='None']
+    sels = [str(wdg[w].value) for w in WDG_COL if str(wdg[w].value) !='None']
     all_reduced = [x for x in cols['all'] if x not in sels]
     ser_reduced = [x for x in cols['seriesable'] if x not in sels]
-    for w in wdg_col:
+    for w in WDG_COL:
         val = str(wdg[w].value)
         none_append = [] if val == 'None' else ['None']
-        opt_reduced = all_reduced if w in wdg_col_all else ser_reduced
+        opt_reduced = all_reduced if w in WDG_COL_ALL else ser_reduced
         wdg[w].options = [val] + opt_reduced + none_append
 
 def update_plots():
     '''
     Make sure x axis and y axis are set. If so, set the dataframe for the plots and build them.
     '''
-    if gl['widgets']['x'].value == 'None' or gl['widgets']['y'].value == 'None':
-        gl['plots'].children = []
+    if GL['widgets']['x'].value == 'None' or GL['widgets']['y'].value == 'None':
+        GL['plots'].children = []
         return
-    gl['df_plots'] = set_df_plots(gl['df_source'], gl['columns'], gl['widgets'])
-    gl['widgets']['series_legend'].text = build_series_legend(gl['df_plots'], gl['widgets']['series'].value)
-    gl['plots'].children = create_figures(gl['df_plots'], gl['widgets'], gl['columns'])
+    GL['df_plots'] = set_df_plots(GL['df_source'], GL['columns'], GL['widgets'])
+    GL['widgets']['series_legend'].text = build_series_legend(GL['df_plots'], GL['widgets']['series'].value)
+    GL['plots'].children = create_figures(GL['df_plots'], GL['widgets'], GL['columns'])
 
 def download():
     '''
     Download a csv file of the currently viewed data to the downloads/ directory,
     with the current timestamp.
     '''
-    gl['df_plots'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
+    GL['df_plots'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
         datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
 
-#initialize globals dict
-gl = {'df_source':None, 'df_plots':None, 'columns':None, 'top_wdg':None, 'widgets':None, 'controls': None, 'plots':None}
-
-#List of widgets that use columns as their selectors
-wdg_col_all = ['x', 'y'] #all columns available for these widgets
-wdg_col_ser = ['x_group', 'series', 'explode', 'explode_group'] #seriesable columns available for these widgets
-wdg_col = wdg_col_all + wdg_col_ser
-
-#List of widgets that don't use columns as selector and share general widget update function
-wdg_non_col = ['chart_type', 'y_agg', 'y_weight', 'adv_op', 'adv_col_base', 'plot_title', 'plot_title_size',
-    'plot_width', 'plot_height', 'opacity', 'x_min', 'x_max', 'x_scale', 'x_title',
-    'x_title_size', 'x_major_label_size', 'x_major_label_orientation',
-    'y_min', 'y_max', 'y_scale', 'y_title', 'y_title_size', 'y_major_label_size',
-    'circle_size', 'bar_width', 'line_width']
 
 #On initial load, read 'widgets' parameter from URL query string and use to set data source (data_source)
 #and widget configuration object (wdg_config)
@@ -583,16 +584,16 @@ if wdg_arr is not None:
         data_source = str(wdg_config['data'])
 
 #build widgets and plots
-gl['top_wdg'] = build_top_wdg(data_source)
-gl['widgets'] = gl['top_wdg'].copy()
-gl['plots'] = bl.column([], id='plots_section')
+GL['top_wdg'] = build_top_wdg(data_source)
+GL['widgets'] = GL['top_wdg'].copy()
+GL['plots'] = bl.column([], id='plots_section')
 if data_source != '':
-    gl['df_source'], gl['columns'] = get_data(data_source)
-    gl['widgets'].update(build_widgets(gl['df_source'], gl['columns'], init_load=True, init_config=wdg_config))
+    GL['df_source'], GL['columns'] = get_data(data_source)
+    GL['widgets'].update(build_widgets(GL['df_source'], GL['columns'], init_load=True, init_config=wdg_config))
     set_wdg_col_options()
     update_plots()
-gl['controls'] = bl.widgetbox(list(gl['widgets'].values()), id='widgets_section')
-layout = bl.row(gl['controls'], gl['plots'], id='layout')
+GL['controls'] = bl.widgetbox(list(GL['widgets'].values()), id='widgets_section')
+layout = bl.row(GL['controls'], GL['plots'], id='layout')
 
 bio.curdoc().add_root(layout)
 bio.curdoc().title = "Exploding Pivot Chart Maker"
