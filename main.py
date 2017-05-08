@@ -1,6 +1,5 @@
-''' Provide a pivot chart maker example app. Similar to Excel pivot charts,
-but with additonal ability to explode into multiple charts.
-See README.md for more information.
+'''
+Pivot chart maker for CSVs, GDX files, and ReEDS run results.
 
 '''
 from __future__ import division
@@ -69,15 +68,14 @@ def initialize():
 
     #build widgets and plots
     GL['top_wdg'] = build_top_wdg(data_source)
-    GL['widgets'] = GL['top_wdg'].copy()
+    GL['controls'] = bl.widgetbox(list(GL['top_wdg'].values()), id='widgets_section')
     GL['plots'] = bl.column([], id='plots_section')
+    layout = bl.row(GL['controls'], GL['plots'], id='layout')
+
     if data_source != '':
-        GL['df_source'], GL['columns'] = get_data(data_source)
-        GL['widgets'].update(build_widgets(GL['df_source'], GL['columns'], init_load=True, init_config=wdg_config))
+        update_data_source(init_load=True, init_config=wdg_config)
         set_wdg_col_options()
         update_plots()
-    GL['controls'] = bl.widgetbox(list(GL['widgets'].values()), id='widgets_section')
-    layout = bl.row(GL['controls'], GL['plots'], id='layout')
 
     bio.curdoc().add_root(layout)
     bio.curdoc().title = "Exploding Pivot Chart Maker"
@@ -88,7 +86,7 @@ def build_top_wdg(data_source):
     wdg['data'].on_change('value', update_data)
     return wdg
 
-def get_data(data_source):
+def get_df_csv(data_source):
     '''
     Read a csv into a pandas dataframe, and determine which columns of the dataframe
     are discrete (strings), continuous (numbers), able to be filtered (aka filterable),
@@ -102,13 +100,8 @@ def get_data(data_source):
         df_source (pandas dataframe): A dataframe of the csv source, with filled NA values.
         cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
     '''
-    data_source = data_source.replace('"', '')
-    path_parts = data_source.split('>')
-    if path_parts[0].lower().endswith('.gdx'):
-        df_source = gdxl.get_df(str(path_parts[0]), str(path_parts[1]))
-        df_source.columns = df_source.columns.astype(str)
-    else:
-        df_source = pd.read_csv(data_source)
+
+    df_source = pd.read_csv(data_source)
     cols = {}
     cols['all'] = df_source.columns.values.tolist()
     cols['discrete'] = [x for x in cols['all'] if df_source[x].dtype == object]
@@ -118,6 +111,32 @@ def get_data(data_source):
     df_source[cols['discrete']] = df_source[cols['discrete']].fillna('{BLANK}')
     df_source[cols['continuous']] = df_source[cols['continuous']].fillna(0)
     return (df_source, cols)
+
+def get_wdg_gdx(data_source):
+    '''
+    Create a parameter select widget and return it.
+
+    Args:
+        data_source (string): Path to gdx file.
+
+    Returns:
+        topwdg (ordered dict): Dictionary of bokeh.model.widgets.
+    '''
+    return #need to implement!
+
+def get_wdg_reeds(path, init_load=False, wdg_config={}):
+    '''
+    From data source, find scenarios and return widgets for meta files, scenarios, and results
+
+    Args:
+        data_source (string): Path to a ReEDS run folder or a folder containing ReEDS runs folders.
+        init_load (Boolean): True if this is the initial page load. False otherwise.
+        wdg_config
+
+    Returns:
+        topwdg (ordered dict): Dictionary of bokeh.model.widgets.
+    '''
+    return
 
 def build_widgets(df_source, cols, init_load=False, init_config={}):
     '''
@@ -533,12 +552,23 @@ def wavg(group, avg_name, weight_name):
 
 def update_data(attr, old, new):
     '''
-    When data source is updated, rebuild widgets and plots.
+    When data source is updated
     '''
+    update_data_source()
+
+def update_data_source(init_load=False, init_config={}):
     GL['widgets'] = GL['top_wdg'].copy()
-    if GL['widgets']['data'].value != '':
-        GL['df_source'], GL['columns'] = get_data(GL['widgets']['data'].value)
-        GL['widgets'].update(build_widgets(GL['df_source'], GL['columns']))
+    path = GL['top_wdg']['data'].value
+    path = path.replace('"', '')
+    if path == '':
+        pass
+    elif path.lower().endswith('.csv'):
+        GL['df_source'], GL['columns'] = get_df_csv(path)
+        GL['widgets'].update(build_widgets(GL['df_source'], GL['columns'], init_load, init_config))
+    elif path.lower().endswith('.gdx'):
+        GL['widgets'].update(get_wdg_gdx(path, GL['widgets']))
+    else:
+        GL['widgets'].update(get_wdg_reeds(path, init_load, init_config))
     GL['controls'].children = list(GL['widgets'].values())
     GL['plots'].children = []
 
