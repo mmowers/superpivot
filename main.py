@@ -17,6 +17,7 @@ import bokeh.plotting as bp
 import datetime
 import six.moves.urllib.parse as urlp
 import gdxl
+from reeds import *
 
 #Defaults to configure:
 PLOT_WIDTH = 300
@@ -51,6 +52,10 @@ WDG_NON_COL = ['chart_type', 'y_agg', 'y_weight', 'adv_op', 'adv_col_base', 'plo
 
 #initialize globals dict for variables that are modified within update functions.
 GL = {'df_source':None, 'df_plots':None, 'columns':None, 'top_wdg':None, 'widgets':None, 'controls': None, 'plots':None}
+
+#ReEDS globals
+custom_sorts = {}
+scenarios = []
 
 def initialize():
     '''
@@ -136,7 +141,150 @@ def get_wdg_reeds(path, init_load=False, wdg_config={}):
     Returns:
         topwdg (ordered dict): Dictionary of bokeh.model.widgets.
     '''
-    return
+    topwdg = collections.OrderedDict()
+    topwdg['meta'] = bmw.Div(text='Meta', css_classes=['meta-dropdown'])
+    for col in columns_meta:
+        if 'map' in columns_meta[col]:
+            topwdg['meta_map_'+col] = bmw.TextInput(title='"'+col+ '" Map', value=columns_meta[col]['map'], css_classes=['wdgkey-meta_map_'+col, 'meta-drop'])
+            if init_load and 'meta_map_'+col in wdg_config: topwdg['meta_map_'+col].value = str(wdg_config['meta_map_'+col])
+            topwdg['meta_map_'+col].on_change('value', update_reeds_meta)
+        if 'join' in columns_meta[col]:
+            topwdg['meta_join_'+col] = bmw.TextInput(title='"'+col+ '" Join', value=columns_meta[col]['join'], css_classes=['wdgkey-meta_join_'+col, 'meta-drop'])
+            if init_load and 'meta_join_'+col in wdg_config: topwdg['meta_join_'+col].value = str(wdg_config['meta_join_'+col])
+            topwdg['meta_join_'+col].on_change('value', update_reeds_meta)
+        if 'style' in columns_meta[col]:
+            topwdg['meta_style_'+col] = bmw.TextInput(title='"'+col+ '" Style', value=columns_meta[col]['style'], css_classes=['wdgkey-meta_style_'+col, 'meta-drop'])
+            if init_load and 'meta_style_'+col in wdg_config: topwdg['meta_style_'+col].value = str(wdg_config['meta_style_'+col])
+            topwdg['meta_style_'+col].on_change('value', update_reeds_meta)
+    scenarios[:] = []
+    runs_paths = path.split('|')
+    for runs_path in runs_paths:
+        runs_path = runs_path.strip()
+        #if the path is pointing to a csv file, gather all scenarios from that file
+        if os.path.isfile(runs_path) and runs_path.lower().endswith('.csv'):
+            custom_sorts['scenario'] = []
+            abs_path = str(os.path.abspath(runs_path))
+            df_scen = pd.read_csv(abs_path)
+            for i_scen, scen in df_scen.iterrows():
+                if os.path.isdir(scen['path']):
+                    abs_path_scen = os.path.abspath(scen['path'])
+                    if os.path.isdir(abs_path_scen+'/gdxfiles'):
+                        custom_sorts['scenario'].append(scen['name'])
+                        scenarios.append({'name': scen['name'], 'path': abs_path_scen})
+        #Else if the path is pointing to a directory, check if the directory is a run folder
+        #containing gdxfiles/ and use this as the lone scenario. Otherwise, it must contain
+        #run folders, so gather all of those scenarios.
+        elif os.path.isdir(runs_path):
+            abs_path = str(os.path.abspath(runs_path))
+            if os.path.isdir(abs_path+'/gdxfiles'):
+                scenarios.append({'name': os.path.basename(abs_path), 'path': abs_path})
+            else:
+                subdirs = os.walk(abs_path).next()[1]
+                for subdir in subdirs:
+                    if os.path.isdir(abs_path+'/'+subdir+'/gdxfiles'):
+                        abs_subdir = str(os.path.abspath(abs_path+'/'+subdir))
+                        scenarios.append({'name': subdir, 'path': abs_subdir})
+    #If we have scenarios, build widgets for scenario filters and result.
+    for key in ["filter_scenarios_dropdown", "filter_scenarios", "result"]:
+        topwdg.pop(key, None)
+
+    if scenarios:
+        labels = [a['name'] for a in scenarios]
+        topwdg['filter_scenarios_dropdown'] = bmw.Div(text='Filter Scenarios', css_classes=['filter-scenarios-dropdown'])
+        topwdg['filter_scenarios'] = bmw.CheckboxGroup(labels=labels, active=list(range(len(labels))), css_classes=['wdgkey-filter_scenarios'])
+        if init_load and 'filter_scenarios' in wdg_config: topwdg['filter_scenarios'].active = wdg_config['filter_scenarios']
+        topwdg['result'] = bmw.Select(title='Result', value='None', options=['None']+list(results_meta.keys()), css_classes=['wdgkey-result'])
+        if init_load and 'result' in wdg_config: topwdg['result'].value = str(wdg_config['result'])
+        topwdg['result'].on_change('value', update_reeds_result)
+    return topwdg
+
+def get_reeds_data():
+    result = topwdg['result'].value
+    #A result has been selected, so either we retrieve it from result_dfs,
+    #which is a dict with one dataframe for each result, or we make a new key in the result_dfs
+    if result not in result_dfs:
+            result_dfs[result] = None
+            cur_scenarios = []
+    else:
+        cur_scenarios = result_dfs[result]['scenario'].unique().tolist() #the scenarios that have already been retrieved and stored in result_dfs
+    #For each selected scenario, retrieve the data from gdx if we don't already have it,
+    #and update result_dfs with the new data.
+    result_meta = results_meta[result]
+    for i in topwdg['filter_scenarios'].active:
+        scenario_name = scenarios[i]['name']
+        if scenario_name not in cur_scenarios:
+            #get the gdx result and preprocess
+            if 'sources' in result_meta:
+                #If we have multiple parameters as data sources, we must gather them all, and the first preprocess
+                #function (which is necessary) will accept a dict of dataframes and return a combined dataframe.
+                df_scen_result = {}
+                for src in result_meta['sources']:
+                    df_src = gdxl.get_df(scenarios[i]['path'] + '\\gdxfiles\\' + src['file'], src['param'])
+                    df_src.columns = src['columns']
+                    df_scen_result[src['name']] = df_src
+            else:
+                #else we have only one parameter as a data source
+                df_scen_result = gdxl.get_df(scenarios[i]['path'] + '\\gdxfiles\\' + result_meta['file'], result_meta['param'])
+                df_scen_result.columns = result_meta['columns']
+            if 'preprocess' in result_meta:
+                for preprocess in result_meta['preprocess']:
+                    df_scen_result = preprocess['func'](df_scen_result, **preprocess['args'])
+            df_scen_result['scenario'] = scenario_name
+            if result_dfs[result] is None:
+                result_dfs[result] = df_scen_result
+            else:
+                result_dfs[result] = pd.concat([result_dfs[result], df_scen_result]).reset_index(drop=True)
+
+def process_reeds_data():
+    global df, columns, discrete, continuous, filterable, seriesable
+    df = result_dfs[topwdg['result'].value].copy()
+
+    #apply joins
+    for col in df.columns.values.tolist():
+        if 'meta_join_'+col in topwdg and topwdg['meta_join_'+col].value != '':
+            df_join = pd.read_csv(topwdg['meta_join_'+col].value)
+            #remove columns to left of col in df_join
+            for c in df_join.columns.values.tolist():
+                if c == col:
+                    break
+                df_join.drop(c, axis=1, inplace=True)
+            #remove duplicate rows
+            df_join.drop_duplicates(subset=col, inplace=True)
+            #merge df_join into df
+            df = pd.merge(left=df, right=df_join, on=col, sort=False)
+
+    #apply mappings
+    for col in df.columns.values.tolist():
+        if 'meta_map_'+col in topwdg and topwdg['meta_map_'+col].value != '':
+            df_map = pd.read_csv(topwdg['meta_map_'+col].value)
+            #filter out values that aren't in raw column
+            df = df[df[col].isin(df_map['raw'].values.tolist())]
+            #now map from raw to display
+            map_dict = dict(zip(list(df_map['raw']), list(df_map['display'])))
+            df[col] = df[col].map(map_dict)
+
+    #apply custom styling
+    for col in df.columns.values.tolist():
+        if 'meta_style_'+col in topwdg and topwdg['meta_style_'+col].value != '':
+            df_style = pd.read_csv(topwdg['meta_style_'+col].value)
+            #filter out values that aren't in order column
+            df = df[df[col].isin(df_style['order'].values.tolist())]
+            #add to custom_sorts with new order
+            custom_sorts[col] = df_style['order'].tolist()
+
+    columns = df.columns.values.tolist()
+    for c in columns:
+        if c in columns_meta:
+            if columns_meta[c]['type'] is 'number':
+                df[c] = pd.to_numeric(df[c], errors='coerce')
+            elif columns_meta[c]['type'] is 'string':
+                df[c] = df[c].astype(str)
+    discrete = [x for x in columns if df[x].dtype == object]
+    continuous = [x for x in columns if x not in discrete]
+    filterable = discrete+[x for x in continuous if x in columns_meta and columns_meta[x]['filterable']]
+    seriesable = discrete+[x for x in continuous if x in columns_meta and columns_meta[x]['seriesable']]
+    df[discrete] = df[discrete].fillna('{BLANK}')
+    df[continuous] = df[continuous].fillna(0)
 
 def build_widgets(df_source, cols, init_load=False, init_config={}):
     '''
@@ -555,6 +703,19 @@ def update_data(attr, old, new):
     When data source is updated
     '''
     update_data_source()
+
+def update_reeds_meta(attr, old, new):
+    if 'result' in GL['widgets'] and GL['widgets']['result'].value is not 'None':
+        process_reeds_data()
+        build_widgets()
+        update_plots()
+
+def update_reeds_result(attr, old, new):
+    if 'result' in GL['widgets'] and GL['widgets']['result'].value is not 'None':
+        get_reeds_data()
+        process_reeds_data()
+        build_widgets()
+        update_plots()
 
 def update_data_source(init_load=False, init_config={}):
     GL['widgets'] = GL['top_wdg'].copy()
