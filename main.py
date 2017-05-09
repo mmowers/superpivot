@@ -51,11 +51,12 @@ WDG_NON_COL = ['chart_type', 'y_agg', 'y_weight', 'adv_op', 'adv_col_base', 'plo
     'circle_size', 'bar_width', 'line_width']
 
 #initialize globals dict for variables that are modified within update functions.
-GL = {'df_source':None, 'df_plots':None, 'columns':None, 'top_wdg':None, 'widgets':None, 'controls': None, 'plots':None}
+GL = {'df_source':None, 'df_plots':None, 'columns':None, 'data_source_wdg':None, 'variant_wdg':None, 'widgets':None, 'controls': None, 'plots':None}
 
 #ReEDS globals
 custom_sorts = {}
 scenarios = []
+result_dfs = {}
 
 def initialize():
     '''
@@ -72,8 +73,8 @@ def initialize():
             data_source = str(wdg_config['data'])
 
     #build widgets and plots
-    GL['top_wdg'] = build_top_wdg(data_source)
-    GL['controls'] = bl.widgetbox(list(GL['top_wdg'].values()), id='widgets_section')
+    GL['data_source_wdg'] = build_data_source_wdg(data_source)
+    GL['controls'] = bl.widgetbox(list(GL['data_source_wdg'].values()), id='widgets_section')
     GL['plots'] = bl.column([], id='plots_section')
     layout = bl.row(GL['controls'], GL['plots'], id='layout')
 
@@ -85,7 +86,7 @@ def initialize():
     bio.curdoc().add_root(layout)
     bio.curdoc().title = "Exploding Pivot Chart Maker"
 
-def build_top_wdg(data_source):
+def build_data_source_wdg(data_source):
     wdg = collections.OrderedDict()
     wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source, css_classes=['wdgkey-data'])
     wdg['data'].on_change('value', update_data)
@@ -142,6 +143,8 @@ def get_wdg_reeds(path, init_load=False, wdg_config={}):
         topwdg (ordered dict): Dictionary of bokeh.model.widgets.
     '''
     topwdg = collections.OrderedDict()
+
+    #Meta widgets
     topwdg['meta'] = bmw.Div(text='Meta', css_classes=['meta-dropdown'])
     for col in columns_meta:
         if 'map' in columns_meta[col]:
@@ -156,6 +159,8 @@ def get_wdg_reeds(path, init_load=False, wdg_config={}):
             topwdg['meta_style_'+col] = bmw.TextInput(title='"'+col+ '" Style', value=columns_meta[col]['style'], css_classes=['wdgkey-meta_style_'+col, 'meta-drop'])
             if init_load and 'meta_style_'+col in wdg_config: topwdg['meta_style_'+col].value = str(wdg_config['meta_style_'+col])
             topwdg['meta_style_'+col].on_change('value', update_reeds_meta)
+
+    #Filter Scenarios widgets and Result widget
     scenarios[:] = []
     runs_paths = path.split('|')
     for runs_path in runs_paths:
@@ -187,7 +192,6 @@ def get_wdg_reeds(path, init_load=False, wdg_config={}):
     #If we have scenarios, build widgets for scenario filters and result.
     for key in ["filter_scenarios_dropdown", "filter_scenarios", "result"]:
         topwdg.pop(key, None)
-
     if scenarios:
         labels = [a['name'] for a in scenarios]
         topwdg['filter_scenarios_dropdown'] = bmw.Div(text='Filter Scenarios', css_classes=['filter-scenarios-dropdown'])
@@ -198,7 +202,7 @@ def get_wdg_reeds(path, init_load=False, wdg_config={}):
         topwdg['result'].on_change('value', update_reeds_result)
     return topwdg
 
-def get_reeds_data():
+def get_reeds_data(topwdg):
     result = topwdg['result'].value
     #A result has been selected, so either we retrieve it from result_dfs,
     #which is a dict with one dataframe for each result, or we make a new key in the result_dfs
@@ -235,8 +239,7 @@ def get_reeds_data():
             else:
                 result_dfs[result] = pd.concat([result_dfs[result], df_scen_result]).reset_index(drop=True)
 
-def process_reeds_data():
-    global df, columns, discrete, continuous, filterable, seriesable
+def process_reeds_data(topwdg):
     df = result_dfs[topwdg['result'].value].copy()
 
     #apply joins
@@ -271,20 +274,22 @@ def process_reeds_data():
             df = df[df[col].isin(df_style['order'].values.tolist())]
             #add to custom_sorts with new order
             custom_sorts[col] = df_style['order'].tolist()
-
-    columns = df.columns.values.tolist()
-    for c in columns:
+    cols = {}
+    cols['all'] = df.columns.values.tolist()
+    for c in cols['all']:
         if c in columns_meta:
             if columns_meta[c]['type'] is 'number':
                 df[c] = pd.to_numeric(df[c], errors='coerce')
             elif columns_meta[c]['type'] is 'string':
                 df[c] = df[c].astype(str)
-    discrete = [x for x in columns if df[x].dtype == object]
-    continuous = [x for x in columns if x not in discrete]
-    filterable = discrete+[x for x in continuous if x in columns_meta and columns_meta[x]['filterable']]
-    seriesable = discrete+[x for x in continuous if x in columns_meta and columns_meta[x]['seriesable']]
-    df[discrete] = df[discrete].fillna('{BLANK}')
-    df[continuous] = df[continuous].fillna(0)
+
+    cols['discrete'] = [x for x in cols['all'] if df[x].dtype == object]
+    cols['continuous'] = [x for x in cols['all'] if x not in cols['discrete']]
+    cols['filterable'] = cols['discrete']+[x for x in cols['continuous'] if x in columns_meta and columns_meta[x]['filterable']]
+    cols['seriesable'] = cols['discrete']+[x for x in cols['continuous'] if x in columns_meta and columns_meta[x]['seriesable']]
+    df[cols['discrete']] = df[cols['discrete']].fillna('{BLANK}')
+    df[cols['continuous']] = df[cols['continuous']].fillna(0)
+    return (df, cols)
 
 def build_widgets(df_source, cols, init_load=False, init_config={}):
     '''
@@ -704,22 +709,9 @@ def update_data(attr, old, new):
     '''
     update_data_source()
 
-def update_reeds_meta(attr, old, new):
-    if 'result' in GL['widgets'] and GL['widgets']['result'].value is not 'None':
-        process_reeds_data()
-        build_widgets()
-        update_plots()
-
-def update_reeds_result(attr, old, new):
-    if 'result' in GL['widgets'] and GL['widgets']['result'].value is not 'None':
-        get_reeds_data()
-        process_reeds_data()
-        build_widgets()
-        update_plots()
-
 def update_data_source(init_load=False, init_config={}):
-    GL['widgets'] = GL['top_wdg'].copy()
-    path = GL['top_wdg']['data'].value
+    GL['widgets'] = GL['data_source_wdg'].copy()
+    path = GL['data_source_wdg']['data'].value
     path = path.replace('"', '')
     if path == '':
         pass
@@ -728,10 +720,27 @@ def update_data_source(init_load=False, init_config={}):
         GL['widgets'].update(build_widgets(GL['df_source'], GL['columns'], init_load, init_config))
     elif path.lower().endswith('.gdx'):
         GL['widgets'].update(get_wdg_gdx(path, GL['widgets']))
-    else:
-        GL['widgets'].update(get_wdg_reeds(path, init_load, init_config))
+    else: #reeds
+        GL['variant_wdg'] = get_wdg_reeds(path, init_load, init_config)
+        GL['widgets'].update(GL['variant_wdg'])
     GL['controls'].children = list(GL['widgets'].values())
     GL['plots'].children = []
+
+def update_reeds_meta(attr, old, new):
+    update_reeds_wdg(type='meta')
+
+def update_reeds_result(attr, old, new):
+    update_reeds_wdg(type='result')
+
+def update_reeds_wdg(type):
+    GL['widgets'] = GL['variant_wdg'].copy()
+    if 'result' in GL['variant_wdg'] and GL['variant_wdg']['result'].value is not 'None':
+        if type == 'result':
+            get_reeds_data(GL['variant_wdg'])
+        GL['df_source'], GL['columns'] = process_reeds_data(GL['variant_wdg'])
+        GL['widgets'].update(build_widgets(GL['df_source'], GL['columns']))
+    GL['controls'].children = list(GL['widgets'].values())
+    update_plots()
 
 def update_wdg(attr, old, new):
     '''
