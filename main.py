@@ -723,6 +723,11 @@ def update_data_source(init_load=False, init_config={}):
     else: #reeds
         GL['variant_wdg'] = get_wdg_reeds(path, init_load, init_config)
         GL['widgets'].update(GL['variant_wdg'])
+        #if this is the initial load, we need to build the rest of the widgets if we've selected a result.
+        if init_load and GL['variant_wdg']['result'].value is not 'None':
+            get_reeds_data(GL['variant_wdg'])
+            GL['df_source'], GL['columns'] = process_reeds_data(GL['variant_wdg'])
+            GL['widgets'].update(build_widgets(GL['df_source'], GL['columns'], init_load, init_config))
     GL['controls'].children = list(GL['widgets'].values())
     GL['plots'].children = []
 
