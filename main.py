@@ -733,7 +733,6 @@ def update_reeds_result(attr, old, new):
     update_reeds_wdg(type='result')
 
 def update_reeds_wdg(type):
-    GL['widgets'] = GL['variant_wdg'].copy()
     if 'result' in GL['variant_wdg'] and GL['variant_wdg']['result'].value is not 'None':
         if type == 'result':
             get_reeds_data(GL['variant_wdg'])
