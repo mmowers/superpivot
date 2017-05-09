@@ -200,6 +200,9 @@ def get_wdg_reeds(path, init_load=False, wdg_config={}):
         topwdg['result'] = bmw.Select(title='Result', value='None', options=['None']+list(results_meta.keys()), css_classes=['wdgkey-result'])
         if init_load and 'result' in wdg_config: topwdg['result'].value = str(wdg_config['result'])
         topwdg['result'].on_change('value', update_reeds_result)
+        topwdg['presets'] = bmw.Select(title='Presets', value='None', options=['None'], css_classes=['wdgkey-presets'])
+        if init_load and 'presets' in wdg_config: topwdg['presets'].value = str(wdg_config['presets'])
+        topwdg['presets'].on_change('value', update_reeds_presets)
     return topwdg
 
 def get_reeds_data(topwdg):
@@ -741,10 +744,24 @@ def update_reeds_wdg(type):
     if 'result' in GL['variant_wdg'] and GL['variant_wdg']['result'].value is not 'None':
         if type == 'result':
             get_reeds_data(GL['variant_wdg'])
+            preset_options = results_meta[GL['variant_wdg']['result'].value]['presets'].keys()
+            GL['widgets']['presets'].value = 'None'
+            GL['widgets']['presets'].options=['None'] + preset_options
         GL['df_source'], GL['columns'] = process_reeds_data(GL['variant_wdg'])
         GL['widgets'].update(build_widgets(GL['df_source'], GL['columns']))
     GL['controls'].children = list(GL['widgets'].values())
     update_plots()
+
+def update_reeds_presets(attr, old, new):
+    wdg = GL['widgets']
+    if wdg['presets'].value != 'None':
+        #set x to "None" so that the chart will not render until all presets have been set.
+        wdg['x'].value = 'None'
+        preset = results_meta[wdg['result'].value]['presets'][wdg['presets'].value]
+        preset_keys_minus_x = [key for key in preset if key != 'x']
+        for key in preset_keys_minus_x:
+            wdg[key].value = preset[key]
+        wdg['x'].value = preset['x']
 
 def update_wdg(attr, old, new):
     '''
