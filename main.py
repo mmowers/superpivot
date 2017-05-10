@@ -385,7 +385,7 @@ def build_widgets(df_source, cols, init_load=False, init_config={}, preset_optio
 
     return wdg
 
-def set_df_plots(df_source, cols, wdg):
+def set_df_plots(df_source, cols, wdg, custom_sorts={}):
     '''
     Apply filters, scaling, aggregation, and sorting to source dataframe, and return the result.
 
@@ -480,7 +480,21 @@ def set_df_plots(df_source, cols, wdg):
     if wdg['series'].value != 'None': sortby_cols = [wdg['series'].value] + sortby_cols
     if wdg['explode'].value != 'None': sortby_cols = [wdg['explode'].value] + sortby_cols
     if wdg['explode_group'].value != 'None': sortby_cols = [wdg['explode_group'].value] + sortby_cols
-    df_plots = df_plots.sort_values(sortby_cols).reset_index(drop=True)
+    #Add custom sort columns
+    temp_sort_cols = sortby_cols[:]
+    for col in custom_sorts:
+        if col in sortby_cols:
+            df_plots[col + '__sort_col'] = df_plots[col].map(lambda x: custom_sorts[col].index(x))
+            temp_sort_cols[sortby_cols.index(col)] = col + '__sort_col'
+    #Do sorting
+    df_plots = df_plots.sort_values(temp_sort_cols).reset_index(drop=True)
+    #Remove custom sort columns
+    for col in custom_sorts:
+        if col in sortby_cols:
+            df_plots = df_plots.drop(col + '__sort_col', 1)
+
+
+
 
     #Rearrange column order for csv download
     unsorted_columns = [col for col in df_plots.columns if col not in sortby_cols + [wdg['y'].value]]
@@ -816,7 +830,7 @@ def update_plots():
     if GL['widgets']['x'].value == 'None' or GL['widgets']['y'].value == 'None':
         GL['plots'].children = []
         return
-    GL['df_plots'] = set_df_plots(GL['df_source'], GL['columns'], GL['widgets'])
+    GL['df_plots'] = set_df_plots(GL['df_source'], GL['columns'], GL['widgets'], custom_sorts)
     GL['widgets']['series_legend'].text = build_series_legend(GL['df_plots'], GL['widgets']['series'].value)
     GL['plots'].children = create_figures(GL['df_plots'], GL['widgets'], GL['columns'])
 
