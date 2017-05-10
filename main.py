@@ -358,7 +358,8 @@ def build_widgets(df_source, cols, init_load=False, init_config={}, preset_optio
     wdg['circle_size'] = bmw.TextInput(title='Circle Size (Dot Only)', value=str(CIRCLE_SIZE), css_classes=['wdgkey-circle_size', 'adjust-drop'])
     wdg['bar_width'] = bmw.TextInput(title='Bar Width (Bar Only)', value=str(BAR_WIDTH), css_classes=['wdgkey-bar_width', 'adjust-drop'])
     wdg['line_width'] = bmw.TextInput(title='Line Width (Line Only)', value=str(LINE_WIDTH), css_classes=['wdgkey-line_width', 'adjust-drop'])
-    wdg['download'] = bmw.Button(label='Download csv', button_type='success')
+    wdg['download'] = bmw.Button(label='Download csv of View', button_type='success')
+    wdg['download_all'] = bmw.Button(label='Download csv of Source', button_type='success')
     wdg['export_config'] = bmw.Div(text='Export Config to URL', css_classes=['export-config', 'bk-bs-btn', 'bk-bs-btn-success'])
 
     #use init_config (from 'widgets' parameter in URL query string) to configure widgets.
@@ -375,6 +376,7 @@ def build_widgets(df_source, cols, init_load=False, init_config={}, preset_optio
         wdg['presets'].on_change('value', update_reeds_presets)
     wdg['update'].on_click(update_plots)
     wdg['download'].on_click(download)
+    wdg['download_all'].on_click(download_all)
     wdg['adv_col'].on_change('value', update_adv_col)
     for name in WDG_COL:
         wdg[name].on_change('value', update_wdg_col)
@@ -824,6 +826,14 @@ def download():
     with the current timestamp.
     '''
     GL['df_plots'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
+        datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
+
+def download_all():
+    '''
+    Download a csv file of the full data source to the downloads/ directory,
+    with the current timestamp.
+    '''
+    GL['df_source'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
         datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
 
 initialize()
