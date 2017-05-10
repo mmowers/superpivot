@@ -733,6 +733,9 @@ def update_data_source(init_load=False, init_config={}):
     GL['widgets'] = GL['data_source_wdg'].copy()
     path = GL['data_source_wdg']['data'].value
     path = path.replace('"', '')
+    #reset ReEDS scenarios and result_dfs
+    scenarios = []
+    result_dfs = {}
     if path == '':
         pass
     elif path.lower().endswith('.csv'):
