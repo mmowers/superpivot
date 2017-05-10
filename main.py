@@ -245,7 +245,7 @@ def process_reeds_data(topwdg):
     #apply joins
     for col in df.columns.values.tolist():
         if 'meta_join_'+col in topwdg and topwdg['meta_join_'+col].value != '':
-            df_join = pd.read_csv(topwdg['meta_join_'+col].value)
+            df_join = pd.read_csv(topwdg['meta_join_'+col].value.replace('"',''))
             #remove columns to left of col in df_join
             for c in df_join.columns.values.tolist():
                 if c == col:
@@ -259,7 +259,7 @@ def process_reeds_data(topwdg):
     #apply mappings
     for col in df.columns.values.tolist():
         if 'meta_map_'+col in topwdg and topwdg['meta_map_'+col].value != '':
-            df_map = pd.read_csv(topwdg['meta_map_'+col].value)
+            df_map = pd.read_csv(topwdg['meta_map_'+col].value.replace('"',''))
             #filter out values that aren't in raw column
             df = df[df[col].isin(df_map['raw'].values.tolist())]
             #now map from raw to display
@@ -269,7 +269,7 @@ def process_reeds_data(topwdg):
     #apply custom styling
     for col in df.columns.values.tolist():
         if 'meta_style_'+col in topwdg and topwdg['meta_style_'+col].value != '':
-            df_style = pd.read_csv(topwdg['meta_style_'+col].value)
+            df_style = pd.read_csv(topwdg['meta_style_'+col].value.replace('"',''))
             #filter out values that aren't in order column
             df = df[df[col].isin(df_style['order'].values.tolist())]
             #add to custom_sorts with new order
