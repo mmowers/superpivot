@@ -54,14 +54,15 @@ WDG_NON_COL = ['chart_type', 'y_agg', 'y_weight', 'adv_op', 'adv_col_base', 'plo
 GL = {'df_source':None, 'df_plots':None, 'columns':None, 'data_source_wdg':None, 'variant_wdg':None, 'widgets':None, 'controls': None, 'plots':None}
 
 #ReEDS globals
-custom_sorts = {}
-scenarios = []
-result_dfs = {}
+custom_sorts = {} #keys are column names. Values are lists of values in the desired sort order
+scenarios = [] #each element is a dict with name of scenario and path to scenario
+result_dfs = {} #keys are ReEDS result names. Values are dataframes for that result (with 'scenario' as one of the columns)
 
 def initialize():
     '''
     On initial load, read 'widgets' parameter from URL query string and use to set data source (data_source)
-    and widget configuration object (wdg_config)
+    and widget configuration object (wdg_config). Initialize controls and plots areas of layout, and
+    send data to opened browser.
     '''
     wdg_config = {}
     args = bio.curdoc().session_context.request.arguments
@@ -87,6 +88,13 @@ def initialize():
     bio.curdoc().title = "Exploding Pivot Chart Maker"
 
 def build_data_source_wdg(data_source):
+    '''
+    Return the initial data source widget, prefilled with an input data_source
+    Args:
+        data_source (string): Path to data source
+    Returns:
+        wdg (ordered dict): ordered dictionary of bokeh.models.widgets (in this case only one) for data source.
+    '''
     wdg = collections.OrderedDict()
     wdg['data'] = bmw.TextInput(title='Data Source (required)', value=data_source, css_classes=['wdgkey-data'])
     wdg['data'].on_change('value', update_data)
@@ -132,12 +140,13 @@ def get_wdg_gdx(data_source):
 
 def get_wdg_reeds(path, init_load=False, wdg_config={}):
     '''
-    From data source, find scenarios and return widgets for meta files, scenarios, and results
+    From data source path, fetch paths to scenarios and return dict of widgets for
+    meta files, scenarios, and results
 
     Args:
-        data_source (string): Path to a ReEDS run folder or a folder containing ReEDS runs folders.
+        path (string): Path to a ReEDS run folder or a folder containing ReEDS runs folders.
         init_load (Boolean): True if this is the initial page load. False otherwise.
-        wdg_config
+        wdg_config (dict): initial configuration for widgets.
 
     Returns:
         topwdg (ordered dict): Dictionary of bokeh.model.widgets.
@@ -203,6 +212,17 @@ def get_wdg_reeds(path, init_load=False, wdg_config={}):
     return topwdg
 
 def get_reeds_data(topwdg):
+    '''
+    For a selected ReEDS result and set of scenarios, fetch gdx data,
+    preprocess it, and add to global result_dfs dictionary if the data
+    hasn't already been fetched.
+
+    Args:
+        topwdg (ordered dict): ReEDS widgets (meta widgets, scenarios widget, result widget)
+
+    Returns:
+        Nothing. Global result_dfs is modified
+    '''
     result = topwdg['result'].value
     #A result has been selected, so either we retrieve it from result_dfs,
     #which is a dict with one dataframe for each result, or we make a new key in the result_dfs
@@ -240,6 +260,17 @@ def get_reeds_data(topwdg):
                 result_dfs[result] = pd.concat([result_dfs[result], df_scen_result]).reset_index(drop=True)
 
 def process_reeds_data(topwdg):
+    '''
+    Apply joins, mappings, ordering data to a selected result dataframe.
+    Also categorize the columns of the dataframe and fill NA values.
+
+    Args:
+        topwdg (ordered dict): ReEDS widgets (meta widgets, scenarios widget, result widget)
+
+    Returns:
+        df (pandas dataframe): A dataframe of the ReEDS result, with filled NA values.
+        cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
+    '''
     df = result_dfs[topwdg['result'].value].copy()
 
     #apply joins
@@ -301,6 +332,7 @@ def build_widgets(df_source, cols, init_load=False, init_config={}, preset_optio
         cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
         init_load (boolean, optional): If this is the initial page load, then this will be True, else False.
         init_config (dict): Initial widget configuration passed via URL.
+        preset_options (list): List of strings for preset selections.
 
     Returns:
         wdg (ordered dict): Dictionary of bokeh.model.widgets.
@@ -393,6 +425,7 @@ def set_df_plots(df_source, cols, wdg, custom_sorts={}):
         df_source (pandas dataframe): Dataframe of the csv source.
         cols (dict): Keys are categories of columns of df_source, and values are a list of columns of that category.
         wdg (ordered dict): Dictionary of bokeh model widgets.
+        custom_sorts (dict): Keys are column names. Values are lists of values in the desired sort order.
 
     Returns:
         df_plots (pandas dataframe): df_source after having been filtered, scaled, aggregated, and sorted.
@@ -853,4 +886,5 @@ def download_all():
     GL['df_source'].to_csv(os.path.dirname(os.path.realpath(__file__)) + '/downloads/out '+
         datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")+'.csv', index=False)
 
+#This sets the whole thing in motion when a page is loaded
 initialize()
