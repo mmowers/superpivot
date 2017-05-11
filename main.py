@@ -44,7 +44,7 @@ WDG_COL_SER = ['x_group', 'series', 'explode', 'explode_group'] #seriesable colu
 WDG_COL = WDG_COL_ALL + WDG_COL_SER
 
 #List of widgets that don't use columns as selector and share general widget update function
-WDG_NON_COL = ['chart_type', 'y_agg', 'y_weight', 'adv_op', 'adv_col_base', 'plot_title', 'plot_title_size',
+WDG_NON_COL = ['chart_type', 'y_agg', 'y_weight', 'plot_title', 'plot_title_size',
     'plot_width', 'plot_height', 'opacity', 'x_min', 'x_max', 'x_scale', 'x_title',
     'x_title_size', 'x_major_label_size', 'x_major_label_orientation',
     'y_min', 'y_max', 'y_scale', 'y_title', 'y_title_size', 'y_major_label_size',
@@ -377,7 +377,9 @@ def build_widgets(df_source, cols, init_load=False, init_config={}, preset_optio
     wdg['update'].on_click(update_plots)
     wdg['download'].on_click(download)
     wdg['download_all'].on_click(download_all)
+    wdg['adv_op'].on_change('value', update_adv)
     wdg['adv_col'].on_change('value', update_adv_col)
+    wdg['adv_col_base'].on_change('value', update_adv)
     for name in WDG_COL:
         wdg[name].on_change('value', update_wdg_col)
     for name in WDG_NON_COL:
@@ -799,6 +801,14 @@ def update_wdg_col(attr, old, new):
     '''
     set_wdg_col_options()
     update_plots()
+
+def update_adv(attr, old, new):
+    '''
+    When updating any advanced column widgets, make sure all are set before calling update_plots()
+    '''
+    wdg = GL['widgets']
+    if wdg['adv_op'].value != 'None' and wdg['adv_col'].value != 'None' and wdg['adv_col_base'].value != 'None':
+        update_plots()
 
 def update_adv_col(attr, old, new):
     '''
