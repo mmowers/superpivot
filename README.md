@@ -61,12 +61,12 @@ There are two different ways to use this app: On Orion (easiest way), and locall
 
 ## Loading data
 After starting up the app in a browser window, you must enter a path in the *Data Source* field, either to a CSV file or to a ReEDS run or set of runs:
-    * *CSV*: Enter a path to a csv file. This file must be properly formatted, with column headers but no row headers. You can *Shift+Right Click* on a csv file, then select *Copy as Path* to get the full path to a file. After that, see the *Core Pivot Functionality* section below.
-    * *ReEDS Run(s)*: Here are the options:
-        * Enter a path to a ReEDS run folder (inside which there is a *gdxfiles/* folder). This works using shared drives too. For example,  *\\\\nrelqnap01d\\ReEDS\\someProject\\runs\\someRun*.
-        * Enter a path to a folder containing ReEDS run folders. For example,  *\\\\nrelqnap01d\\ReEDS\\someProject\\runs*.
-        * Enter a path to a csv file that contains a list of runs (see *csv/scenario_template.csv* for an example.)
-        After that, see the *ReEDS Widgets* and *Core Pivot Functionality* sections below.
+* *CSV*: Enter a path to a csv file. This file must be properly formatted, with column headers but no row headers. You can *Shift+Right Click* on a csv file, then select *Copy as Path* to get the full path to a file. After that, see the *Core Pivot Functionality* section below.
+* *ReEDS Run(s)*: Here are the options:
+    * Enter a path to a ReEDS run folder (inside which there is a *gdxfiles/* folder). This works using shared drives too. For example,  *\\\\nrelqnap01d\\ReEDS\\someProject\\runs\\someRun*.
+    * Enter a path to a folder containing ReEDS run folders. For example,  *\\\\nrelqnap01d\\ReEDS\\someProject\\runs*.
+    * Enter a path to a csv file that contains a list of runs (see *csv/scenario_template.csv* for an example.)
+    * After that, see the *ReEDS Widgets* and *Core Pivot Functionality* sections below.
 
 ## ReEDS Widgets
 * *Meta*: Click the *Meta* section to expand, and see the files used for some default *maps* (to rename and aggregate ReEDS categories), *styles* (to reorder categories and style them), and *merges* (to join more columns, e.g. to add regional aggregations). If you'd like to update any of these files, simply edit the file (only if you're working locally), or point to a new file.
